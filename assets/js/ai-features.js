@@ -1,4 +1,4 @@
-import GeminiClient from './gemini-client-v1beta.js';
+import GeminiClient from './gemini-client-latest.js';
 
 // AI Features for MealMatrix
 class MealAI {

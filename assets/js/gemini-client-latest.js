@@ -5,7 +5,7 @@ import config from './config.js';
 class GeminiClient {    constructor(apiKey) {
         this.apiKey = apiKey || config.geminiApiKey;
         this.baseUrl = 'https://generativelanguage.googleapis.com/v1beta';
-        this.modelName = 'models/gemini-1.5-pro-latest';
+        this.modelName = 'models/gemini-2.0-flash';
         
         if (!this.apiKey) {
             throw new Error('Gemini API key is required - get one from https://aistudio.google.com/app/apikey');
@@ -31,28 +31,42 @@ class GeminiClient {    constructor(apiKey) {
             console.error('Error listing Gemini models:', error);
             throw error;
         }
-    }    async generateContent(prompt) {
+    }    async generateContent(prompt, retryCount = 0, maxRetries = 3) {
         try {
-            const url = `${this.baseUrl}/models/${this.modelName}:generateContent?key=${this.apiKey}`;
-            console.log('Making Gemini API request to:', url);
+            const url = `${this.baseUrl}/${this.modelName}:generateContent?key=${this.apiKey}`;
+            console.log(`Making Gemini API request (attempt ${retryCount + 1}/${maxRetries + 1})...`);
             
             const response = await fetch(url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
-                },                body: JSON.stringify({
-                    prompt: {
-                        text: prompt
-                    },
-                    temperature: 0.7,
-                    maxOutputTokens: 800
+                },
+                body: JSON.stringify({
+                    contents: [{
+                        parts: [{
+                            text: prompt
+                        }]
+                    }],
+                    generationConfig: {
+                        temperature: 0.7,
+                        maxOutputTokens: 2048,
+                        topK: 1,
+                        topP: 0.8
+                    }
                 })
-            });
-
-            if (!response.ok) {
+            });            if (!response.ok) {
                 const errorData = await response.json().catch(() => null);
                 console.error('Gemini API Error Response:', errorData);
                 const errorMessage = errorData?.error?.message || response.statusText;
+                
+                // Handle 503 Service Unavailable with retries
+                if (response.status === 503 && retryCount < maxRetries) {
+                    const retryDelay = Math.pow(2, retryCount) * 1000; // Exponential backoff
+                    console.log(`Service unavailable. Retrying in ${retryDelay/1000} seconds...`);
+                    await new Promise(resolve => setTimeout(resolve, retryDelay));
+                    return this.generateContent(prompt, retryCount + 1, maxRetries);
+                }
+                
                 throw new Error(`Gemini API request failed (${response.status}): ${errorMessage}`);
             }
 
