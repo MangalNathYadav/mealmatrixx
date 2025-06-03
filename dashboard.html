@@ -16,6 +16,83 @@
             align-items: center;
         }
 
+        .summary-section {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .summary-section:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .summary-section h4 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .analysis-item {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            border: 1px solid #eee;
+        }
+
+        .analysis-item strong {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+        }
+
+        .insights-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .insights-list li {
+            margin-bottom: 0.75rem;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .insights-list li:before {
+            content: "💡";
+            position: absolute;
+            left: 0;
+        }
+
+        .recommendations-list {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .recommendation-item {
+            background: #f0f8ff;
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--primary-color);
+        }
+
+        .recommendation-item strong {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+        }
+
+        .recommendation-item p {
+            margin: 0;
+            font-size: 0.95rem;
+        }
+
         .btn-ai {
             background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             color: white;
@@ -166,6 +243,83 @@
             font-size: 0.9rem;
             margin: 0.5rem 0;
         }
+
+        .summary-section {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .summary-section:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .summary-section h4 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .analysis-item {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            border: 1px solid #eee;
+        }
+
+        .analysis-item strong {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+        }
+
+        .insights-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .insights-list li {
+            margin-bottom: 0.75rem;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .insights-list li:before {
+            content: "💡";
+            position: absolute;
+            left: 0;
+        }
+
+        .recommendations-list {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .recommendation-item {
+            background: #f0f8ff;
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--primary-color);
+        }
+
+        .recommendation-item strong {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+        }
+
+        .recommendation-item p {
+            margin: 0;
+            font-size: 0.95rem;
+        }
     </style>
 </head>
 <body>    <nav class="navbar">
@@ -201,81 +355,175 @@
     <script src="assets/js/auth.js"></script>
     <script src="assets/js/ai-ui.js" type="module"></script><script type="module">
         import ai from './assets/js/ai-features.js';
+        import aiUI from './assets/js/ai-ui.js';
 
-        const weeklySummaryBtn = document.getElementById('weeklySummaryBtn');
-        const weeklySummaryContainer = document.getElementById('weeklySummary');
+        // Toast notification helper
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
 
-        // Generate Weekly Summary        weeklySummaryBtn.addEventListener('click', async () => {
-            const spinner = weeklySummaryBtn.querySelector('.ai-spinner');
-            weeklySummaryContainer.innerHTML = ''; // Clear previous results
-            try {
-                spinner.classList.add('visible');
-                console.log('Generating weekly summary...');
-                
-                // Get last 7 days of meals
-                const user = firebase.auth().currentUser;
-                const mealsRef = firebase.database().ref(`users/${user.uid}/meals`);
-                const weekAgo = new Date();
-                weekAgo.setDate(weekAgo.getDate() - 7);
+        // Initialize event listeners when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            const weeklySummaryBtn = document.getElementById('weeklySummaryBtn');
+            const weeklySummaryContainer = document.getElementById('weeklySummary');
 
-                const snapshot = await mealsRef.once('value');
-                const meals = snapshot.val() || {};
-                const recentMeals = Object.values(meals).filter(meal => 
-                    new Date(meal.dateTime) >= weekAgo
-                );
+            if (!weeklySummaryBtn || !weeklySummaryContainer) {
+                console.error('Weekly summary elements not found');
+                return;
+            }
 
-                if (recentMeals.length === 0) {
-                    showToast('No meals logged in the past week', 'info');
+            // Generate Weekly Summary
+            weeklySummaryBtn.addEventListener('click', async () => {
+                const spinner = weeklySummaryBtn.querySelector('.ai-spinner');
+                if (!spinner) {
+                    console.error('Spinner element not found');
                     return;
                 }
 
-                const summary = await ai.generateWeeklySummary(recentMeals);
-                weeklySummaryContainer.innerHTML = `
-                    <h3>🤖 Weekly AI Summary</h3>
-                    <div class="ai-content">${summary}</div>
-                `;
-                weeklySummaryContainer.classList.add('visible');
+                weeklySummaryContainer.innerHTML = ''; // Clear previous results
+                try {
+                    spinner.classList.add('visible');
+                    console.log('Generating weekly summary...');
+                    
+                    // Get last 7 days of meals
+                    const user = firebase.auth().currentUser;
+                    if (!user) {
+                        throw new Error('Please log in to view your weekly summary');
+                    }
 
-            } catch (error) {
-                showToast(error.message, 'error');
-            } finally {
-                spinner.classList.remove('visible');
-            }
+                    const mealsRef = firebase.database().ref(`users/${user.uid}/meals`);
+                    const weekAgo = new Date();
+                    weekAgo.setDate(weekAgo.getDate() - 7);
+
+                    const snapshot = await mealsRef.once('value');
+                    const meals = snapshot.val() || {};
+                    const recentMeals = Object.values(meals).filter(meal => 
+                        new Date(meal.dateTime) >= weekAgo
+                    );
+
+                    if (recentMeals.length === 0) {
+                        showToast('No meals logged in the past week', 'info');
+                        return;
+                    }
+
+                    console.log('Recent meals:', recentMeals);
+                    const summary = await ai.generateWeeklySummary(recentMeals);
+                    console.log('Weekly summary response:', summary);
+
+                    if (!summary || typeof summary !== 'object') {
+                        throw new Error('Invalid summary response from AI');
+                    }
+
+                    const content = `
+                        <h3>🤖 Weekly AI Summary</h3>
+                        <div class="ai-content">
+                            <div class="summary-section">
+                                <h4>Overview</h4>
+                                <p>${summary.summary || 'No overview available'}</p>
+                            </div>
+                            
+                            ${summary.analysis ? `
+                                <div class="summary-section">
+                                    <h4>Detailed Analysis</h4>
+                                    <div class="analysis-grid">
+                                        ${summary.analysis.caloriesTrend ? `
+                                            <div class="analysis-item">
+                                                <strong>Calories</strong>
+                                                <p>${summary.analysis.caloriesTrend}</p>
+                                            </div>
+                                        ` : ''}
+                                        ${summary.analysis.mealTiming ? `
+                                            <div class="analysis-item">
+                                                <strong>Meal Timing</strong>
+                                                <p>${summary.analysis.mealTiming}</p>
+                                            </div>
+                                        ` : ''}
+                                        ${summary.analysis.nutritionBalance ? `
+                                            <div class="analysis-item">
+                                                <strong>Nutrition</strong>
+                                                <p>${summary.analysis.nutritionBalance}</p>
+                                            </div>
+                                        ` : ''}
+                                    </div>
+                                </div>
+                            ` : ''}
+
+                            ${summary.insights && summary.insights.length > 0 ? `
+                                <div class="summary-section">
+                                    <h4>Key Insights</h4>
+                                    <ul class="insights-list">
+                                        ${summary.insights.map(insight => `
+                                            <li>${insight}</li>
+                                        `).join('')}
+                                    </ul>
+                                </div>
+                            ` : ''}
+
+                            ${summary.recommendations && summary.recommendations.length > 0 ? `
+                                <div class="summary-section">
+                                    <h4>Recommendations</h4>
+                                    <div class="recommendations-list">
+                                        ${summary.recommendations.map(rec => `
+                                            <div class="recommendation-item">
+                                                <strong>${rec.area || 'Improvement Area'}</strong>
+                                                <p>${rec.suggestion || rec}</p>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+
+                    weeklySummaryContainer.innerHTML = content;
+                    weeklySummaryContainer.classList.add('visible');
+
+                } catch (error) {
+                    console.error('Weekly summary error:', error);
+                    showToast(error.message || 'Failed to generate weekly summary', 'error');
+                } finally {
+                    spinner.classList.remove('visible');
+                }
+            });
+
+            // Add a suggest better meal button to meal cards
+            window.suggestBetterMeal = async (mealId) => {
+                const meal = document.querySelector(`[data-meal-id="${mealId}"]`);
+                const suggestionsContainer = meal.querySelector('.suggestion-list');
+                const spinner = meal.querySelector('.suggest-better .ai-spinner');
+
+                try {
+                    spinner.classList.add('visible');
+                    const mealData = {
+                        name: meal.querySelector('h3').textContent,
+                        calories: parseInt(meal.querySelector('.meal-metadata').textContent.match(/Calories: (\d+)/)[1])
+                    };
+
+                    const suggestions = await ai.suggestBetterMeal(mealData);
+                    suggestionsContainer.innerHTML = `
+                        <h4>🤖 Healthier Alternatives</h4>
+                        <ul>
+                            ${suggestions.map(s => `
+                                <li>
+                                    <strong>${s.name}</strong> (${s.calories} cal)
+                                    <p>${s.reason}</p>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    `;
+                    suggestionsContainer.classList.add('visible');
+
+                } catch (error) {
+                    showToast(error.message, 'error');
+                } finally {
+                    spinner.classList.remove('visible');
+                }
+            };
         });
-
-        // Add a suggest better meal button to meal cards
-        window.suggestBetterMeal = async (mealId) => {
-            const meal = document.querySelector(`[data-meal-id="${mealId}"]`);
-            const suggestionsContainer = meal.querySelector('.suggestion-list');
-            const spinner = meal.querySelector('.suggest-better .ai-spinner');
-
-            try {
-                spinner.classList.add('visible');
-                const mealData = {
-                    name: meal.querySelector('h3').textContent,
-                    calories: parseInt(meal.querySelector('.meal-metadata').textContent.match(/Calories: (\d+)/)[1])
-                };
-
-                const suggestions = await ai.suggestBetterMeal(mealData);
-                suggestionsContainer.innerHTML = `
-                    <h4>🤖 Healthier Alternatives</h4>
-                    <ul>
-                        ${suggestions.map(s => `
-                            <li>
-                                <strong>${s.name}</strong> (${s.calories} cal)
-                                <p>${s.reason}</p>
-                            </li>
-                        `).join('')}
-                    </ul>
-                `;
-                suggestionsContainer.classList.add('visible');
-
-            } catch (error) {
-                showToast(error.message, 'error');
-            } finally {
-                spinner.classList.remove('visible');
-            }
-        };
     </script>
     <script src="assets/js/dashboard.js"></script>
 </body>

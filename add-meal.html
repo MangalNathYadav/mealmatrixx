@@ -94,6 +94,49 @@
             outline: none;
             border-color: var(--primary-color);
         }
+
+        .ai-result {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--primary-color);
+            background-color: white;
+        }
+
+        .ai-result.visible {
+            display: block;
+        }
+
+        .ai-result.fade-in {
+            opacity: 1;
+        }
+
+        .food-list {
+            list-style: none;
+            padding: 0;
+            margin: 0.5rem 0;
+        }
+
+        .food-list li {
+            padding: 0.25rem 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .food-list li:last-child {
+            border-bottom: none;
+        }
+
+        .analysis-section {
+            margin-bottom: 1rem;
+        }
+
+        .analysis-section h4 {
+            color: var(--primary-color);
+            margin: 0 0 0.5rem 0;
+        }
     </style>
 </head>
 <body>

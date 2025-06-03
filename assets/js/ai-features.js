@@ -12,7 +12,23 @@ class MealAI {
         try {
             console.log('Analyzing meal:', mealText);
             const result = await this.client.analyzeMeal(mealText);
-            console.log('Analysis result:', result);
+            console.log('Raw analysis result:', result);
+            
+            // Extract JSON from markdown code blocks if present
+            if (result.text && typeof result.text === 'string') {
+                const jsonMatch = result.text.match(/```json\n([\s\S]*?)\n```/);
+                if (jsonMatch && jsonMatch[1]) {
+                    try {
+                        const parsedResult = JSON.parse(jsonMatch[1]);
+                        console.log('Parsed JSON result:', parsedResult);
+                        return parsedResult;
+                    } catch (parseError) {
+                        console.error('Failed to parse JSON from response:', parseError);
+                        throw new Error('Invalid response format from AI service');
+                    }
+                }
+            }
+            
             return result;
         } catch (error) {
             console.error('Meal analysis failed:', error);

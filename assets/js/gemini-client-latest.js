@@ -162,72 +162,113 @@ class GeminiClient {    constructor(apiKey) {
     async analyzeMeal(mealText) {
         const prompt = `You are a professional nutritionist AI. Analyze this meal: "${mealText}"
 
-        Instructions:
-        1. Break down the meal into individual components
-        2. Provide accurate calorie estimates based on standard portions
-        3. Assess nutritional balance
-        4. Suggest improvements while keeping cultural preferences in mind
-
-        Return a JSON object with this exact structure:
+        Return ONLY a JSON object without any markdown formatting or additional text. Use this exact structure:
         {
             "foods": ["item1 (portion)", "item2 (portion)"],
             "calories": {
-                "total": number,
-                "breakdown": {
-                    "item1": number,
-                    "item2": number
-                }
-            },
-            "nutrition": {
-                "protein": "high/medium/low",
-                "carbs": "high/medium/low",
-                "fats": "high/medium/low",
-                "fiber": "high/medium/low"
+                "total": number
             },
             "assessment": "Brief but specific health assessment",
-            "suggestion": "Practical improvement suggestion",
-            "alternatives": ["healthier option 1", "healthier option 2"]
-        }`;
+            "suggestion": "Practical improvement suggestion"
+        }
 
-        return this.generateContent(prompt);
+        The JSON should be valid and directly parseable. Do not include any code blocks, quotes, or other formatting.`;
+
+        const result = await this.generateContent(prompt);
+        
+        // If we got a text response with markdown, try to extract the JSON
+        if (result.text && typeof result.text === 'string') {
+            try {
+                // Try to extract JSON from markdown code blocks if present
+                const jsonMatch = result.text.match(/```json\n([\s\S]*?)\n```/) || 
+                                result.text.match(/```\n([\s\S]*?)\n```/) ||
+                                result.text.match(/({[\s\S]*})/);
+                                
+                if (jsonMatch && jsonMatch[1]) {
+                    const parsed = JSON.parse(jsonMatch[1]);
+                    return {
+                        ...parsed,
+                        _meta: result._meta
+                    };
+                }
+                
+                // If no JSON found in markdown, try parsing the entire text
+                return {
+                    ...JSON.parse(result.text),
+                    _meta: result._meta
+                };
+            } catch (error) {
+                console.error('Failed to parse JSON from Gemini response:', error);
+                throw new Error('Invalid response format from AI service');
+            }
+        }
+        
+        return result;
     }
 
-    // Generate weekly summary
+    // Generate weekly summary with improved prompt
     async generateWeeklySummary(meals) {
         const totalCalories = meals.reduce((sum, meal) => sum + (meal.calories || 0), 0);
-        const avgCaloriesPerDay = totalCalories / 7;
+        const avgCaloriesPerDay = Math.round(totalCalories / 7);
         
-        const prompt = `Analyze these meals for the week:
+        const prompt = `You are a professional nutritionist AI. Analyze these meals from the past week:
+        Total Meals: ${meals.length}
         Total Calories: ${totalCalories}
         Daily Average: ${avgCaloriesPerDay}
         Meals: ${JSON.stringify(meals)}
 
-        Return a JSON object with this structure:
+        Return ONLY a JSON object without any markdown formatting or additional text. Use this exact structure:
         {
-            "summary": "Weekly pattern analysis",
-            "patterns": {
-                "timing": "Meal timing analysis",
-                "portions": "Portion size analysis",
-                "variety": "Food variety analysis"
+            "summary": "Brief overview of eating patterns",
+            "analysis": {
+                "caloriesTrend": "Analysis of calorie patterns",
+                "mealTiming": "Analysis of meal timing",
+                "nutritionBalance": "Analysis of nutritional balance"
             },
-            "concerns": [
-                {
-                    "issue": "Specific concern",
-                    "impact": "Health impact",
-                    "solution": "Solution"
-                }
+            "insights": [
+                "Key insight 1",
+                "Key insight 2"
             ],
-            "positives": ["Good habits"],
-            "suggestions": [
+            "recommendations": [
                 {
                     "area": "Area to improve",
-                    "action": "Action step",
-                    "benefit": "Expected benefit"
+                    "suggestion": "Specific actionable suggestion"
                 }
             ]
-        }`;
+        }
 
-        return this.generateContent(prompt);
+        The JSON should be valid and directly parseable. Do not include any code blocks, quotes, or other formatting.`;
+
+        const result = await this.generateContent(prompt);
+        
+        // If we got a text response with markdown, try to extract the JSON
+        if (result.text && typeof result.text === 'string') {
+            try {
+                // Try to extract JSON from markdown code blocks if present
+                const jsonMatch = result.text.match(/```json\n([\s\S]*?)\n```/) || 
+                                result.text.match(/```\n([\s\S]*?)\n```/) ||
+                                result.text.match(/({[\s\S]*})/);
+                                
+                if (jsonMatch && jsonMatch[1]) {
+                    const parsed = JSON.parse(jsonMatch[1]);
+                    return {
+                        ...parsed,
+                        _meta: result._meta
+                    };
+                }
+                
+                // If no JSON found in markdown, try parsing the entire text
+                return {
+                    ...JSON.parse(result.text),
+                    _meta: result._meta
+                };
+            } catch (error) {
+                console.error('Failed to parse JSON from Gemini response:', error);
+                throw new Error('Invalid response format from AI service');
+            }
+        }
+        
+        return result;
     }
 
     // Suggest better meals

@@ -222,107 +222,78 @@ class AIUIHelper {
 
     displayAnalysis(result, containerId) {
         const container = document.getElementById(containerId);
-        if (!container || !result) return;
-
-        // Handle text-only responses
-        if (result._meta?.format === 'text') {
-            container.innerHTML = `
-                <div class="ai-result">
-                    <div class="analysis-section">
-                        <p>${result.text}</p>
-                    </div>
-                    ${this._renderMetadata(result._meta)}
-                </div>
-            `;
-            container.classList.add('visible');
+        if (!container || !result) {
+            console.error('Container or result is missing:', { containerId, result });
             return;
         }
 
-        // Ensure all required properties exist with defaults
-        const safeResult = {
-            foods: result.foods || [],
-            calories: result.calories ? {
-                total: result.calories.total || 0,
-                breakdown: result.calories.breakdown || {}
-            } : {
-                total: 0,
-                breakdown: {}
-            },
-            nutrition: result.nutrition || {
-                protein: 'unknown',
-                carbs: 'unknown',
-                fats: 'unknown',
-                fiber: 'unknown'
-            },
-            assessment: result.assessment || 'No assessment available',
-            suggestion: result.suggestion || 'No suggestions available',
-            alternatives: result.alternatives || [],
-            _meta: result._meta || {
-                version: '1.0',
-                timestamp: new Date().toISOString()
-            }
-        };
+        console.log('Displaying analysis:', result);
 
-        container.innerHTML = `
-            <div class="ai-result">
+        // Build the HTML content
+        let html = '<div class="ai-result">';
+
+        // Add foods section if available
+        if (Array.isArray(result.foods) && result.foods.length > 0) {
+            html += `
                 <div class="analysis-section">
-                    <h3>Foods Analyzed</h3>
-                    ${safeResult.foods.length > 0 ? `
-                        <ul>
-                            ${safeResult.foods.map(food => `<li>${food}</li>`).join('')}
-                        </ul>
-                    ` : '<p>No foods specified</p>'}
+                    <h4>Foods Detected</h4>
+                    <ul class="food-list">
+                        ${result.foods.map(food => `<li>${food}</li>`).join('')}
+                    </ul>
                 </div>
+            `;
+        }
 
+        // Add calories section if available
+        if (result.calories?.total) {
+            html += `
                 <div class="analysis-section">
-                    <h3>Calories</h3>
-                    <p class="total-calories">Total: ${safeResult.calories.total} calories</p>
-                    ${Object.keys(safeResult.calories.breakdown).length > 0 ? `
-                        <ul>
-                            ${Object.entries(safeResult.calories.breakdown)
-                                .map(([food, cals]) => `<li>${food}: ${cals} calories</li>`)
-                                .join('')}
-                        </ul>
-                    ` : '<p>No calorie breakdown available</p>'}
-                </div>
-
-                <div class="analysis-section">
-                    <h3>Nutritional Profile</h3>
+                    <h4>Calories</h4>
                     <div class="nutrition-grid">
-                        ${Object.entries(safeResult.nutrition)
-                            .map(([nutrient, level]) => `
-                                <div class="nutrition-item ${level.toLowerCase()}">
-                                    <strong>${nutrient}</strong>
-                                    <br>
-                                    ${level}
-                                </div>`)
-                            .join('')}
+                        <div class="nutrition-item">
+                            <strong>${result.calories.total}</strong>
+                            <span>Total Calories</span>
+                        </div>
                     </div>
                 </div>
+            `;
+        }
 
+        // Add assessment if available
+        if (result.assessment) {
+            html += `
                 <div class="analysis-section">
-                    <h3>Assessment</h3>
-                    <p>${safeResult.assessment}</p>
+                    <h4>Assessment</h4>
+                    <p>${result.assessment}</p>
                 </div>
+            `;
+        }
 
+        // Add suggestion if available
+        if (result.suggestion) {
+            html += `
                 <div class="analysis-section">
-                    <h3>Suggestions for Improvement</h3>
-                    <p>${safeResult.suggestion}</p>
+                    <h4>Suggestion</h4>
+                    <p>${result.suggestion}</p>
                 </div>
+            `;
+        }
 
-                ${safeResult.alternatives.length > 0 ? `
-                    <div class="analysis-section">
-                        <h3>Healthier Alternatives</h3>
-                        <ul>
-                            ${safeResult.alternatives.map(alt => `<li>${alt}</li>`).join('')}
-                        </ul>
-                    </div>
-                ` : ''}
-                
-                ${this._renderMetadata(safeResult._meta)}
-            </div>
-        `;
+        html += '</div>';
+
+        // Update container content and show it
+        container.innerHTML = html;
+        container.style.display = 'block';
+        
+        // Ensure the container is visible
         container.classList.add('visible');
+        
+        // Add animation class
+        requestAnimationFrame(() => {
+            container.classList.add('fade-in');
+        });
+
+        console.log('Analysis display complete');
     }
 }
 
