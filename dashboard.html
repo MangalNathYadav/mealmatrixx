@@ -15,6 +15,8 @@
             display: flex;
             gap: 1rem;
             align-items: center;
+            flex-wrap: nowrap;
+            margin-right: 1rem;
         }
 
         .summary-section {
@@ -95,14 +97,21 @@
         }
 
         .btn-ai {
+            white-space: nowrap;
+            padding: 0.75rem 1.25rem;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 0.95rem;
             background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             color: white;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             gap: 0.75rem;
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
+            border: none;
+            cursor: pointer;
         }
 
         .ai-spinner {
@@ -113,6 +122,7 @@
             border-radius: 50%;
             animation: spin 1s linear infinite;
             display: none;
+            flex-shrink: 0;
         }
 
         .ai-spinner.visible {
@@ -126,6 +136,12 @@
         .btn-ai:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(var(--primary-color-rgb), 0.3);
+        }
+
+        .btn-ai svg {
+            flex-shrink: 0;
+            width: 16px;
+            height: 16px;
         }
 
         .weekly-summary {
@@ -212,24 +228,29 @@
 
         .nav-actions {
             display: flex;
-            align-items: center;
             gap: 1rem;
+            align-items: center;
+            flex-wrap: nowrap;
+            margin-right: 1rem;
         }
 
         .nav-actions .btn {
             padding: 0.75rem 1.25rem;
             border-radius: 8px;
             font-weight: 500;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             gap: 0.5rem;
             transition: all 0.2s ease;
+            white-space: nowrap;
+            min-width: fit-content;
         }
 
         .nav-actions .btn-primary {
             background: var(--primary-color);
             color: white;
             border: none;
+            margin: 0 0.5rem;
         }
 
         .nav-actions .btn-primary:hover {
