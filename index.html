@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MealMatrix - Food Tracking Made Simple</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <style>
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 2rem;
+        }
+
+        .hero-content {
+            max-width: 800px;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .btn-cta {
+            padding: 1rem 2rem;
+            border-radius: var(--border-radius);
+            font-size: 1.1rem;
+            text-decoration: none;
+            transition: transform 0.3s ease;
+        }
+
+        .btn-cta:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-cta.primary {
+            background: white;
+            color: var(--primary-color);
+        }
+
+        .btn-cta.secondary {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+    </style>
+</head>
+<body>
+    <main class="hero">
+        <div class="hero-content">
+            <h1>Welcome to MealMatrix</h1>
+            <p>Track your meals effortlessly with our simple and intuitive food tracking application. Stay on top of your nutrition goals with ease.</p>
+            <div class="cta-buttons">
+                <a href="login.html" class="btn-cta primary">Login</a>
+                <a href="register.html" class="btn-cta secondary">Sign Up</a>
+            </div>
+        </div>
+    </main>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    
+    <!-- App Scripts -->
+    <script src="firebase-config.js"></script>
+    <script src="assets/js/auth.js"></script>
+</body>
+</html>

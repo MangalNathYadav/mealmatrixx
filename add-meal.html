@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MealMatrix - Add Meal</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <style>
+        .meal-form-container {
+            max-width: 600px;
+            margin: 2rem auto;
+            background: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+
+        .form-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .back-btn {
+            color: var(--primary-color);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="meal-form-container">
+            <div class="form-header">
+                <a href="dashboard.html" class="back-btn">← Back to Dashboard</a>
+                <h2 id="formTitle">Add New Meal</h2>
+            </div>
+            
+            <form id="mealForm">
+                <div class="form-group">
+                    <label for="mealName">Meal Name</label>
+                    <input type="text" id="mealName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="calories">Calories</label>
+                    <input type="number" id="calories" required min="0">
+                </div>
+                
+                <div class="form-group">
+                    <label for="dateTime">Date & Time</label>
+                    <input type="datetime-local" id="dateTime" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="notes">Notes (Optional)</label>
+                    <textarea id="notes"></textarea>
+                </div>
+                
+                <button type="submit" class="btn-primary" id="submitBtn">Add Meal</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    
+    <!-- App Scripts -->
+    <script src="firebase-config.js"></script>
+    <script src="assets/js/auth.js"></script>
+    <script src="assets/js/addMeal.js"></script>
+</body>
+</html>
