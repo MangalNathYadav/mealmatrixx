@@ -4,15 +4,65 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MealMatrix - Add Meal</title>
-    <link rel="stylesheet" href="assets/css/styles.css">
-    <style>
+    <link rel="stylesheet" href="assets/css/styles.css">    <style>
         .meal-form-container {
-            max-width: 600px;
+            max-width: 800px;
             margin: 2rem auto;
             background: white;
             padding: 2rem;
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
+        }
+
+        .ai-analysis {
+            margin-top: 2rem;
+            padding: 1rem;
+            border: 1px solid var(--primary-color);
+            border-radius: var(--border-radius);
+            display: none;
+        }
+
+        .ai-analysis.visible {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        .ai-suggestion {
+            background: #f0f8ff;
+            padding: 1rem;
+            margin-top: 1rem;
+            border-radius: var(--border-radius);
+        }
+
+        .loading-spinner {
+            display: none;
+            width: 30px;
+            height: 30px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            margin: 1rem auto;
+            animation: spin 1s linear infinite;
+        }
+
+        .loading-spinner.visible {
+            display: block;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .form-header {
@@ -53,7 +103,23 @@
                 <a href="dashboard.html" class="back-btn">← Back to Dashboard</a>
                 <h2 id="formTitle">Add New Meal</h2>
             </div>
-            
+              <!-- AI Quick Input -->
+            <div class="ai-input-section">
+                <h3>Quick Add with AI</h3>
+                <p>Describe your meal and let AI analyze it</p>
+                <div class="form-group">
+                    <div class="ai-input">
+                        <input type="text" id="aiMealInput" placeholder="e.g., 2 samosas and a Pepsi">
+                        <button type="button" id="analyzeBtn" class="btn-ai">
+                            <span>Analyze</span>
+                            <div class="ai-spinner"></div>
+                        </button>
+                    </div>
+                </div>
+                <div id="aiResult" class="ai-result"></div>
+            </div>
+
+            <!-- Manual Input Form -->
             <form id="mealForm">
                 <div class="form-group">
                     <label for="mealName">Meal Name</label>
@@ -84,10 +150,50 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+      <!-- Firebase Functions SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-functions-compat.js"></script>
     
     <!-- App Scripts -->
     <script src="firebase-config.js"></script>
     <script src="assets/js/auth.js"></script>
+    <script type="module">
+        import { mealAI, showAILoading, removeAILoading, showAIResult } from './assets/js/ai-features.js';
+
+        // AI Analysis Button Handler
+        document.getElementById('analyzeBtn').addEventListener('click', async () => {
+            const aiInput = document.getElementById('aiMealInput');
+            const resultContainer = document.getElementById('aiResult');
+            const spinner = document.getElementById('analyzeBtn').querySelector('.ai-spinner');
+
+            if (!aiInput.value.trim()) {
+                showToast('Please enter a meal description', 'error');
+                return;
+            }
+
+            try {
+                spinner.classList.add('visible');
+                const result = await mealAI.analyzeMeal(aiInput.value);
+                
+                // Clear any existing results
+                resultContainer.innerHTML = '';
+                showAIResult(resultContainer, result);
+
+                // Auto-fill the form if calories were detected
+                if (result.calories) {
+                    document.getElementById('calories').value = result.calories;
+                }
+                if (result.foods && result.foods.length > 0) {
+                    document.getElementById('mealName').value = result.foods.join(', ');
+                }
+                document.getElementById('notes').value = `AI Assessment: ${result.assessment}\nSuggestion: ${result.suggestion}`;
+                
+            } catch (error) {
+                showToast(error.message, 'error');
+            } finally {
+                spinner.classList.remove('visible');
+            }
+        });
+    </script>
     <script src="assets/js/addMeal.js"></script>
 </body>
 </html>

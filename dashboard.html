@@ -4,11 +4,81 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MealMatrix - Dashboard</title>
-    <link rel="stylesheet" href="assets/css/styles.css">
-    <style>
+    <link rel="stylesheet" href="assets/css/styles.css">    <style>
         /* Dashboard specific styles */
         .dashboard {
             padding: 2rem 0;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .btn-ai {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .btn-ai:hover {
+            transform: translateY(-2px);
+        }
+
+        .weekly-summary {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--box-shadow);
+            display: none;
+        }
+
+        .weekly-summary.visible {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        .suggest-better {
+            background: #f0f8ff;
+            padding: 1rem;
+            margin-top: 1rem;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--primary-color);
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .suggest-better:hover {
+            background: #e0f0ff;
+        }
+
+        .suggestion-list {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: white;
+            border-radius: var(--border-radius);
+            display: none;
+        }
+
+        .suggestion-list.visible {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         
         .navbar {
@@ -98,13 +168,23 @@
         }
     </style>
 </head>
-<body>
-    <nav class="navbar">
+<body>    <nav class="navbar">
         <h2>MealMatrix</h2>
-        <button id="logoutBtn" class="btn">Logout</button>
+        <div class="nav-actions">
+            <button id="weeklySummaryBtn" class="btn btn-ai">
+                <span>📊 Weekly Summary</span>
+                <div class="ai-spinner"></div>
+            </button>
+            <button id="logoutBtn" class="btn">Logout</button>
+        </div>
     </nav>
 
     <div class="container dashboard">
+        <!-- AI Weekly Summary -->
+        <div id="weeklySummary" class="weekly-summary">
+            <!-- Summary will be inserted here -->
+        </div>
+
         <div id="mealGrid" class="meal-grid">
             <!-- Meals will be dynamically inserted here -->
             <div class="empty-state">
@@ -120,10 +200,89 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
-    
+      <!-- Firebase Functions SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-functions-compat.js"></script>
+
     <!-- App Scripts -->
     <script src="firebase-config.js"></script>
     <script src="assets/js/auth.js"></script>
+    <script type="module">
+        import { mealAI, showAILoading, removeAILoading, showAIResult } from './assets/js/ai-features.js';
+
+        const weeklySummaryBtn = document.getElementById('weeklySummaryBtn');
+        const weeklySummaryContainer = document.getElementById('weeklySummary');
+
+        // Generate Weekly Summary
+        weeklySummaryBtn.addEventListener('click', async () => {
+            const spinner = weeklySummaryBtn.querySelector('.ai-spinner');
+            try {
+                spinner.classList.add('visible');
+                
+                // Get last 7 days of meals
+                const user = firebase.auth().currentUser;
+                const mealsRef = firebase.database().ref(`users/${user.uid}/meals`);
+                const weekAgo = new Date();
+                weekAgo.setDate(weekAgo.getDate() - 7);
+
+                const snapshot = await mealsRef.once('value');
+                const meals = snapshot.val() || {};
+                const recentMeals = Object.values(meals).filter(meal => 
+                    new Date(meal.dateTime) >= weekAgo
+                );
+
+                if (recentMeals.length === 0) {
+                    showToast('No meals logged in the past week', 'info');
+                    return;
+                }
+
+                const summary = await mealAI.generateWeeklySummary(recentMeals);
+                weeklySummaryContainer.innerHTML = `
+                    <h3>🤖 Weekly AI Summary</h3>
+                    <div class="ai-content">${summary}</div>
+                `;
+                weeklySummaryContainer.classList.add('visible');
+
+            } catch (error) {
+                showToast(error.message, 'error');
+            } finally {
+                spinner.classList.remove('visible');
+            }
+        });
+
+        // Add a suggest better meal button to meal cards
+        window.suggestBetterMeal = async (mealId) => {
+            const meal = document.querySelector(`[data-meal-id="${mealId}"]`);
+            const suggestionsContainer = meal.querySelector('.suggestion-list');
+            const spinner = meal.querySelector('.suggest-better .ai-spinner');
+
+            try {
+                spinner.classList.add('visible');
+                const mealData = {
+                    name: meal.querySelector('h3').textContent,
+                    calories: parseInt(meal.querySelector('.meal-metadata').textContent.match(/Calories: (\d+)/)[1])
+                };
+
+                const suggestions = await mealAI.suggestBetterMeal(mealData);
+                suggestionsContainer.innerHTML = `
+                    <h4>🤖 Healthier Alternatives</h4>
+                    <ul>
+                        ${suggestions.map(s => `
+                            <li>
+                                <strong>${s.name}</strong> (${s.calories} cal)
+                                <p>${s.reason}</p>
+                            </li>
+                        `).join('')}
+                    </ul>
+                `;
+                suggestionsContainer.classList.add('visible');
+
+            } catch (error) {
+                showToast(error.message, 'error');
+            } finally {
+                spinner.classList.remove('visible');
+            }
+        };
+    </script>
     <script src="assets/js/dashboard.js"></script>
 </body>
 </html>

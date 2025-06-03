@@ -1,5 +1,6 @@
 // Dashboard functionality
 const mealGrid = document.getElementById('mealGrid');
+const logoutBtn = document.getElementById('logoutBtn');ment.getElementById('mealGrid');
 const logoutBtn = document.getElementById('logoutBtn');
 
 // Handle logout
@@ -20,13 +21,15 @@ function loadMeals() {
         mealGrid.innerHTML = '';
         
         if (!meals) {
-            // Show empty state
-            mealGrid.innerHTML = `
+            // Show empty state            mealGrid.innerHTML = `
                 <div class="empty-state">
                     <h3>No meals added yet</h3>
                     <p>Click the + button to add your first meal</p>
                 </div>
             `;
+
+            // Hide weekly summary when no meals
+            document.getElementById('weeklySummary').classList.remove('visible');
             return;
         }
 

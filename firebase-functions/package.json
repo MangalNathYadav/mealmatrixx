@@ -1,0 +1,23 @@
+{
+  "name": "firebase-functions",
+  "version": "1.0.0",
+  "description": "Firebase Cloud Functions for MealMatrix",
+  "main": "index.js",
+  "scripts": {
+    "build": "echo \"No build required\"",
+    "serve": "firebase emulators:start --only functions",
+    "shell": "firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "engines": {
+    "node": "18"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.2.0",
+    "firebase-admin": "^11.11.1",
+    "firebase-functions": "^4.7.0"
+  },
+  "private": true
+}
