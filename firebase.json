@@ -1,10 +1,4 @@
 {
-  "functions": {
-    "source": "firebase-functions",
-    "predeploy": [
-      "npm --prefix \"$RESOURCE_DIR\" install"
-    ]
-  },
   "hosting": {
     "public": ".",
     "ignore": [

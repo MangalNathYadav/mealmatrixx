@@ -194,29 +194,23 @@
         </div>
 
         <a href="add-meal.html" class="add-meal-btn">+</a>
-    </div>
-
-    <!-- Firebase SDK -->
+    </div>    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
-      <!-- Firebase Functions SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-functions-compat.js"></script>
-
-    <!-- App Scripts -->
-    <script src="firebase-config.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>    <!-- App Scripts -->    <script src="firebase-config.js"></script>
     <script src="assets/js/auth.js"></script>
-    <script type="module">
-        import { mealAI, showAILoading, removeAILoading, showAIResult } from './assets/js/ai-features.js';
+    <script src="assets/js/ai-ui.js" type="module"></script><script type="module">
+        import ai from './assets/js/ai-features.js';
 
         const weeklySummaryBtn = document.getElementById('weeklySummaryBtn');
         const weeklySummaryContainer = document.getElementById('weeklySummary');
 
-        // Generate Weekly Summary
-        weeklySummaryBtn.addEventListener('click', async () => {
+        // Generate Weekly Summary        weeklySummaryBtn.addEventListener('click', async () => {
             const spinner = weeklySummaryBtn.querySelector('.ai-spinner');
+            weeklySummaryContainer.innerHTML = ''; // Clear previous results
             try {
                 spinner.classList.add('visible');
+                console.log('Generating weekly summary...');
                 
                 // Get last 7 days of meals
                 const user = firebase.auth().currentUser;
@@ -235,7 +229,7 @@
                     return;
                 }
 
-                const summary = await mealAI.generateWeeklySummary(recentMeals);
+                const summary = await ai.generateWeeklySummary(recentMeals);
                 weeklySummaryContainer.innerHTML = `
                     <h3>🤖 Weekly AI Summary</h3>
                     <div class="ai-content">${summary}</div>
@@ -262,7 +256,7 @@
                     calories: parseInt(meal.querySelector('.meal-metadata').textContent.match(/Calories: (\d+)/)[1])
                 };
 
-                const suggestions = await mealAI.suggestBetterMeal(mealData);
+                const suggestions = await ai.suggestBetterMeal(mealData);
                 suggestionsContainer.innerHTML = `
                     <h4>🤖 Healthier Alternatives</h4>
                     <ul>

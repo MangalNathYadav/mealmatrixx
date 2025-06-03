@@ -1,0 +1,10 @@
+{
+  "name": "mealmatrix",
+  "version": "1.0.0",
+  "description": "MealMatrix - AI-Powered Meal Tracking App",
+  "main": "index.html",
+  "scripts": {
+    "deploy:functions": "cd firebase-functions && npm install && firebase deploy --only functions"
+  },
+  "private": true
+}

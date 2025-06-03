@@ -1,11 +1,17 @@
 // Dashboard functionality
 const mealGrid = document.getElementById('mealGrid');
-const logoutBtn = document.getElementById('logoutBtn');ment.getElementById('mealGrid');
 const logoutBtn = document.getElementById('logoutBtn');
 
 // Handle logout
-logoutBtn.addEventListener('click', () => {
-    firebase.auth().signOut();
+logoutBtn.addEventListener('click', async () => {
+    try {
+        await firebase.auth().signOut();
+        showToast('Logged out successfully', 'success');
+        window.location.href = 'login.html';
+    } catch (error) {
+        console.error('Logout error:', error);
+        showToast('Failed to logout. Please try again.');
+    }
 });
 
 // Load user's meals
@@ -20,8 +26,8 @@ function loadMeals() {
         // Clear current meals
         mealGrid.innerHTML = '';
         
-        if (!meals) {
-            // Show empty state            mealGrid.innerHTML = `
+        if (!meals) {            // Show empty state
+            mealGrid.innerHTML = `
                 <div class="empty-state">
                     <h3>No meals added yet</h3>
                     <p>Click the + button to add your first meal</p>

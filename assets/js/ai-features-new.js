@@ -1,5 +1,3 @@
-import GeminiClient from './gemini-client-v1beta.js';
-
 // AI Features for MealMatrix
 class MealAI {
     constructor() {
@@ -47,6 +45,6 @@ class MealAI {
     }
 }
 
-// Create and export a single instance
-const ai = new MealAI();
-export default ai;
+// Initialize and export AI instance
+const mealAI = new MealAI();
+export { mealAI };

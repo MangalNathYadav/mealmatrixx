@@ -103,13 +103,13 @@
                 <a href="dashboard.html" class="back-btn">← Back to Dashboard</a>
                 <h2 id="formTitle">Add New Meal</h2>
             </div>
-              <!-- AI Quick Input -->
+          <!-- AI Quick Input -->
             <div class="ai-input-section">
-                <h3>Quick Add with AI</h3>
-                <p>Describe your meal and let AI analyze it</p>
+                <h3>Quick Add with AI 🤖</h3>
+                <p>Describe your meal and let AI analyze it for you</p>
                 <div class="form-group">
                     <div class="ai-input">
-                        <input type="text" id="aiMealInput" placeholder="e.g., 2 samosas and a Pepsi">
+                        <input type="text" id="aiMealInput" placeholder="e.g., 2 samosas and a Pepsi" class="ai-textbox">
                         <button type="button" id="analyzeBtn" class="btn-ai">
                             <span>Analyze</span>
                             <div class="ai-spinner"></div>
@@ -144,20 +144,14 @@
                 <button type="submit" class="btn-primary" id="submitBtn">Add Meal</button>
             </form>
         </div>
-    </div>
-
-    <!-- Firebase SDK -->
+    </div>    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
-      <!-- Firebase Functions SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-functions-compat.js"></script>
-    
-    <!-- App Scripts -->
-    <script src="firebase-config.js"></script>
+      <!-- App Scripts -->    <script src="firebase-config.js"></script>
     <script src="assets/js/auth.js"></script>
-    <script type="module">
-        import { mealAI, showAILoading, removeAILoading, showAIResult } from './assets/js/ai-features.js';
+    <script src="assets/js/ai-ui.js" type="module"></script><script type="module">
+        import ai from './assets/js/ai-features.js';
 
         // AI Analysis Button Handler
         document.getElementById('analyzeBtn').addEventListener('click', async () => {
@@ -168,15 +162,14 @@
             if (!aiInput.value.trim()) {
                 showToast('Please enter a meal description', 'error');
                 return;
-            }
-
-            try {
-                spinner.classList.add('visible');
-                const result = await mealAI.analyzeMeal(aiInput.value);
-                
-                // Clear any existing results
-                resultContainer.innerHTML = '';
-                showAIResult(resultContainer, result);
+            }                try {
+                    spinner.classList.add('visible');
+                    console.log('Analyzing meal:', aiInput.value);
+                    const result = await ai.analyzeMeal(aiInput.value);
+                    console.log('AI Response:', result);
+                    
+                    // Show results using our UI helper
+                    showAIResult(resultContainer, result);
 
                 // Auto-fill the form if calories were detected
                 if (result.calories) {
