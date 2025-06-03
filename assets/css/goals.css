@@ -1,0 +1,209 @@
+/* Goals specific styles */
+.empty-goals-message {
+    text-align: center;
+    padding: 3rem 2rem;
+    background: linear-gradient(to bottom, var(--bg-subtle), white);
+    border-radius: 12px;
+    border: 2px dashed var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.empty-goals-message:hover {
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+}
+
+.empty-goals-message img {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 1.5rem;
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+    animation: float 3s ease-in-out infinite;
+}
+
+.empty-goals-message h4 {
+    color: var(--primary-color);
+    font-size: 1.5rem;
+    margin: 0.5rem 0;
+}
+
+.empty-goals-message p {
+    color: var(--text-color);
+    margin-bottom: 2rem;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+/* Enhanced Goals Progress Section */
+.goals-progress {
+    background: white;
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    margin-bottom: 2rem;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.goals-progress:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+}
+
+.goals-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--bg-subtle);
+}
+
+.goals-header h3 {
+    font-size: 1.5rem;
+    margin: 0;
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.goals-header h3::before {
+    content: '🎯';
+    font-size: 1.75rem;
+}
+
+.btn-link {
+    color: var(--primary-color);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1rem;
+    padding: 0.75rem 1.25rem;
+    border-radius: 8px;
+    background: var(--bg-subtle);
+    transition: all 0.2s ease;
+}
+
+.btn-link:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: scale(1.05);
+}
+
+.btn-link span {
+    font-weight: 500;
+}
+
+/* Goals Stats Grid */
+.goals-data {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.goal-stat-card {
+    background: var(--bg-subtle);
+    padding: 1.75rem;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.goal-stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.goal-stat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.25rem;
+}
+
+.goal-stat-title {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--text-color);
+    margin: 0;
+}
+
+.goal-stat-value {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin: 0.75rem 0;
+}
+
+.progress-bar-container {
+    position: relative;
+    height: 10px;
+    background: #e5e7eb;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    position: absolute;
+    height: 100%;
+    left: 0;
+    top: 0;
+    border-radius: 6px;
+    transition: width 0.5s ease;
+}
+
+.progress-bar-fill.good {
+    background: linear-gradient(to right, #22c55e, #15803d);
+}
+
+.progress-bar-fill.warning {
+    background: linear-gradient(to right, #f59e0b, #d97706);
+}
+
+.progress-bar-fill.over {
+    background: linear-gradient(to right, #ef4444, #dc2626);
+}
+
+.goal-stat-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: var(--text-color);
+}
+
+/* Loading State */
+.goals-loading {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: var(--text-color);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid var(--bg-subtle);
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}

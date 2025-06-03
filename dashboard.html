@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MealMatrix - Dashboard</title>
-    <link rel="stylesheet" href="assets/css/styles.css">    <style>
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="assets/css/goals.css">    <style>
         /* Dashboard specific styles */
         .dashboard {
             padding: 2rem 0;
@@ -98,12 +99,33 @@
             color: white;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            transition: transform 0.3s ease;
+            gap: 0.75rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ai-spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+
+        .ai-spinner.visible {
+            display: block;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
         .btn-ai:hover {
             transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(var(--primary-color-rgb), 0.3);
         }
 
         .weekly-summary {
@@ -160,12 +182,104 @@
         
         .navbar {
             background: white;
-            padding: 1rem;
-            box-shadow: var(--box-shadow);
+            padding: 1.25rem 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
             margin-bottom: 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .navbar h2 {
+            color: var(--primary-color);
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .navbar h2 img {
+            width: 32px;
+            height: 32px;
+            object-fit: contain;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .nav-actions .btn {
+            padding: 0.75rem 1.25rem;
+            border-radius: 8px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .nav-actions .btn-primary {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+        }
+
+        .nav-actions .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(var(--primary-color-rgb), 0.2);
+        }
+
+        .nav-actions .btn-ai {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-actions .btn-ai::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .nav-actions .btn-ai:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(var(--primary-color-rgb), 0.3);
+        }
+
+        .nav-actions .btn-ai:hover::before {
+            opacity: 1;
+        }
+
+        .nav-actions .btn-ai > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .nav-actions #logoutBtn {
+            background: var(--bg-subtle);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+        }
+
+        .nav-actions #logoutBtn:hover {
+            background: #f3f4f6;
+            border-color: var(--primary-color);
         }
 
         .meal-grid {
@@ -377,6 +491,168 @@
             border-bottom: 2px solid var(--primary-color);
         }
 
+        /* Goals Progress Styles */
+        .goals-progress {
+            background: white;
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 2rem;
+        }
+
+        .goals-progress h3 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .progress-item {
+            margin-bottom: 1rem;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text-color);
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary-color);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        /* Enhanced Goals Progress Styles */
+        .goals-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .goals-header h3 {
+            margin: 0;
+        }
+
+        .btn-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            transition: opacity 0.2s ease;
+        }
+
+        .btn-link:hover {
+            opacity: 0.8;
+        }
+
+        .empty-goals-message {
+            text-align: center;
+            padding: 2rem;
+            background: var(--bg-subtle);
+            border-radius: 8px;
+            border: 2px dashed var(--border-color);
+        }
+
+        .empty-goals-message h4 {
+            color: var(--primary-color);
+            margin: 0.5rem 0;
+        }
+
+        .empty-goals-message p {
+            color: var(--text-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .goals-loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-color);
+        }
+
+        .goals-data {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .goal-stat-card {
+            background: var(--bg-subtle);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .goal-stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .goal-stat-title {
+            font-size: 0.9rem;
+            color: var(--text-color);
+            margin: 0;
+        }
+
+        .goal-stat-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin: 0.5rem 0;
+        }
+
+        .progress-bar-container {
+            position: relative;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .progress-bar-fill {
+            position: absolute;
+            height: 100%;
+            left: 0;
+            top: 0;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-bar-fill.good {
+            background: #22c55e;
+        }
+
+        .progress-bar-fill.warning {
+            background: #f59e0b;
+        }
+
+        .progress-bar-fill.over {
+            background: #ef4444;
+        }
+
+        .goal-stat-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+            color: var(--text-color);
+        }
+
         /* Hide scrollbar when popup is open */
         body.popup-open {
             overflow: hidden;
@@ -384,23 +660,70 @@
     </style>
 </head>
 <body>    <nav class="navbar">
-        <h2>MealMatrix</h2>
+        <h2>
+            <img src="assets/mealmatrixx_logo.png" alt="MealMatrix Logo">
+            MealMatrix
+        </h2>
         <div class="nav-actions">
+            <a href="nutrition-goals.html" class="btn btn-primary">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M8 1.5L14 5.5V10.5L8 14.5L2 10.5V5.5L8 1.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                    <path d="M8 7.5L8 14.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    <path d="M14 5.5L8 7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    <path d="M2 5.5L8 7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+                My Goals
+            </a>
             <button id="weeklySummaryBtn" class="btn btn-ai">
-                <span>📊 Weekly Summary</span>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M2 13.5H14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    <path d="M4 13.5V7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    <path d="M8 13.5V3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    <path d="M12 13.5V5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+                Weekly Summary
                 <div class="ai-spinner"></div>
             </button>
-            <button id="logoutBtn" class="btn">Logout</button>
+            <button id="logoutBtn" class="btn">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M6 14H3.33333C2.97971 14 2.64057 13.8595 2.39052 13.6095C2.14048 13.3594 2 13.0203 2 12.6667V3.33333C2 2.97971 2.14048 2.64057 2.39052 2.39052C2.64057 2.14048 2.97971 2 3.33333 2H6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M10.6667 11.3333L14 8L10.6667 4.66667" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M14 8H6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Logout
+            </button>
         </div>
-    </nav>    <!-- Full-screen Weekly Summary Popup -->
+    </nav><!-- Full-screen Weekly Summary Popup -->
     <div id="weeklySummaryPopup" class="fullscreen-popup">
         <button class="close-popup" onclick="closeWeeklySummary()">×</button>
         <div class="popup-content">
             <!-- Summary will be inserted here -->
         </div>
-    </div>
+    </div>    <div class="container dashboard">
+        <!-- Goals Progress Section -->        <div id="goalsProgress" class="goals-progress">
+            <div class="goals-header">
+                <h3>Today's Goals Progress</h3>
+                <a href="nutrition-goals.html" class="btn-link">
+                    <span>⚙️ Configure Goals</span>
+                </a>
+            </div>
+            <div class="goals-content">
+                <div class="goals-loading">
+                    <div class="loading-spinner"></div>
+                    <p>Loading your nutrition goals...</p>
+                </div>
+                <div class="goals-empty" style="display: none;">
+                    <div class="empty-goals-message">
+                        <img src="assets/mealmatrixx_logo.png" alt="Set Goals">
+                        <h4>Set Your Nutrition Goals</h4>
+                        <p>Track your progress, get personalized insights, and achieve your health targets with customized nutrition goals.</p>
+                        <a href="nutrition-goals.html" class="btn btn-primary">Get Started with Goals</a>
+                    </div>
+                </div>
+                <div class="goals-data" style="display: none;"></div>
+            </div>
+        </div>
 
-    <div class="container dashboard">
         <div id="mealGrid" class="meal-grid">
             <!-- Meals will be dynamically inserted here -->
             <div class="empty-state">
@@ -415,9 +738,10 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>    <!-- App Scripts -->    <script src="firebase-config.js"></script>
     <script src="assets/js/auth.js"></script>
-    <script src="assets/js/ai-ui.js" type="module"></script><script type="module">
+    <script src="assets/js/ai-ui.js" type="module"></script>    <script type="module">
         import ai from './assets/js/ai-features.js';
         import aiUI from './assets/js/ai-ui.js';
+        import goalsManager from './assets/js/goals.js';
 
         // Toast notification helper
         function showToast(message, type = 'info') {
@@ -442,10 +766,15 @@
             }, 300);
         };
 
-        // Initialize event listeners when DOM is ready
-        document.addEventListener('DOMContentLoaded', () => {
+        // Initialize event listeners when DOM is ready        document.addEventListener('DOMContentLoaded', async () => {
             const weeklySummaryBtn = document.getElementById('weeklySummaryBtn');
             const popup = document.getElementById('weeklySummaryPopup');
+            const goalsProgressElement = document.getElementById('goalsProgress');
+
+            // Initialize goals progress
+            if (goalsProgressElement) {
+                await goalsManager.updateGoalProgress(goalsProgressElement);
+            }
 
             if (!weeklySummaryBtn || !popup) {
                 console.error('Weekly summary elements not found');

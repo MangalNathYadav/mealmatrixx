@@ -1,0 +1,390 @@
+/* Navigation styles */
+.navbar {
+    background: white;
+    padding: 1.25rem 2rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.navbar h2 {
+    color: var(--primary-color);
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.navbar h2::before {
+    content: '🍽️';
+    font-size: 1.5rem;
+}
+
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.nav-actions .btn {
+    background: var(--bg-subtle);
+    color: var(--text-color);
+    padding: 0.75rem 1.25rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+    border: 1px solid var(--border-color);
+}
+
+.nav-actions .btn:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Nutrition Goals specific styles */
+.goals-container {
+    max-width: 1200px; /* Increased to accommodate 3 cards */
+    margin: 2rem auto;
+    padding: 3rem;
+    background: linear-gradient(to bottom right, white, var(--bg-subtle));
+    border-radius: 16px;
+    box-shadow: var(--box-shadow);
+    border: 1px solid var(--border-color);
+}
+
+.goals-header {
+    text-align: center;
+    margin-bottom: 3.5rem;
+    animation: fadeSlideDown 0.6s ease-out;
+    position: relative;
+    padding-bottom: 2rem;
+}
+
+.goals-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 4px;
+    background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+    border-radius: 2px;
+}
+
+.goals-header h2 {
+    color: var(--primary-color);
+    font-size: 2.5rem;
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    text-transform: capitalize;
+    letter-spacing: -0.5px;
+}
+
+.goals-header h2::before {
+    content: '🎯';
+    font-size: 2.75rem;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+}
+
+.goals-header p {
+    color: var(--text-color);
+    max-width: 700px; /* Increased for better readability */
+    margin: 0 auto;
+    line-height: 1.7;
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+.goals-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr; /* Always show 3 columns on desktop */
+    gap: 2rem;
+    margin-top: 2rem;
+    animation: fadeSlideUp 0.6s ease-out 0.2s both;
+}
+
+/* Tablet view - 2 columns */
+@media (max-width: 1024px) {
+    .goals-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* Mobile view - 1 column */
+@media (max-width: 768px) {
+    .goals-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.goal-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    height: 100%; /* Ensure all cards are same height */
+    display: flex;
+    flex-direction: column;
+}
+
+.goal-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.goal-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+}
+
+.goal-card:hover::before {
+    opacity: 1;
+}
+
+/* Add visual separation between cards */
+.goal-card:not(:last-child) {
+    margin-right: 1px; /* Creates a subtle line between cards */
+}
+
+/* Ensure consistent card width */
+.goal-card {
+    min-width: 0; /* Prevents content from forcing card wider */
+}
+
+.goal-header {
+    color: var(--primary-color);
+    font-size: 1.25rem;
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.goal-header[data-icon]::before {
+    content: attr(data-icon);
+    font-size: 1.5rem;
+}
+
+.goal-input-group {
+    margin-bottom: 1.75rem;
+    position: relative;
+}
+
+.goal-input-group:last-child {
+    margin-bottom: 0;
+}
+
+.goal-input-group label {
+    display: block;
+    margin-bottom: 0.75rem;
+    color: var(--text-color);
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.goal-input-group input,
+.goal-input-group select {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    background: var(--bg-subtle);
+}
+
+.goal-input-group input:hover,
+.goal-input-group select:hover {
+    border-color: var(--primary-color);
+}
+
+.goal-input-group input:focus,
+.goal-input-group select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    background: white;
+    box-shadow: 0 0 0 4px rgba(var(--primary-color-rgb), 0.1);
+}
+
+.goal-input-group input::placeholder {
+    color: #9ca3af;
+}
+
+.goal-input-group .input-hint {
+    font-size: 0.85rem;
+    color: #6b7280;
+    margin-top: 0.5rem;
+    display: none;
+}
+
+.goal-input-group input:focus + .input-hint {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+.save-goals-container {
+    margin-top: 3rem;
+    text-align: center;
+    animation: fadeSlideUp 0.6s ease-out 0.4s both;
+}
+
+.save-goals {
+    background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+    color: white;
+    border: none;
+    padding: 1rem 2.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(var(--primary-color-rgb), 0.2);
+}
+
+.save-goals:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(var(--primary-color-rgb), 0.3);
+}
+
+.save-goals:active {
+    transform: translateY(0);
+}
+
+.success-message {
+    display: none;
+    background: linear-gradient(to right, #dcfce7, #bbf7d0);
+    color: #166534;
+    padding: 1.25rem;
+    border-radius: 8px;
+    margin: 1.5rem 0;
+    text-align: center;
+    font-weight: 500;
+    border: 1px solid #86efac;
+    box-shadow: 0 4px 6px rgba(22, 101, 52, 0.1);
+}
+
+.success-message span {
+    font-size: 1.25rem;
+    margin-right: 0.5rem;
+}
+
+.success-message.visible {
+    display: block;
+    animation: bounceIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* Validation styles */
+.goal-input-group.error input,
+.goal-input-group.error select {
+    border-color: #ef4444;
+    background: #fef2f2;
+}
+
+.goal-input-group.error .error-message {
+    color: #ef4444;
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.goal-input-group.error .error-message::before {
+    content: '⚠️';
+}
+
+/* Animations */
+@keyframes fadeSlideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes bounceIn {
+    0% {
+        transform: scale(0.3);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    70% { transform: scale(0.9); }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .goals-container {
+        margin: 1rem;
+        padding: 2rem;
+    }
+
+    .goals-header h2 {
+        font-size: 1.75rem;
+    }
+
+    .goals-header p {
+        font-size: 1rem;
+    }
+
+    .goals-grid {
+        gap: 1.5rem;
+    }
+
+    .goal-card {
+        padding: 1.5rem;
+    }
+}
