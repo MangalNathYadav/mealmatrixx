@@ -149,41 +149,140 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
       <!-- App Scripts -->    <script src="firebase-config.js"></script>
-    <script src="assets/js/auth.js"></script>
-    <script src="assets/js/ai-ui.js" type="module"></script><script type="module">
+    <script src="assets/js/auth.js"></script>    <script src="assets/js/ai-ui.js" type="module"></script>    
+    <script type="module">
         import ai from './assets/js/ai-features.js';
+        import aiUI from './assets/js/ai-ui.js';
 
-        // AI Analysis Button Handler
-        document.getElementById('analyzeBtn').addEventListener('click', async () => {
-            const aiInput = document.getElementById('aiMealInput');
-            const resultContainer = document.getElementById('aiResult');
-            const spinner = document.getElementById('analyzeBtn').querySelector('.ai-spinner');
+        // Toast notification helper
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
 
-            if (!aiInput.value.trim()) {
-                showToast('Please enter a meal description', 'error');
-                return;
-            }                try {
-                    spinner.classList.add('visible');
+        // Initialize event listeners when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set default date time to current
+            const dateTimeInput = document.getElementById('dateTime');
+            if (dateTimeInput) {
+                dateTimeInput.value = new Date().toISOString().slice(0, 16);
+            }
+
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            if (!analyzeBtn) return;
+
+            analyzeBtn.addEventListener('click', async () => {
+                const aiInput = document.getElementById('aiMealInput');
+                const resultContainer = document.getElementById('aiResult');
+                let shouldRetry = false;
+                
+                if (!aiInput?.value.trim()) {
+                    showToast('Please enter a meal description', 'error');
+                    return;
+                }
+
+                try {
+                    aiUI.showLoading('Analyzing your meal...');
                     console.log('Analyzing meal:', aiInput.value);
                     const result = await ai.analyzeMeal(aiInput.value);
                     console.log('AI Response:', result);
                     
-                    // Show results using our UI helper
-                    showAIResult(resultContainer, result);
+                    // Enhanced response validation
+                    if (!result) {
+                        throw new Error('No response from AI service');
+                    }
 
-                // Auto-fill the form if calories were detected
-                if (result.calories) {
-                    document.getElementById('calories').value = result.calories;
+                    // Validate response structure
+                    if (!isValidAIResponse(result)) {
+                        throw new Error('Invalid AI response format');
+                    }
+                    
+                    // Show results using our UI helper
+                    aiUI.displayAnalysis(result, 'aiResult');
+
+                    // Auto-fill form with validated data
+                    const caloriesInput = document.getElementById('calories');
+                    const mealNameInput = document.getElementById('mealName');
+                    const notesInput = document.getElementById('notes');
+
+                    if (typeof result.calories?.total === 'number' && caloriesInput) {
+                        caloriesInput.value = result.calories.total;
+                    }
+                    if (Array.isArray(result.foods) && result.foods.length > 0 && mealNameInput) {
+                        mealNameInput.value = result.foods.join(', ');
+                    }
+                    if ((typeof result.assessment === 'string' || typeof result.suggestion === 'string') && notesInput) {
+                        const assessmentText = result.assessment ? 'AI Assessment: ' + result.assessment : '';
+                        const suggestionText = result.suggestion ? 'Suggestion: ' + result.suggestion : '';
+                        const notes = [assessmentText, suggestionText].filter(Boolean).join('\n');
+                        notesInput.value = notes;
+                    }
+
+                } catch (error) {
+                    console.error('Analysis failed:', error);
+                    
+                    // Handle different types of errors
+                    if (error.message?.includes('503') || 
+                        error.message?.includes('timeout') || 
+                        error.message?.includes('message port closed')) {
+                        
+                        shouldRetry = true;
+                        const retryDelay = 2000;
+                        aiUI.showRetrying(2);
+                        setTimeout(() => {
+                            const btn = document.getElementById('analyzeBtn');
+                            if (btn) btn.click();
+                        }, retryDelay);
+                    } else {
+                        const errorMessage = error.message === 'Invalid AI response format' 
+                            ? 'Received invalid response from AI. Please try again.'
+                            : error?.message || 'Analysis failed, please try again';
+                        showToast(errorMessage, 'error');
+                        aiUI.hideLoading();
+                    }
+                } finally {
+                    if (!shouldRetry) {
+                        aiUI.hideLoading();
+                    }
                 }
-                if (result.foods && result.foods.length > 0) {
-                    document.getElementById('mealName').value = result.foods.join(', ');
+            });
+
+            // Helper function to validate AI response structure
+            function isValidAIResponse(response) {
+                // Check if response is an object
+                if (!response || typeof response !== 'object') {
+                    return false;
                 }
-                document.getElementById('notes').value = `AI Assessment: ${result.assessment}\nSuggestion: ${result.suggestion}`;
-                
-            } catch (error) {
-                showToast(error.message, 'error');
-            } finally {
-                spinner.classList.remove('visible');
+
+                // Validate calories
+                if (response.calories && (
+                    typeof response.calories !== 'object' ||
+                    typeof response.calories.total !== 'number'
+                )) {
+                    return false;
+                }
+
+                // Validate foods array
+                if (response.foods && !Array.isArray(response.foods)) {
+                    return false;
+                }
+
+                // Validate assessment and suggestion
+                if (response.assessment && typeof response.assessment !== 'string') {
+                    return false;
+                }
+                if (response.suggestion && typeof response.suggestion !== 'string') {
+                    return false;
+                }
+
+                // Must have at least one valid property
+                return response.calories?.total || 
+                       (response.foods && response.foods.length > 0) ||
+                       response.assessment ||
+                       response.suggestion;
             }
         });
     </script>

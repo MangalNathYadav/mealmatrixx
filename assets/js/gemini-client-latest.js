@@ -31,58 +31,126 @@ class GeminiClient {    constructor(apiKey) {
             console.error('Error listing Gemini models:', error);
             throw error;
         }
-    }    async generateContent(prompt, retryCount = 0, maxRetries = 3) {
+    }    async generateContent(prompt, retryCount = 0, maxRetries = 10) {
         try {
+            if (retryCount >= maxRetries) {
+                throw new Error('Maximum retry attempts reached. Please try again later.');
+            }
+
             const url = `${this.baseUrl}/${this.modelName}:generateContent?key=${this.apiKey}`;
-            console.log(`Making Gemini API request (attempt ${retryCount + 1}/${maxRetries + 1})...`);
+            console.log(`Making Gemini API request (attempt ${retryCount + 1}/${maxRetries})...`);
             
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    contents: [{
-                        parts: [{
+            // Add timeout to the fetch request
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [{
                             text: prompt
-                        }]
-                    }],
-                    generationConfig: {
-                        temperature: 0.7,
-                        maxOutputTokens: 2048,
-                        topK: 1,
-                        topP: 0.8
+                            }]
+                        }],
+                        generationConfig: {
+                            temperature: 0.7,
+                            maxOutputTokens: 2048,
+                            topK: 1,
+                            topP: 0.8
+                        }
+                    }),
+                    signal: controller.signal
+                });
+
+                clearTimeout(timeout);
+
+                if (!response.ok) {
+                    let errorMessage;
+                    try {
+                        const errorData = await response.json();
+                        errorMessage = errorData?.error?.message || response.statusText;
+                    } catch {
+                        errorMessage = response.statusText;
                     }
-                })
-            });            if (!response.ok) {
-                const errorData = await response.json().catch(() => null);
-                console.error('Gemini API Error Response:', errorData);
-                const errorMessage = errorData?.error?.message || response.statusText;
+
+                    // Handle 503 Service Unavailable with retries
+                    if (response.status === 503 && retryCount < maxRetries) {
+                        const retryDelay = Math.pow(2, retryCount) * 1000; // Exponential backoff
+                        console.log(`Service unavailable. Retrying in ${retryDelay/1000} seconds...`);
+                        await new Promise(resolve => setTimeout(resolve, retryDelay));
+                        return this.generateContent(prompt, retryCount + 1, maxRetries);
+                    }
+                    
+                    throw new Error(`Gemini API request failed (${response.status}): ${errorMessage}`);
+                }
+
+                let data;
+                try {
+                    data = await response.json();
+                } catch (parseError) {
+                    console.error('Failed to parse Gemini response:', parseError);
+                    throw new Error('Failed to parse response from Gemini API');
+                }
+
+                // Enhanced response handling
+                if (data?.candidates?.[0]?.content?.parts?.[0]?.text) {
+                    const text = data.candidates[0].content.parts[0].text;
+                    let result;
+                    
+                    try {
+                        result = JSON.parse(text);
+                        // Add metadata about the API call
+                        result._meta = {
+                            model: this.modelName,
+                            attempts: retryCount + 1,
+                            timestamp: new Date().toISOString(),
+                            version: '2.0'
+                        };
+                        console.log('✅ Gemini API Success (JSON):', result);
+                        return result;
+                    } catch {
+                        // If not JSON, return formatted text response
+                        result = {
+                            text: text,
+                            _meta: {
+                                model: this.modelName,
+                                attempts: retryCount + 1,
+                                timestamp: new Date().toISOString(),
+                                version: '2.0',
+                                format: 'text'
+                            }
+                        };
+                        console.log('✅ Gemini API Success (Text):', result);
+                        return result;
+                    }
+                } else {
+                    console.error('Invalid Gemini response format:', data);
+                    throw new Error('Invalid response format from Gemini API');
+                }
+            } catch (fetchError) {
+                clearTimeout(timeout);
                 
-                // Handle 503 Service Unavailable with retries
-                if (response.status === 503 && retryCount < maxRetries) {
-                    const retryDelay = Math.pow(2, retryCount) * 1000; // Exponential backoff
-                    console.log(`Service unavailable. Retrying in ${retryDelay/1000} seconds...`);
+                // Handle abort error (timeout)
+                if (fetchError.name === 'AbortError') {
+                    if (retryCount < maxRetries) {
+                        console.log('Request timed out, retrying...');
+                        return this.generateContent(prompt, retryCount + 1, maxRetries);
+                    }
+                    throw new Error('Request timed out after multiple retries');
+                }
+                
+                // Handle other fetch errors
+                if (retryCount < maxRetries) {
+                    const retryDelay = Math.pow(2, retryCount) * 1000;
+                    console.log(`Network error, retrying in ${retryDelay/1000} seconds...`);
                     await new Promise(resolve => setTimeout(resolve, retryDelay));
                     return this.generateContent(prompt, retryCount + 1, maxRetries);
                 }
-                
-                throw new Error(`Gemini API request failed (${response.status}): ${errorMessage}`);
-            }
-
-            const data = await response.json();
-            console.log('Gemini API Response:', data);
-
-            if (!data.candidates?.[0]?.content?.parts?.[0]?.text) {
-                console.error('Invalid Gemini response format:', data);
-                throw new Error('Invalid response format from Gemini API');
-            }
-
-            const text = data.candidates[0].content.parts[0].text;
-            try {
-                return JSON.parse(text);
-            } catch {
-                return text;
+                throw fetchError;
             }
         } catch (error) {
             console.error('Gemini API Error:', error);

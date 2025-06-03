@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MealMatrix - Advanced Features</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="page-header">
+            <a href="dashboard.html" class="back-btn">← Back to Dashboard</a>
+            <h1>Advanced Features</h1>
+        </div>
+
+        <div class="features-container">
+            <!-- Feature sections will be dynamically added here -->
+            <div id="mealPlanSection"></div>
+            <div id="recipeModSection"></div>
+            <div id="grocerySection"></div>
+        </div>
+
+        <!-- Loading Overlay (reused from ai-ui.js) -->
+        <div id="ai-loading-overlay"></div>
+        <div class="modal-backdrop"></div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
+    <!-- App Scripts -->
+    <script src="firebase-config.js"></script>
+    <script src="assets/js/auth.js"></script>
+    <script src="assets/js/ai-ui.js" type="module"></script>
+    <script type="module">
+        import advancedAI from './assets/js/ai-advanced.js';
+        import advancedUI from './assets/js/advanced-features-ui.js';
+        import aiUI from './assets/js/ai-ui.js';
+
+        // Initialize UI sections
+        document.addEventListener('DOMContentLoaded', () => {
+            // Render all feature sections
+            advancedUI.renderMealPlanSection(document.getElementById('mealPlanSection'));
+            advancedUI.renderRecipeModSection(document.getElementById('recipeModSection'));
+            advancedUI.renderGrocerySection(document.getElementById('grocerySection'));
+
+            // Setup event listeners
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            // Meal Plan Generation
+            document.getElementById('generatePlanBtn')?.addEventListener('click', async () => {
+                try {
+                    aiUI.showLoading('Generating your meal plan...');
+                    const preferences = {
+                        goals: 'weight maintenance',
+                        restrictions: 'none',
+                        calorieTarget: 2000,
+                        days: 7
+                    };
+                    const result = await advancedAI.generateMealPlan(preferences);
+                    advancedUI.showResults('mealPlanResults', result, 'mealPlan');
+                } catch (error) {
+                    console.error('Failed to generate meal plan:', error);
+                    showToast(error.message, 'error');
+                } finally {
+                    aiUI.hideLoading();
+                }
+            });
+
+            // Recipe Modification
+            document.getElementById('modifyRecipeBtn')?.addEventListener('click', async () => {
+                try {
+                    aiUI.showLoading('Modifying recipe...');
+                    const result = await advancedAI.modifyRecipe(
+                        'Classic Spaghetti Bolognese',
+                        'Make it vegetarian and gluten-free'
+                    );
+                    advancedUI.showResults('recipeModResults', result, 'recipe');
+                } catch (error) {
+                    console.error('Failed to modify recipe:', error);
+                    showToast(error.message, 'error');
+                } finally {
+                    aiUI.hideLoading();
+                }
+            });
+
+            // Grocery List Generation
+            document.getElementById('generateListBtn')?.addEventListener('click', async () => {
+                try {
+                    aiUI.showLoading('Generating grocery list...');
+                    const result = await advancedAI.generateGroceryList(
+                        ['Spaghetti Bolognese', 'Grilled Chicken Salad'],
+                        { budget: 'medium', organic: true }
+                    );
+                    advancedUI.showResults('groceryResults', result, 'grocery');
+                } catch (error) {
+                    console.error('Failed to generate grocery list:', error);
+                    showToast(error.message, 'error');
+                } finally {
+                    aiUI.hideLoading();
+                }
+            });
+        }
+
+        // Toast notification helper
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+    </script>
+</body>
+</html>
