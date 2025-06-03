@@ -11,13 +11,42 @@
             --bg-subtle: #f9fafb;
         }
 
+        .container {
+            max-width: 100%;
+            padding: 0 1rem;
+        }
+
         .meal-form-container {
-            max-width: 680px;
+            max-width: 1200px;
             margin: 2rem auto;
+            padding: 2.5rem;
             background: white;
-            padding: 2rem;
-            border: 1px solid var(--border-color);
             border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-columns {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2.5rem;
+            margin-top: 2rem;
+        }
+
+        .ai-section {
+            position: relative;
+            background: var(--bg-subtle);
+            padding: 2rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            height: fit-content;
+        }
+
+        .manual-form {
+            background: var(--bg-subtle);
+            padding: 2rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            height: fit-content;
         }
 
         .ai-analysis {
@@ -121,12 +150,60 @@
 
         .btn-primary:active {
             filter: brightness(90%);
-        }
-
-        .btn-primary:disabled {
+        }        .btn-primary:disabled {
             opacity: 0.7;
             cursor: not-allowed;
             transform: none;
+        }
+
+        .btn-loading {
+            display: none;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .btn-primary.loading .btn-text {
+            visibility: hidden;
+        }
+
+        .btn-primary.loading .btn-loading {
+            display: block;
+        }
+
+        .btn-primary {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease-out, height 0.6s ease-out;
+        }
+
+        .btn-primary:active::after {
+            width: 200px;
+            height: 200px;
+            opacity: 0;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .btn-primary:not(:disabled):hover {
+            animation: pulse 0.3s ease-in-out;
         }
 
         #formTitle {
@@ -259,16 +336,27 @@
             color: var(--primary-color);
         }
 
-        .loading-dots:after {
-            content: '.';
-            animation: dots 1.5s steps(5, end) infinite;
+        .loading-dots {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
         }
 
-        @keyframes dots {
-            0%, 20% { content: '.'; }
-            40% { content: '..'; }
-            60% { content: '...'; }
-            80%, 100% { content: ''; }
+        .loading-dots::after {
+            content: '...';
+            animation: loadingDots 1.5s steps(4) infinite;
+            width: 20px;
+            text-align: left;
+            display: inline-block;
+        }
+
+        @keyframes loadingDots {
+            0% { content: ''; }
+            25% { content: '.'; }
+            50% { content: '..'; }
+            75% { content: '...'; }
+            100% { content: ''; }
         }        .ai-input-section {
             margin-bottom: 2rem;
             padding: 1.5rem;
@@ -340,45 +428,86 @@
         textarea::placeholder, .form-control::placeholder {
             color: #9ca3af;
         }
+
+        .ai-section {
+            position: relative;
+            margin-bottom: 2rem;
+            padding: 2rem;
+            border-radius: 8px;
+            background: var(--bg-subtle);
+            border: 1px solid var(--border-color);
+        }
+
+        .ai-section h3 {
+            color: var(--text-color);
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            font-weight: 500;
+        }        .manual-form {
+            background: var(--bg-subtle);
+            padding: 2rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .form-columns {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .meal-form-container {
+                padding: 1.5rem;
+            }
+
+            .ai-section, 
+            .manual-form {
+                padding: 1.5rem;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="meal-form-container">
-            <div class="form-header">
+    <div class="container">        <div class="meal-form-container">
+            <div class="form-header" style="grid-column: 1 / -1;">
                 <a href="dashboard.html" class="back-btn">← Back to Dashboard</a>
                 <h2 id="formTitle">Add New Meal</h2>
             </div>
-          <!-- AI Quick Input -->
-            <div class="ai-input-section">
-                <h3>AI-Powered Meal Analysis</h3>
-                <textarea id="mealDescription" class="form-control" rows="4" 
-                    placeholder="Describe your meal here for AI analysis..."></textarea>
-                <button onclick="analyzeMeal()" class="btn btn-primary mt-3" id="analyzeButton">
-                    Analyze Meal
-                </button>
-                
-                <div id="aiResult" class="ai-result empty mt-3">
-                    <div class="empty-state">
-                        Enter your meal description above for AI analysis
+            
+            <div class="form-columns">
+                <!-- AI Quick Input -->
+                <div class="ai-section">
+                    <h3>AI-Powered Meal Analysis</h3>
+                    <textarea id="mealDescription" class="form-control" rows="4" 
+                        placeholder="Describe your meal here for AI analysis..."></textarea>
+                    <button class="btn btn-primary mt-3" id="analyzeButton">
+                        <span class="btn-text">Analyze Meal</span>
+                        <div class="btn-loading">
+                            <div class="loading-dots"></div>
+                        </div>
+                    </button>
+                    
+                    <div id="aiResult" class="ai-result empty mt-3">
+                        <div class="empty-state">
+                            Enter your meal description above for AI analysis
+                        </div>
+                        <div class="loading-message" style="display: none">
+                            Analyzing your meal<span class="loading-dots"></span>
+                        </div>
                     </div>
-                    <div class="loading-message" style="display: none">
-                        Analyzing your meal<span class="loading-dots"></span>
+                    
+                    <div id="analysisError" class="analysis-error">
+                        <p>Sorry, there was an error analyzing your meal.</p>
+                        <button class="retry-button" onclick="analyzeMeal()">Try Again</button>
                     </div>
                 </div>
-                
-                <div id="analysisError" class="analysis-error">
-                    <p>Sorry, there was an error analyzing your meal.</p>
-                    <button class="retry-button" onclick="analyzeMeal()">Try Again</button>
-                </div>
-            </div>
 
-            <!-- Manual Input Form -->
-            <form id="mealForm">
+                <!-- Manual Input Form -->
+                <form id="mealForm" class="manual-form">
+                <h3>Manual Input</h3>
                 <div class="form-group">
                     <label for="mealName">Meal Name</label>
                     <input type="text" id="mealName" required>
-                </div>
                 
                 <div class="form-group">
                     <label for="calories">Calories</label>
@@ -403,19 +532,82 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
       <!-- App Scripts -->    <script src="firebase-config.js"></script>
-    <script src="assets/js/auth.js"></script>    <script src="assets/js/ai-ui.js" type="module"></script>    
-    <script type="module">
+    <script src="assets/js/auth.js"></script>    <script src="assets/js/ai-ui.js" type="module"></script>      <script type="module">
         import ai from './assets/js/ai-features.js';
         import aiUI from './assets/js/ai-ui.js';
 
-        // Toast notification helper
-        function showToast(message, type = 'info') {
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.textContent = message;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
-        }
+        window.analyzeMeal = async function() {
+            const analyzeButton = document.getElementById('analyzeButton');
+            const description = document.getElementById('mealDescription').value.trim();
+            const resultDiv = document.getElementById('aiResult');
+            const errorDiv = document.getElementById('analysisError');
+            const loadingMessage = resultDiv.querySelector('.loading-message');
+            
+            if (!description) {
+                resultDiv.classList.add('empty');
+                return;
+            }
+
+            try {
+                resultDiv.classList.remove('empty');
+                errorDiv.classList.remove('visible');
+                loadingMessage.style.display = 'block';
+                analyzeButton.classList.add('loading');
+                analyzeButton.disabled = true;
+                
+                const result = await ai.analyzeMeal(description);
+                
+                if (!result || typeof result !== 'object') {
+                    throw new Error('Invalid AI response format');
+                }
+                
+                // Show results with animation
+                resultDiv.style.display = 'block';
+                resultDiv.style.opacity = '0';
+                resultDiv.innerHTML = `
+                    <div class="analysis-content">
+                        <h4>Analysis Results</h4>
+                        <p><strong>Estimated Calories:</strong> ${result.calories?.total || result.calories}</p>
+                        <p><strong>Identified Foods:</strong></p>
+                        <ul class="food-list">
+                            ${result.foods.map(food => `<li>${food}</li>`).join('')}
+                        </ul>
+                        ${result.suggestions || result.assessment ? `
+                            <div class="analysis-section">
+                                <h4>Suggestions</h4>
+                                <p>${result.suggestions || result.assessment}</p>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+                
+                // Trigger fade in animation
+                setTimeout(() => {
+                    resultDiv.style.opacity = '1';
+                }, 10);
+
+                // Auto-fill form fields
+                if (result.calories?.total || result.calories) {
+                    document.getElementById('calories').value = result.calories?.total || result.calories;
+                }
+                if (result.foods?.length) {
+                    document.getElementById('mealName').value = result.foods.join(', ');
+                }
+                if (result.suggestions || result.assessment) {
+                    document.getElementById('notes').value = 
+                        `AI Analysis: ${result.suggestions || result.assessment}`;
+                }
+
+            } catch (error) {
+                console.error('Analysis error:', error);
+                errorDiv.classList.add('visible');
+                resultDiv.classList.add('empty');
+            } finally {
+                loadingMessage.style.display = 'none';
+                analyzeButton.disabled = false;
+                analyzeButton.classList.remove('loading');
+            }
+        };
 
         // Initialize event listeners when DOM is ready
         document.addEventListener('DOMContentLoaded', () => {
@@ -423,108 +615,14 @@
             const dateTimeInput = document.getElementById('dateTime');
             if (dateTimeInput) {
                 dateTimeInput.value = new Date().toISOString().slice(0, 16);
-            }            const analyzeButton = document.getElementById('analyzeButton');
-            if (!analyzeButton) return;
-
-            analyzeButton.addEventListener('click', async () => {
-                const description = document.getElementById('mealDescription').value.trim();
-                const resultDiv = document.getElementById('aiResult');
-                const errorDiv = document.getElementById('analysisError');
-                const loadingMessage = resultDiv.querySelector('.loading-message');
-                
-                if (!description) {
-                    resultDiv.classList.add('empty');
-                    return;
-                }
-
-                try {
-                    resultDiv.classList.remove('empty');
-                    errorDiv.classList.remove('visible');
-                    loadingMessage.style.display = 'block';
-                    analyzeButton.disabled = true;
-                    
-                    const result = await ai.analyzeMeal(description);
-                    
-                    if (!isValidAIResponse(result)) {
-                        throw new Error('Invalid AI response format');
-                    }
-                    
-                    // Show results
-                    resultDiv.style.display = 'block';
-                    resultDiv.style.opacity = '1';
-                    resultDiv.innerHTML = `
-                        <div class="analysis-content">
-                            <h4>Analysis Results</h4>
-                            <p><strong>Estimated Calories:</strong> ${result.calories?.total || result.calories}</p>
-                            <p><strong>Identified Foods:</strong></p>
-                            <ul class="food-list">
-                                ${result.foods.map(food => `<li>${food}</li>`).join('')}
-                            </ul>
-                            ${result.suggestions || result.assessment ? `
-                                <div class="analysis-section">
-                                    <h4>Suggestions</h4>
-                                    <p>${result.suggestions || result.assessment}</p>
-                                </div>
-                            ` : ''}
-                        </div>
-                    `;
-
-                    // Auto-fill form fields
-                    if (result.calories?.total || result.calories) {
-                        document.getElementById('calories').value = result.calories?.total || result.calories;
-                    }
-                    if (result.foods?.length) {
-                        document.getElementById('mealName').value = result.foods.join(', ');
-                    }
-                    if (result.suggestions || result.assessment) {
-                        document.getElementById('notes').value = 
-                            `AI Analysis: ${result.suggestions || result.assessment}`;
-                    }
-
-                } catch (error) {
-                    console.error('Analysis error:', error);
-                    errorDiv.classList.add('visible');
-                    resultDiv.classList.add('empty');
-                } finally {
-                    loadingMessage.style.display = 'none';
-                    analyzeButton.disabled = false;
-                }
-            });
-
-            // Helper function to validate AI response structure
-            function isValidAIResponse(response) {
-                // Check if response is an object
-                if (!response || typeof response !== 'object') {
-                    return false;
-                }
-
-                // Validate calories
-                if (response.calories && (
-                    typeof response.calories !== 'object' ||
-                    typeof response.calories.total !== 'number'
-                )) {
-                    return false;
-                }
-
-                // Validate foods array
-                if (response.foods && !Array.isArray(response.foods)) {
-                    return false;
-                }
-
-                // Validate assessment and suggestion
-                if (response.assessment && typeof response.assessment !== 'string') {
-                    return false;
-                }
-                if (response.suggestion && typeof response.suggestion !== 'string') {
-                    return false;
-                }
-
-                // Must have at least one valid property
-                return response.calories?.total || 
-                       (response.foods && response.foods.length > 0) ||
-                       response.assessment ||
-                       response.suggestion;
             }
+            
+            const analyzeButton = document.getElementById('analyzeButton');
+            if (!analyzeButton) return;
+            
+            analyzeButton.addEventListener('click', () => {
+                window.analyzeMeal();
+            });
         });
     </script>    <script src="assets/js/addMeal.js"></script>
 </body>
