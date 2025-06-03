@@ -320,6 +320,67 @@
             margin: 0;
             font-size: 0.95rem;
         }
+
+        .fullscreen-popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.98);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .fullscreen-popup.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .popup-content {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .close-popup {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+
+        .close-popup:hover {
+            transform: scale(1.1);
+            background: var(--secondary-color);
+        }
+
+        .popup-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        /* Hide scrollbar when popup is open */
+        body.popup-open {
+            overflow: hidden;
+        }
     </style>
 </head>
 <body>    <nav class="navbar">
@@ -331,14 +392,15 @@
             </button>
             <button id="logoutBtn" class="btn">Logout</button>
         </div>
-    </nav>
-
-    <div class="container dashboard">
-        <!-- AI Weekly Summary -->
-        <div id="weeklySummary" class="weekly-summary">
+    </nav>    <!-- Full-screen Weekly Summary Popup -->
+    <div id="weeklySummaryPopup" class="fullscreen-popup">
+        <button class="close-popup" onclick="closeWeeklySummary()">×</button>
+        <div class="popup-content">
             <!-- Summary will be inserted here -->
         </div>
+    </div>
 
+    <div class="container dashboard">
         <div id="mealGrid" class="meal-grid">
             <!-- Meals will be dynamically inserted here -->
             <div class="empty-state">
@@ -366,25 +428,45 @@
             setTimeout(() => toast.remove(), 3000);
         }
 
-        // Initialize event listeners when DOM is ready
-        document.addEventListener('DOMContentLoaded', () => {
+        // Initialize event listeners when DOM is ready        document.addEventListener('DOMContentLoaded', () => {
             const weeklySummaryBtn = document.getElementById('weeklySummaryBtn');
-            const weeklySummaryContainer = document.getElementById('weeklySummary');
+            const popup = document.getElementById('weeklySummaryPopup');
 
-            if (!weeklySummaryBtn || !weeklySummaryContainer) {
+            if (!weeklySummaryBtn || !popup) {
                 console.error('Weekly summary elements not found');
                 return;
-            }
+            }            // Add close weekly summary function to window object
+            window.closeWeeklySummary = () => {
+                const popup = document.getElementById('weeklySummaryPopup');
+                if (!popup) return;
+                
+                const content = popup.querySelector('.popup-content');
+                document.body.classList.remove('popup-open');
+                popup.classList.remove('visible');
+                // Clear content after animation
+                setTimeout(() => {
+                    if (content) content.innerHTML = '';
+                }, 300);
+            };
+
+            // Add keyboard event listener for closing popup with Escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    closeWeeklySummary();
+                }
+            });
 
             // Generate Weekly Summary
             weeklySummaryBtn.addEventListener('click', async () => {
+                const popup = document.getElementById('weeklySummaryPopup');
+                const content = popup.querySelector('.popup-content');
                 const spinner = weeklySummaryBtn.querySelector('.ai-spinner');
-                if (!spinner) {
-                    console.error('Spinner element not found');
+                if (!spinner || !popup || !content) {
+                    console.error('Required elements not found');
                     return;
                 }
 
-                weeklySummaryContainer.innerHTML = ''; // Clear previous results
+                content.innerHTML = ''; // Clear previous results
                 try {
                     spinner.classList.add('visible');
                     console.log('Generating weekly summary...');
@@ -416,10 +498,10 @@
 
                     if (!summary || typeof summary !== 'object') {
                         throw new Error('Invalid summary response from AI');
-                    }
-
-                    const content = `
-                        <h3>🤖 Weekly AI Summary</h3>
+                    }                    const summaryContent = `
+                        <div class="popup-header">
+                            <h2>🤖 Your Weekly Meal Analysis</h2>
+                        </div>
                         <div class="ai-content">
                             <div class="summary-section">
                                 <h4>Overview</h4>
@@ -476,11 +558,17 @@
                                     </div>
                                 </div>
                             ` : ''}
-                        </div>
-                    `;
-
-                    weeklySummaryContainer.innerHTML = content;
-                    weeklySummaryContainer.classList.add('visible');
+                        </div>                    `;
+                    
+                    const popupContent = popup.querySelector('.popup-content');
+                    if (!popupContent) {
+                        throw new Error('Popup content container not found');
+                    }
+                    
+                    // Update popup content and show it
+                    popupContent.innerHTML = summaryContent;
+                    document.body.classList.add('popup-open');
+                    popup.classList.add('visible');
 
                 } catch (error) {
                     console.error('Weekly summary error:', error);

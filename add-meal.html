@@ -5,21 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MealMatrix - Add Meal</title>
     <link rel="stylesheet" href="assets/css/styles.css">    <style>
+        :root {
+            --border-color: #e5e7eb;
+            --text-color: #374151;
+            --bg-subtle: #f9fafb;
+        }
+
         .meal-form-container {
-            max-width: 800px;
+            max-width: 680px;
             margin: 2rem auto;
             background: white;
             padding: 2rem;
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
         }
 
         .ai-analysis {
-            margin-top: 2rem;
-            padding: 1rem;
-            border: 1px solid var(--primary-color);
-            border-radius: var(--border-radius);
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
             display: none;
+            background: var(--bg-subtle);
         }
 
         .ai-analysis.visible {
@@ -70,59 +77,230 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 2rem;
+        }        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.625rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 0.875rem;
+            background: white;
+            color: var(--text-color);
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb), 0.1);
+        }        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            filter: brightness(95%);
+        }
+
+        .btn-primary:active {
+            filter: brightness(90%);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        #formTitle {
+            font-size: 1.5rem;
+            color: #1a365d;
+            font-weight: 600;
         }
 
         .back-btn {
-            color: var(--primary-color);
-            text-decoration: none;
-            display: flex;
+            display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: #f8fafc;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            border: 1px solid #e2e8f0;
         }
 
-        textarea {
-            width: 100%;
+        .back-btn:hover {
+            background: #f1f5f9;
+            transform: translateX(-2px);
+        }        .analysis-error {
             padding: 0.75rem;
-            border: 1px solid #ddd;
-            border-radius: var(--border-radius);
+            border-radius: 4px;
+            background-color: #fef2f2;
+            border: 1px solid #fee2e2;
+            color: #991b1b;
+            margin-top: 1rem;
+            font-size: 0.875rem;
+            display: none;
+        }
+
+        .retry-button {
+            background-color: #991b1b;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            margin-top: 0.75rem;
+            transition: background-color 0.2s ease;
+        }
+
+        .retry-button:hover {
+            background-color: #9b2c2c;
+            transform: translateY(-1px);
+        }
+
+        .loading-message {
             font-size: 1rem;
-            min-height: 100px;
-            resize: vertical;
+            font-weight: 500;
+            color: var(--primary-color);
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
 
-        textarea:focus {
-            outline: none;
-            border-color: var(--primary-color);
+        #mealDescription {
+            margin-bottom: 1rem;
         }
 
-        .ai-result {
+        .btn {
+            font-weight: 600;
+        }
+
+        .mt-3 {
+            margin-top: 1rem;
+        }        .ai-result {
             display: none;
             opacity: 0;
-            transition: opacity 0.3s ease;
+            transition: opacity 0.2s ease;
             margin-top: 1rem;
             padding: 1rem;
-            border-radius: var(--border-radius);
-            border: 1px solid var(--primary-color);
-            background-color: white;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            background: white;
+            min-height: 100px;
+            position: relative;
         }
 
-        .ai-result.visible {
-            display: block;
+        .ai-result.empty {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            font-style: italic;
+            background: var(--bg-subtle);
+            border: 1px dashed var(--border-color);
+            font-size: 0.875rem;
         }
 
-        .ai-result.fade-in {
-            opacity: 1;
+        .analysis-content {
+            animation: fadeIn 0.4s ease;
         }
 
-        .food-list {
+        .analysis-content h4 {
+            color: var(--primary-color);
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .analysis-content p {
+            color: #2c3e50;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .analysis-content strong {
+            color: #1a365d;
+            font-weight: 600;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .loading-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: var(--primary-color);
+        }
+
+        .loading-dots:after {
+            content: '.';
+            animation: dots 1.5s steps(5, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60% { content: '...'; }
+            80%, 100% { content: ''; }
+        }        .ai-input-section {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            border-radius: 6px;
+            background: var(--bg-subtle);
+            border: 1px solid var(--border-color);
+        }
+
+        .ai-input-section h3 {
+            color: var(--text-color);
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            font-weight: 500;
+        }        .food-list {
             list-style: none;
             padding: 0;
             margin: 0.5rem 0;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
         }
 
         .food-list li {
-            padding: 0.25rem 0;
-            border-bottom: 1px solid #eee;
+            padding: 0.5rem 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.875rem;
+            color: var(--text-color);
+        }
+
+        .food-list li:before {
+            content: "-";
+            color: #9ca3af;
+            margin-right: 0.5rem;
         }
 
         .food-list li:last-child {
@@ -137,6 +315,31 @@
             color: var(--primary-color);
             margin: 0 0 0.5rem 0;
         }
+
+        textarea, .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 0.875rem;
+            min-height: 120px;
+            resize: vertical;
+            background: white;
+            color: var(--text-color);
+            line-height: 1.5;
+            font-family: inherit;
+            margin-bottom: 1rem;
+        }
+
+        textarea:focus, .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb), 0.1);
+        }
+
+        textarea::placeholder, .form-control::placeholder {
+            color: #9ca3af;
+        }
     </style>
 </head>
 <body>
@@ -148,18 +351,26 @@
             </div>
           <!-- AI Quick Input -->
             <div class="ai-input-section">
-                <h3>Quick Add with AI 🤖</h3>
-                <p>Describe your meal and let AI analyze it for you</p>
-                <div class="form-group">
-                    <div class="ai-input">
-                        <input type="text" id="aiMealInput" placeholder="e.g., 2 samosas and a Pepsi" class="ai-textbox">
-                        <button type="button" id="analyzeBtn" class="btn-ai">
-                            <span>Analyze</span>
-                            <div class="ai-spinner"></div>
-                        </button>
+                <h3>AI-Powered Meal Analysis</h3>
+                <textarea id="mealDescription" class="form-control" rows="4" 
+                    placeholder="Describe your meal here for AI analysis..."></textarea>
+                <button onclick="analyzeMeal()" class="btn btn-primary mt-3" id="analyzeButton">
+                    Analyze Meal
+                </button>
+                
+                <div id="aiResult" class="ai-result empty mt-3">
+                    <div class="empty-state">
+                        Enter your meal description above for AI analysis
+                    </div>
+                    <div class="loading-message" style="display: none">
+                        Analyzing your meal<span class="loading-dots"></span>
                     </div>
                 </div>
-                <div id="aiResult" class="ai-result"></div>
+                
+                <div id="analysisError" class="analysis-error">
+                    <p>Sorry, there was an error analyzing your meal.</p>
+                    <button class="retry-button" onclick="analyzeMeal()">Try Again</button>
+                </div>
             </div>
 
             <!-- Manual Input Form -->
@@ -212,84 +423,71 @@
             const dateTimeInput = document.getElementById('dateTime');
             if (dateTimeInput) {
                 dateTimeInput.value = new Date().toISOString().slice(0, 16);
-            }
+            }            const analyzeButton = document.getElementById('analyzeButton');
+            if (!analyzeButton) return;
 
-            const analyzeBtn = document.getElementById('analyzeBtn');
-            if (!analyzeBtn) return;
-
-            analyzeBtn.addEventListener('click', async () => {
-                const aiInput = document.getElementById('aiMealInput');
-                const resultContainer = document.getElementById('aiResult');
-                let shouldRetry = false;
+            analyzeButton.addEventListener('click', async () => {
+                const description = document.getElementById('mealDescription').value.trim();
+                const resultDiv = document.getElementById('aiResult');
+                const errorDiv = document.getElementById('analysisError');
+                const loadingMessage = resultDiv.querySelector('.loading-message');
                 
-                if (!aiInput?.value.trim()) {
-                    showToast('Please enter a meal description', 'error');
+                if (!description) {
+                    resultDiv.classList.add('empty');
                     return;
                 }
 
                 try {
-                    aiUI.showLoading('Analyzing your meal...');
-                    console.log('Analyzing meal:', aiInput.value);
-                    const result = await ai.analyzeMeal(aiInput.value);
-                    console.log('AI Response:', result);
+                    resultDiv.classList.remove('empty');
+                    errorDiv.classList.remove('visible');
+                    loadingMessage.style.display = 'block';
+                    analyzeButton.disabled = true;
                     
-                    // Enhanced response validation
-                    if (!result) {
-                        throw new Error('No response from AI service');
-                    }
-
-                    // Validate response structure
+                    const result = await ai.analyzeMeal(description);
+                    
                     if (!isValidAIResponse(result)) {
                         throw new Error('Invalid AI response format');
                     }
                     
-                    // Show results using our UI helper
-                    aiUI.displayAnalysis(result, 'aiResult');
+                    // Show results
+                    resultDiv.style.display = 'block';
+                    resultDiv.style.opacity = '1';
+                    resultDiv.innerHTML = `
+                        <div class="analysis-content">
+                            <h4>Analysis Results</h4>
+                            <p><strong>Estimated Calories:</strong> ${result.calories?.total || result.calories}</p>
+                            <p><strong>Identified Foods:</strong></p>
+                            <ul class="food-list">
+                                ${result.foods.map(food => `<li>${food}</li>`).join('')}
+                            </ul>
+                            ${result.suggestions || result.assessment ? `
+                                <div class="analysis-section">
+                                    <h4>Suggestions</h4>
+                                    <p>${result.suggestions || result.assessment}</p>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
 
-                    // Auto-fill form with validated data
-                    const caloriesInput = document.getElementById('calories');
-                    const mealNameInput = document.getElementById('mealName');
-                    const notesInput = document.getElementById('notes');
-
-                    if (typeof result.calories?.total === 'number' && caloriesInput) {
-                        caloriesInput.value = result.calories.total;
+                    // Auto-fill form fields
+                    if (result.calories?.total || result.calories) {
+                        document.getElementById('calories').value = result.calories?.total || result.calories;
                     }
-                    if (Array.isArray(result.foods) && result.foods.length > 0 && mealNameInput) {
-                        mealNameInput.value = result.foods.join(', ');
+                    if (result.foods?.length) {
+                        document.getElementById('mealName').value = result.foods.join(', ');
                     }
-                    if ((typeof result.assessment === 'string' || typeof result.suggestion === 'string') && notesInput) {
-                        const assessmentText = result.assessment ? 'AI Assessment: ' + result.assessment : '';
-                        const suggestionText = result.suggestion ? 'Suggestion: ' + result.suggestion : '';
-                        const notes = [assessmentText, suggestionText].filter(Boolean).join('\n');
-                        notesInput.value = notes;
+                    if (result.suggestions || result.assessment) {
+                        document.getElementById('notes').value = 
+                            `AI Analysis: ${result.suggestions || result.assessment}`;
                     }
 
                 } catch (error) {
-                    console.error('Analysis failed:', error);
-                    
-                    // Handle different types of errors
-                    if (error.message?.includes('503') || 
-                        error.message?.includes('timeout') || 
-                        error.message?.includes('message port closed')) {
-                        
-                        shouldRetry = true;
-                        const retryDelay = 2000;
-                        aiUI.showRetrying(2);
-                        setTimeout(() => {
-                            const btn = document.getElementById('analyzeBtn');
-                            if (btn) btn.click();
-                        }, retryDelay);
-                    } else {
-                        const errorMessage = error.message === 'Invalid AI response format' 
-                            ? 'Received invalid response from AI. Please try again.'
-                            : error?.message || 'Analysis failed, please try again';
-                        showToast(errorMessage, 'error');
-                        aiUI.hideLoading();
-                    }
+                    console.error('Analysis error:', error);
+                    errorDiv.classList.add('visible');
+                    resultDiv.classList.add('empty');
                 } finally {
-                    if (!shouldRetry) {
-                        aiUI.hideLoading();
-                    }
+                    loadingMessage.style.display = 'none';
+                    analyzeButton.disabled = false;
                 }
             });
 
@@ -328,7 +526,6 @@
                        response.suggestion;
             }
         });
-    </script>
-    <script src="assets/js/addMeal.js"></script>
+    </script>    <script src="assets/js/addMeal.js"></script>
 </body>
 </html>
