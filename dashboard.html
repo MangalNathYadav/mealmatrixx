@@ -428,31 +428,34 @@
             setTimeout(() => toast.remove(), 3000);
         }
 
-        // Initialize event listeners when DOM is ready        document.addEventListener('DOMContentLoaded', () => {
+        // Close weekly summary function
+        window.closeWeeklySummary = () => {
+            const popup = document.getElementById('weeklySummaryPopup');
+            if (!popup) return;
+            
+            const content = popup.querySelector('.popup-content');
+            document.body.classList.remove('popup-open');
+            popup.classList.remove('visible');
+            // Clear content after animation
+            setTimeout(() => {
+                if (content) content.innerHTML = '';
+            }, 300);
+        };
+
+        // Initialize event listeners when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
             const weeklySummaryBtn = document.getElementById('weeklySummaryBtn');
             const popup = document.getElementById('weeklySummaryPopup');
 
             if (!weeklySummaryBtn || !popup) {
                 console.error('Weekly summary elements not found');
                 return;
-            }            // Add close weekly summary function to window object
-            window.closeWeeklySummary = () => {
-                const popup = document.getElementById('weeklySummaryPopup');
-                if (!popup) return;
-                
-                const content = popup.querySelector('.popup-content');
-                document.body.classList.remove('popup-open');
-                popup.classList.remove('visible');
-                // Clear content after animation
-                setTimeout(() => {
-                    if (content) content.innerHTML = '';
-                }, 300);
-            };
+            }
 
             // Add keyboard event listener for closing popup with Escape key
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
-                    closeWeeklySummary();
+                    window.closeWeeklySummary();
                 }
             });
 
@@ -461,12 +464,14 @@
                 const popup = document.getElementById('weeklySummaryPopup');
                 const content = popup.querySelector('.popup-content');
                 const spinner = weeklySummaryBtn.querySelector('.ai-spinner');
+                
                 if (!spinner || !popup || !content) {
                     console.error('Required elements not found');
                     return;
                 }
 
                 content.innerHTML = ''; // Clear previous results
+                
                 try {
                     spinner.classList.add('visible');
                     console.log('Generating weekly summary...');
@@ -498,7 +503,9 @@
 
                     if (!summary || typeof summary !== 'object') {
                         throw new Error('Invalid summary response from AI');
-                    }                    const summaryContent = `
+                    }
+                    
+                    const summaryContent = `
                         <div class="popup-header">
                             <h2>🤖 Your Weekly Meal Analysis</h2>
                         </div>
@@ -558,15 +565,11 @@
                                     </div>
                                 </div>
                             ` : ''}
-                        </div>                    `;
-                    
-                    const popupContent = popup.querySelector('.popup-content');
-                    if (!popupContent) {
-                        throw new Error('Popup content container not found');
-                    }
+                        </div>
+                    `;
                     
                     // Update popup content and show it
-                    popupContent.innerHTML = summaryContent;
+                    content.innerHTML = summaryContent;
                     document.body.classList.add('popup-open');
                     popup.classList.add('visible');
 
@@ -577,40 +580,6 @@
                     spinner.classList.remove('visible');
                 }
             });
-
-            // Add a suggest better meal button to meal cards
-            window.suggestBetterMeal = async (mealId) => {
-                const meal = document.querySelector(`[data-meal-id="${mealId}"]`);
-                const suggestionsContainer = meal.querySelector('.suggestion-list');
-                const spinner = meal.querySelector('.suggest-better .ai-spinner');
-
-                try {
-                    spinner.classList.add('visible');
-                    const mealData = {
-                        name: meal.querySelector('h3').textContent,
-                        calories: parseInt(meal.querySelector('.meal-metadata').textContent.match(/Calories: (\d+)/)[1])
-                    };
-
-                    const suggestions = await ai.suggestBetterMeal(mealData);
-                    suggestionsContainer.innerHTML = `
-                        <h4>🤖 Healthier Alternatives</h4>
-                        <ul>
-                            ${suggestions.map(s => `
-                                <li>
-                                    <strong>${s.name}</strong> (${s.calories} cal)
-                                    <p>${s.reason}</p>
-                                </li>
-                            `).join('')}
-                        </ul>
-                    `;
-                    suggestionsContainer.classList.add('visible');
-
-                } catch (error) {
-                    showToast(error.message, 'error');
-                } finally {
-                    spinner.classList.remove('visible');
-                }
-            };
         });
     </script>
     <script src="assets/js/dashboard.js"></script>
