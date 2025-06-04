@@ -179,119 +179,118 @@
                             <span>15%</span>
                         </div>
                     </div>
+                </div>            </div>
+
+            <!-- Dashboard with Sidebar and Main Content -->
+            <div class="dashboard-container">
+                <!-- Left Sidebar -->
+                <aside class="dashboard-sidebar">
+                    <!-- Daily Calorie Goals Section -->
+                    <div class="sidebar-section">
+                        <h3 class="sidebar-title">Daily Calorie Goals</h3>
+                        <div class="goal-item">
+                            <div class="goal-header">
+                                <span class="goal-label">Target Daily Calories</span>
+                                <span class="goal-value">5000 kcal</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 45%"></div>
+                            </div>
+                            <div class="goal-stats">
+                                <span>2250 kcal consumed</span>
+                                <span>45%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Macro Goals Section -->
+                    <div class="sidebar-section">
+                        <h3 class="sidebar-title">Macro Goals</h3>
+                        <div class="goal-item">
+                            <div class="goal-header">
+                                <span class="goal-label">Protein</span>
+                                <span class="goal-value">200g</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 35%"></div>
+                            </div>
+                            <div class="goal-stats">
+                                <span>70g consumed</span>
+                                <span>35%</span>
+                            </div>
+                        </div>
+                        <div class="goal-item">
+                            <div class="goal-header">
+                                <span class="goal-label">Carbs</span>
+                                <span class="goal-value">250g</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 40%"></div>
+                            </div>
+                            <div class="goal-stats">
+                                <span>100g consumed</span>
+                                <span>40%</span>
+                            </div>
+                        </div>
+                        <div class="goal-item">
+                            <div class="goal-header">
+                                <span class="goal-label">Fat</span>
+                                <span class="goal-value">55g</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 50%"></div>
+                            </div>
+                            <div class="goal-stats">
+                                <span>27.5g consumed</span>
+                                <span>50%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Health Goals Section -->
+                    <div class="sidebar-section">
+                        <h3 class="sidebar-title">Health Goals</h3>
+                        <div class="goal-item">
+                            <div class="goal-header">
+                                <span class="goal-label">Target Weight</span>
+                                <span class="goal-value">56 kg</span>
+                            </div>
+                            <div class="goal-stats">
+                                <span>Gain Muscle Mass</span>
+                            </div>
+                        </div>
+                        <div class="goal-item">
+                            <div class="goal-header">
+                                <span class="goal-label">Weekly Goal</span>
+                                <span class="goal-value">+0.2 kg</span>
+                            </div>
+                            <div class="goal-stats">
+                                <span>Healthy weight gain pace</span>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- Main Content Area -->
+                <div class="dashboard-main">
+                    <!-- Today's Meals Section -->
+                    <div class="section-header">
+                        <h2>Today's Meals</h2>
+                    </div>
+                    <div class="meals-container">
+                        <!-- Empty state - will be replaced by actual meals when available -->
+                        <div class="meal-card empty-meal-card">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">🍽️</div>
+                                <h3 class="empty-state-title">No meals added yet</h3>
+                                <p class="empty-state-text">Click the + button to add your first meal</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
-
-    <!-- Dashboard Main Content -->
-    <div class="dashboard-layout container">
-        <!-- Sidebar with Goals -->
-        <aside class="sidebar">
-            <!-- Daily Calorie Goals Section -->
-            <div class="sidebar-section">
-                <h3 class="sidebar-title">Daily Calorie Goals</h3>
-                <div class="goal-item">
-                    <div class="goal-header">
-                        <span class="goal-label">Target Daily Calories</span>
-                        <span class="goal-value">5000 kcal</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: 45%"></div>
-                    </div>
-                    <div class="goal-stats">
-                        <span>2250 kcal consumed</span>
-                        <span>45%</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Macro Goals Section -->
-            <div class="sidebar-section">
-                <h3 class="sidebar-title">Macro Goals</h3>
-                <div class="goal-item">
-                    <div class="goal-header">
-                        <span class="goal-label">Protein</span>
-                        <span class="goal-value">200g</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: 35%"></div>
-                    </div>
-                    <div class="goal-stats">
-                        <span>70g consumed</span>
-                        <span>35%</span>
-                    </div>
-                </div>
-                <div class="goal-item">
-                    <div class="goal-header">
-                        <span class="goal-label">Carbs</span>
-                        <span class="goal-value">250g</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: 40%"></div>
-                    </div>
-                    <div class="goal-stats">
-                        <span>100g consumed</span>
-                        <span>40%</span>
-                    </div>
-                </div>
-                <div class="goal-item">
-                    <div class="goal-header">
-                        <span class="goal-label">Fat</span>
-                        <span class="goal-value">55g</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: 50%"></div>
-                    </div>
-                    <div class="goal-stats">
-                        <span>27.5g consumed</span>
-                        <span>50%</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Health Goals Section -->
-            <div class="sidebar-section">
-                <h3 class="sidebar-title">Health Goals</h3>
-                <div class="goal-item">
-                    <div class="goal-header">
-                        <span class="goal-label">Target Weight</span>
-                        <span class="goal-value">56 kg</span>
-                    </div>
-                    <div class="goal-stats">
-                        <span>Gain Muscle Mass</span>
-                    </div>
-                </div>
-                <div class="goal-item">
-                    <div class="goal-header">
-                        <span class="goal-label">Weekly Goal</span>
-                        <span class="goal-value">+0.2 kg</span>
-                    </div>
-                    <div class="goal-stats">
-                        <span>Healthy weight gain pace</span>
-                    </div>
-                </div>
-            </div>
-        </aside>
-
-        <!-- Main Content Area -->
-        <main class="main-content">
-            <div class="meals-section">
-                <div class="meals-header">
-                    <h2 class="meals-title">Today's Meals</h2>
-                </div>
-                
-                <div id="mealGrid" class="meal-grid">
-                    <!-- Empty state - will be replaced by actual meals when available -->
-                    <div class="empty-state">
-                        <div class="empty-state-icon">🍽️</div>
-                        <h3 class="empty-state-title">No meals added yet</h3>
-                        <p class="empty-state-text">Click the + button to add your first meal</p>
-                    </div>
-                </div>
-            </div>
-        </main>
-    </div>
 
     <!-- Add Meal Button -->
     <a href="add-meal.html" class="add-button">+</a>
