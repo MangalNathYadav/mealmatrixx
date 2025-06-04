@@ -155,6 +155,7 @@ class GoalsManager {
                 sidebar.style.display = 'none';
             } else {
                 sidebar.style.display = 'block';
+                this.updateSidebarGoals(sidebar);
             }
         }
 
@@ -230,6 +231,78 @@ class GoalsManager {
                 `;
             }
         });
+    }
+
+    updateSidebarGoals(sidebar) {
+        // Update calorie goals in sidebar
+        const calorieGoalValue = sidebar.querySelector('.sidebar-section:nth-child(1) .goal-value');
+        const calorieProgressFill = sidebar.querySelector('.sidebar-section:nth-child(1) .progress-fill');
+        const calorieStats = sidebar.querySelector('.sidebar-section:nth-child(1) .goal-stats');
+
+        if (calorieGoalValue && this.goals.targetCalories) {
+            calorieGoalValue.textContent = `${this.formatValue(this.goals.targetCalories)} kcal`;
+        }
+        
+        if (calorieProgressFill && calorieStats && this.goals.targetCalories) {
+            const caloriePercentage = this.getPercentage(this.dailyProgress.calories, this.goals.targetCalories);
+            calorieProgressFill.style.width = `${caloriePercentage}%`;
+            calorieStats.innerHTML = `
+                <span>${this.formatValue(this.dailyProgress.calories)} kcal consumed</span>
+                <span>${caloriePercentage}%</span>
+            `;
+        }
+
+        // Update macro goals in sidebar
+        const macros = ['protein', 'carbs', 'fat'];
+        macros.forEach((macro, index) => {
+            const macroItem = sidebar.querySelector(`.sidebar-section:nth-child(2) .goal-item:nth-child(${index + 1})`);
+            if (!macroItem) return;
+
+            const value = this.goals[`${macro}Goal`];
+            const goalValue = macroItem.querySelector('.goal-value');
+            const progressFill = macroItem.querySelector('.progress-fill');
+            const stats = macroItem.querySelector('.goal-stats');
+
+            if (goalValue && value) {
+                goalValue.textContent = `${this.formatValue(value)}g`;
+            }
+
+            if (progressFill && stats && value) {
+                const percentage = this.getPercentage(this.dailyProgress[macro], value);
+                progressFill.style.width = `${percentage}%`;
+                stats.innerHTML = `
+                    <span>${this.formatValue(this.dailyProgress[macro])}g consumed</span>
+                    <span>${percentage}%</span>
+                `;
+            }
+        });
+
+        // Update health goals in sidebar
+        const weightValue = sidebar.querySelector('.sidebar-section:nth-child(3) .goal-item:nth-child(1) .goal-value');
+        const weeklyValue = sidebar.querySelector('.sidebar-section:nth-child(3) .goal-item:nth-child(2) .goal-value');
+        const weightStats = sidebar.querySelector('.sidebar-section:nth-child(3) .goal-item:nth-child(1) .goal-stats span');
+        const weeklyStats = sidebar.querySelector('.sidebar-section:nth-child(3) .goal-item:nth-child(2) .goal-stats span');
+
+        if (weightValue && this.goals.weightGoal) {
+            weightValue.textContent = `${this.formatValue(this.goals.weightGoal)} kg`;
+        }
+
+        if (weeklyValue && weightStats && weeklyStats && this.goals.weightGoal) {
+            const weeklyGoal = this.goals.weeklyGoal || 0;
+            const prefix = weeklyGoal > 0 ? '+' : '';
+            weeklyValue.textContent = `${prefix}${this.formatValue(weeklyGoal)} kg`;
+            
+            const goalTypeText = this.goals.goalType === 'maintain' ? 
+                'Maintain Weight' : 
+                this.goals.goalType === 'gain' ? 
+                'Gain Muscle Mass' : 
+                'Lose Weight';
+                
+            weightStats.textContent = goalTypeText;
+            weeklyStats.textContent = weeklyGoal === 0 ? 
+                'Maintenance' : 
+                `Healthy ${weeklyGoal > 0 ? 'weight gain' : 'weight loss'} pace`;
+        }
     }
 
     generateAIPrompt() {

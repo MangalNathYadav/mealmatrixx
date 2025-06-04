@@ -84,39 +84,21 @@ class GoalsManager {
         this.updateGoalsUI();
     }
 
-    formatNumber(num) {
-        if (num === null || num === undefined) return 0;
-        return Math.round(num * 10) / 10;
-    }
-
-    getPercentage(current, target) {
-        if (!target || !current) return 0;
-        const percentage = (current / target) * 100;
-        return Math.min(Math.max(Math.round(percentage), 0), 100);
-    }
-
-    // UI Loading State
-    showLoading(message) {
-        const loadingOverlay = document.querySelector('.loading-overlay');
-        const loadingMessage = document.querySelector('.loading-message');
-        
-        if (loadingOverlay && loadingMessage) {
-            loadingMessage.textContent = message;
-            loadingOverlay.classList.add('visible');
-        }
-    }
-
-    hideLoading() {
-        const loadingOverlay = document.querySelector('.loading-overlay');
-        if (loadingOverlay) {
-            loadingOverlay.classList.remove('visible');
-        }
-    }
-
-    // Update Goals UI
     updateGoalsUI() {
         if (!this.goals) return;
+        const sidebar = document.querySelector('.dashboard-sidebar');
+        
+        // Handle visibility of sidebar based on goals existence
+        if (sidebar) {
+            if (!this.hasAnyGoals()) {
+                sidebar.style.display = 'none';
+            } else {
+                sidebar.style.display = 'block';
+                this.updateSidebarGoals(sidebar);
+            }
+        }
 
+        // Update goal cards in the grid
         const elements = {
             calories: document.getElementById('caloriesProgress'),
             protein: document.getElementById('proteinProgress'),
@@ -147,6 +129,120 @@ class GoalsManager {
                 }
             }
         });
+    }
+
+    updateSidebarGoals(sidebar) {
+        if (!sidebar || !this.goals) return;
+
+        // Update calorie goals in sidebar
+        const calorieGoalValue = sidebar.querySelector('.sidebar-section:nth-child(1) .goal-value');
+        const calorieProgressFill = sidebar.querySelector('.sidebar-section:nth-child(1) .progress-fill');
+        const calorieStats = sidebar.querySelector('.sidebar-section:nth-child(1) .goal-stats');
+
+        if (calorieGoalValue && this.goals.targetCalories) {
+            calorieGoalValue.textContent = `${this.formatNumber(this.goals.targetCalories)} kcal`;
+        }
+        
+        if (calorieProgressFill && calorieStats && this.goals.targetCalories) {
+            const caloriePercentage = this.getPercentage(this.dailyProgress.calories, this.goals.targetCalories);
+            calorieProgressFill.style.width = `${caloriePercentage}%`;
+            calorieStats.innerHTML = `
+                <span>${this.formatNumber(this.dailyProgress.calories)} kcal consumed</span>
+                <span>${caloriePercentage}%</span>
+            `;
+        }
+
+        // Update macro goals in sidebar
+        const macros = ['protein', 'carbs', 'fat'];
+        const macroSection = sidebar.querySelector('.sidebar-section:nth-child(2)');
+        
+        if (macroSection) {
+            macros.forEach((macro, index) => {
+                const macroItem = macroSection.querySelector(`.goal-item:nth-child(${index + 1})`);
+                if (!macroItem) return;
+
+                const value = this.goals[`${macro}Goal`];
+                const goalValue = macroItem.querySelector('.goal-value');
+                const progressFill = macroItem.querySelector('.progress-fill');
+                const stats = macroItem.querySelector('.goal-stats');
+
+                if (goalValue && value) {
+                    goalValue.textContent = `${this.formatNumber(value)}g`;
+                }
+
+                if (progressFill && stats && value) {
+                    const percentage = this.getPercentage(this.dailyProgress[macro], value);
+                    progressFill.style.width = `${percentage}%`;
+                    stats.innerHTML = `
+                        <span>${this.formatNumber(this.dailyProgress[macro])}g consumed</span>
+                        <span>${percentage}%</span>
+                    `;
+                }
+            });
+        }
+
+        // Update health goals in sidebar
+        const healthSection = sidebar.querySelector('.sidebar-section:nth-child(3)');
+        if (healthSection && this.goals.weightGoal) {
+            const weightValue = healthSection.querySelector('.goal-item:nth-child(1) .goal-value');
+            const weeklyValue = healthSection.querySelector('.goal-item:nth-child(2) .goal-value');
+            const weightStats = healthSection.querySelector('.goal-item:nth-child(1) .goal-stats span');
+            const weeklyStats = healthSection.querySelector('.goal-item:nth-child(2) .goal-stats span');
+
+            if (weightValue) {
+                weightValue.textContent = `${this.formatNumber(this.goals.weightGoal)} kg`;
+            }
+
+            if (weeklyValue && weightStats && weeklyStats) {
+                const weeklyGoal = this.goals.weeklyGoal || 0;
+                const prefix = weeklyGoal > 0 ? '+' : '';
+                weeklyValue.textContent = `${prefix}${this.formatNumber(weeklyGoal)} kg`;
+                
+                const goalTypeText = this.goals.goalType === 'maintain' ? 
+                    'Maintain Weight' : 
+                    this.goals.goalType === 'gain' ? 
+                    'Gain Muscle Mass' : 
+                    'Lose Weight';
+                    
+                weightStats.textContent = goalTypeText;
+                weeklyStats.textContent = weeklyGoal === 0 ? 
+                    'Maintenance' : 
+                    `Healthy ${weeklyGoal > 0 ? 'weight gain' : 'weight loss'} pace`;
+            }
+        }
+    }
+
+    formatNumber(num) {
+        if (num === null || num === undefined) return 0;
+        return Math.round(num * 10) / 10;
+    }
+
+    getPercentage(current, target) {
+        if (!target || !current) return 0;
+        const percentage = (current / target) * 100;
+        return Math.min(Math.max(Math.round(percentage), 0), 100);
+    }
+
+    // UI Loading State
+    showLoading(message) {
+        const loadingOverlay = document.querySelector('.loading-overlay');
+        const loadingMessage = document.querySelector('.loading-message');
+        
+        if (loadingOverlay && loadingMessage) {
+            loadingMessage.textContent = message;
+            loadingOverlay.classList.add('visible');
+        }
+    }
+
+    hideLoading() {
+        const loadingOverlay = document.querySelector('.loading-overlay');
+        if (loadingOverlay) {
+            loadingOverlay.classList.remove('visible');
+        }
+    }
+
+    hasAnyGoals() {
+        return !!(this.goals?.targetCalories || this.goals?.proteinGoal || this.goals?.carbsGoal || this.goals?.fatGoal);
     }
 }
 

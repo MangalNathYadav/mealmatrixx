@@ -3,298 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MealMatrix - Nutrition Goals</title>    <link rel="stylesheet" href="assets/css/styles.css">
+    <title>MealMatrix - Nutrition Goals</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/new-styles.css">
     <link rel="stylesheet" href="assets/css/nutrition-goals.css">
-    <style>
-        /* Loading Overlay Styles */
-        .loading-overlay {
-            backdrop-filter: blur(4px);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .loading-overlay.visible {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid var(--primary-color);
-            border-top-color: transparent;
-            border-radius: 50%;
-            animation: spin 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-            margin-bottom: 1rem;
-        }
-
-        .loading-text {
-            color: var(--text-color);
-            font-size: 1.1rem;
-            font-weight: 500;
-            opacity: 0.9;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        .goals-container {
-            max-width: 1200px;
-            margin: 2rem auto;
-            padding: 3rem;
-            background: linear-gradient(to bottom right, white, var(--bg-subtle));
-            border-radius: 16px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            border: 1px solid var(--border-color);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .goals-container:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.08), 0 12px 18px -3px rgba(0, 0, 0, 0.12);
-        }
-
-        .goals-header {
-            text-align: center;
-            margin-bottom: 3.5rem;
-            animation: fadeSlideDown 0.6s ease-out;
-            position: relative;
-            padding-bottom: 2rem;
-        }
-
-        .goals-header::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100px;
-            height: 4px;
-            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
-            border-radius: 2px;
-        }
-
-        .goals-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 2rem;
-            animation: fadeSlideUp 0.6s ease-out 0.2s both;
-        }
-
-        .goal-card {
-            background: white;
-            padding: 2rem;
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            height: 100%;
-        }
-
-        .goal-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .goal-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-        }
-
-        .goal-card:hover::before {
-            opacity: 1;
-        }
-
-        .goal-header {
-            color: var(--primary-color);
-            font-size: 1.25rem;
-            margin-bottom: 1.5rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .goal-input-group {
-            margin-bottom: 1.75rem;
-            position: relative;
-        }
-
-        .goal-input-group label {
-            display: block;
-            margin-bottom: 0.75rem;
-            color: var(--text-color);
-            font-weight: 500;
-            font-size: 0.95rem;
-        }
-
-        .goal-input-group input,
-        .goal-input-group select {
-            width: 100%;
-            padding: 0.875rem 1rem;
-            border: 2px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: all 0.2s ease;
-            background: var(--bg-subtle);
-        }
-
-        .goal-input-group input:hover,
-        .goal-input-group select:hover {
-            border-color: var(--primary-color);
-        }
-
-        .goal-input-group input:focus,
-        .goal-input-group select:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            background: white;
-            box-shadow: 0 0 0 4px rgba(var(--primary-color-rgb), 0.1);
-        }
-
-        .input-hint {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            margin-top: 0.5rem;
-            opacity: 0;
-            transform: translateY(-10px);
-            transition: all 0.2s ease;
-        }
-
-        .goal-input-group input:focus + .input-hint,
-        .goal-input-group select:focus + .input-hint {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .save-goals-container {
-            margin-top: 3rem;
-            text-align: center;
-            animation: fadeSlideUp 0.6s ease-out 0.4s both;
-        }
-
-        .save-goals {
-            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
-            color: white;
-            border: none;
-            padding: 1rem 2.5rem;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(var(--primary-color-rgb), 0.2);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .save-goals::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            transition: width 0.6s ease-out, height 0.6s ease-out;
-        }
-
-        .save-goals:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 8px rgba(var(--primary-color-rgb), 0.3);
-        }
-
-        .save-goals:active::after {
-            width: 200px;
-            height: 200px;
-            opacity: 0;
-        }
-
-        .success-message {
-            display: none;
-            background: linear-gradient(to right, #dcfce7, #bbf7d0);
-            color: #166534;
-            padding: 1.25rem;
-            border-radius: 8px;
-            margin: 1.5rem 0;
-            text-align: center;
-            font-weight: 500;
-            transform: translateY(20px);
-            opacity: 0;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .success-message.visible {
-            display: block;
-            transform: translateY(0);
-            opacity: 1;
-        }
-
-        @keyframes fadeSlideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes fadeSlideUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        @media (max-width: 1024px) {
-            .goals-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .goals-container {
-                margin: 1rem;
-                padding: 2rem;
-            }
-
-            .goals-grid {
-                grid-template-columns: 1fr;
-                gap: 1.5rem;
-            }
-
-            .goal-card {
-                padding: 1.5rem;
-            }
-        }
-    </style>
 </head>
 <body>
     <!-- Loading Overlay -->
@@ -421,20 +135,14 @@
             const icon = type === 'error' ? '❌' : type === 'success' ? '✅' : 'ℹ️';
             toast.innerHTML = `<span class="toast-icon">${icon}</span><span class="toast-message">${message}</span>`;
             
+            // Add to DOM and animate
             document.body.appendChild(toast);
-            
-            // Animate in
-            requestAnimationFrame(() => {
-                toast.style.opacity = '1';
-                toast.style.transform = 'translateY(0)';
-            });
-
+                
             // Remove after delay
             setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transform = 'translateY(-20px)';
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
+                toast.classList.add('removing');
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
         }
 
         // Load user's goals
@@ -445,30 +153,66 @@
             showLoading();
 
             try {
+                // Get the user's nutrition goals from the correct path
                 const goalsRef = firebase.database().ref(`users/${user.uid}/nutritionGoals`);
                 const snapshot = await goalsRef.once('value');
                 const goals = snapshot.val() || {};
-
-                // Set input values with smooth transitions
-                const inputs = {
-                    'targetCalories': goals.targetCalories || '',
-                    'activityLevel': goals.activityLevel || 'moderate',
-                    'proteinGoal': goals.proteinGoal || '',
-                    'carbsGoal': goals.carbsGoal || '',
-                    'fatGoal': goals.fatGoal || '',
-                    'weightGoal': goals.weightGoal || '',
-                    'goalType': goals.goalType || 'maintain',
-                    'weeklyGoal': goals.weeklyGoal || ''
+                
+                // Define default values
+                const defaultValues = {
+                    targetCalories: 2000,
+                    activityLevel: 'moderate',
+                    proteinGoal: 150,
+                    carbsGoal: 250,
+                    fatGoal: 65,
+                    weightGoal: 70,
+                    goalType: 'maintain',
+                    weeklyGoal: 0.5
                 };
 
-                Object.entries(inputs).forEach(([id, value]) => {
-                    const input = document.getElementById(id);
-                    if (input) {
-                        input.style.transition = 'all 0.3s ease';
-                        input.value = value;
-                        input.classList.add('populated');
+                // Check for any existing goals
+                const hasExistingGoals = Object.values(goals).some(value => 
+                    value !== null && value !== undefined && value !== '');
+
+                // Populate form fields with either DB values or defaults
+                const fields = ['targetCalories', 'activityLevel', 'proteinGoal', 'carbsGoal', 'fatGoal', 'weightGoal', 'goalType', 'weeklyGoal'];
+                
+                fields.forEach(field => {
+                    const input = document.getElementById(field);
+                    if (!input) return;
+
+                    const dbValue = goals[field];
+                    const hasDbValue = dbValue !== null && dbValue !== undefined && dbValue !== '';
+                    
+                    // Set value from DB or default
+                    input.value = hasDbValue ? dbValue : defaultValues[field];
+                    
+                    // Add appropriate classes for styling
+                    input.classList.add('populated');
+                    if (hasDbValue) {
+                        input.classList.add('from-db');
+                        input.classList.add('autofilled');
+                        setTimeout(() => input.classList.remove('autofilled'), 1000);
+                    } else {
+                        input.classList.add('default-value');
+                    }
+
+                    // Special handling for goalType and weeklyGoal relationship
+                    if (field === 'goalType') {
+                        const weeklyGoalInput = document.getElementById('weeklyGoal');
+                        if (input.value === 'maintain') {
+                            weeklyGoalInput.value = '0';
+                            weeklyGoalInput.disabled = true;
+                        }
                     }
                 });
+
+                // Show appropriate toast message
+                if (hasExistingGoals) {
+                    showToast('Previous goals loaded successfully', 'success');
+                } else {
+                    showToast('Welcome! Please set your nutrition goals', 'info');
+                }
 
             } catch (error) {
                 console.error('Error loading goals:', error);
