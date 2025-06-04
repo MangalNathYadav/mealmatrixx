@@ -17,7 +17,7 @@ Nutrition Trend Graphs: Visualize nutrient intake over time with interactive cha
 Meal Pattern Analysis: Identify eating patterns and suggest improvements
 Health Correlations: Connect mood, energy levels, and sleep quality to eating habits
 Goal Progress Tracking: Visual indicators of progress toward nutritional targets
-Social & Sharing
+Social & Sharingn
 Recipe Sharing: Allow users to share successful meals with the community
 Challenges & Achievements: Gamify healthy eating with challenges and badges
 Expert Consultation: Connect with nutritionists for personalized advice
