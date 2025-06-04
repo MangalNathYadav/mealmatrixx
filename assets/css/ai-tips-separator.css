@@ -1,0 +1,50 @@
+/* 
+   MealMatrix - AI Tips Separator Styles
+   Custom styles to add visual separation between AI tip cards
+*/
+
+/* Add separator between AI tip sections */
+.ai-tips-section + .ai-tips-section {
+  margin-top: 1rem !important;
+  padding-top: 0.5rem;
+  position: relative;
+}
+
+/* Create visual break between cards */
+.ai-tips-section + .ai-tips-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(to right, rgba(203, 213, 225, 0.3), rgba(203, 213, 225, 0.8), rgba(203, 213, 225, 0.3));
+}
+
+/* Add shadow to enhance separation */
+.ai-tip-card {
+  position: relative;
+  background-color: white;
+  border-radius: 8px;
+  padding: 0.75rem !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(203, 213, 225, 0.4);
+  margin-bottom: 0.75rem;
+}
+
+/* Remove margin from last card in each section */
+.ai-tip-card:last-child {
+  margin-bottom: 0;
+}
+
+/* Subtle hover effect */
+.ai-tip-card:hover {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+  transition: all 0.2s ease;
+}
+
+/* Improve spacing for icons */
+.ai-tip-icon {
+  margin-top: 0.25rem;
+}

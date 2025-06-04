@@ -1,6 +1,7 @@
 // Import required modules
 import goalsManager from './goals.js';
 import ai from './ai-features.js';
+import nutritionTipGenerator from './nutrition-tip-generator.js';
 
 // Toast notification helper
 function showToast(message, type = 'info') {
@@ -154,24 +155,23 @@ function updateMealGrid(meals) {
             <div class="meal-header">
                 <h3>${meal.name}</h3>
                 <span class="meal-time">${new Date(meal.dateTime).toLocaleString()}</span>
-            </div>
-            <div class="meal-content">
+            </div>            <div class="meal-content">
                 <div class="meal-stats">
-                    <div class="stat">
-                        <span>Calories</span>
-                        <strong>${meal.calories || 0}</strong>
+                    <div class="meal-stat calories">
+                        <span class="meal-stat-label">Calories</span>
+                        <span class="meal-stat-value">${meal.calories || 0}</span>
                     </div>
-                    <div class="stat">
-                        <span>Protein</span>
-                        <strong>${meal.protein || 0}g</strong>
+                    <div class="meal-stat protein">
+                        <span class="meal-stat-label">Protein</span>
+                        <span class="meal-stat-value">${meal.protein || 0}g</span>
                     </div>
-                    <div class="stat">
-                        <span>Carbs</span>
-                        <strong>${meal.carbs || 0}g</strong>
+                    <div class="meal-stat carbs">
+                        <span class="meal-stat-label">Carbs</span>
+                        <span class="meal-stat-value">${meal.carbs || 0}g</span>
                     </div>
-                    <div class="stat">
-                        <span>Fat</span>
-                        <strong>${meal.fat || 0}g</strong>
+                    <div class="meal-stat fat">
+                        <span class="meal-stat-label">Fat</span>
+                        <span class="meal-stat-value">${meal.fat || 0}g</span>
                     </div>
                 </div>
                 ${meal.notes ? `<p class="meal-notes">${meal.notes}</p>` : ''}
@@ -463,136 +463,100 @@ function initializeAINutritionTips() {
 
 // Function to generate AI nutrition tips based on user data
 async function generateAINutritionTips() {
-    const aiTipsContent = document.querySelector('.ai-tips-content');
-    if (!aiTipsContent) return;
-    
-    // Show loading state
-    aiTipsContent.innerHTML = `
-        <div class="ai-tip">
-            <div class="ai-tip-icon">⏳</div>
-            <p>Analyzing your nutrition data...</p>
-        </div>
-    `;
+    const aiTipsContainers = document.querySelectorAll('.ai-tips-content');
+    if (!aiTipsContainers.length) return;
     
     try {
-        // In a real app, this would call your AI service
-        // For now we'll simulate tips based on available data
-        const mockTips = [
-            {
-                icon: '🥩',
-                tip: "Based on your protein intake, try adding more lean protein sources to reach your daily goal."
-            },
-            {
-                icon: '🥦',
-                tip: "You're low on fiber today. Adding vegetables or whole grains to your next meal would be beneficial."
-            },
-            {
-                icon: '💧',
-                tip: "Remember to stay hydrated. Aim for at least 8 glasses of water today."
-            },
-            {
-                icon: '🍳',
-                tip: "Consider having eggs for your next meal to boost your protein intake."
-            },
-            {
-                icon: '🥑',
-                tip: "You've reached 50% of your healthy fats goal. Avocados or nuts would be a great addition today."
+        const user = firebase.auth().currentUser;
+        if (!user) return;
+
+        // Get user data and meals
+        const [userSnap, mealsSnap] = await Promise.all([
+            firebase.database().ref(`users/${user.uid}`).once('value'),
+            firebase.database().ref(`users/${user.uid}/meals`).once('value')
+        ]);
+
+        const userData = userSnap.val() || {};
+        const mealsData = mealsSnap.val() || {};
+
+        // Use the NutritionTipGenerator to generate personalized tips
+        const tips = await nutritionTipGenerator.generateTips(userData, mealsData);
+        
+        // Update each tip container with the personalized tips
+        aiTipsContainers.forEach((container, index) => {
+            if (index < tips.length) {
+                const tip = tips[index];
+                container.innerHTML = `
+                    <div class="ai-tip-card">
+                        <div class="ai-tip-icon ${tip.iconClass}">${tip.icon}</div>
+                        <p>${tip.tip}</p>
+                    </div>
+                `;
             }
-        ];
-        
-        // Randomly select two tips
-        const selectedTips = [];
-        while (selectedTips.length < 2 && mockTips.length > 0) {
-            const randomIndex = Math.floor(Math.random() * mockTips.length);
-            selectedTips.push(mockTips.splice(randomIndex, 1)[0]);
-        }
-        
-        // Update the tips section
-        let tipsHTML = '';
-        selectedTips.forEach(tip => {
-            tipsHTML += `
-                <div class="ai-tip">
-                    <div class="ai-tip-icon">${tip.icon}</div>
-                    <p>${tip.tip}</p>
-                </div>
-            `;
         });
-        
-        aiTipsContent.innerHTML = `
-            ${tipsHTML}
-            <div class="ai-tip-actions">
-                <button class="btn-refresh-tips">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                        <path d="M1 4V10H7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M23 20V14H17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M20.49 9C19.9828 7.56678 19.1209 6.2854 17.9845 5.27542C16.8482 4.26543 15.4745 3.55976 13.9917 3.22426C12.5089 2.88875 10.9652 2.93434 9.50481 3.35677C8.04437 3.77921 6.71475 4.56471 5.64 5.64L1 10M23 14L18.36 18.36C17.2853 19.4353 15.9556 20.2208 14.4952 20.6432C13.0348 21.0657 11.4911 21.1113 10.0083 20.7757C8.52547 20.4402 7.1518 19.7346 6.01547 18.7246C4.87913 17.7146 4.01717 16.4332 3.51 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                    Refresh Tips
-                </button>
-            </div>
-        `;
-        
-        // Re-attach event listener to the new button
-        const newRefreshBtn = aiTipsContent.querySelector('.btn-refresh-tips');
-        if (newRefreshBtn) {
-            newRefreshBtn.addEventListener('click', generateAINutritionTips);
-        }
         
     } catch (error) {
         console.error('Failed to generate AI nutrition tips:', error);
         
-        // Display fallback tip
-        aiTipsContent.innerHTML = `
-            <div class="ai-tip">
-                <div class="ai-tip-icon">💡</div>
-                <p>Always aim for a balanced diet with proteins, healthy fats, and complex carbohydrates.</p>
-            </div>
-            <div class="ai-tip">
-                <div class="ai-tip-icon">🍎</div>
-                <p>Include a variety of fruits and vegetables in your meals to ensure you get essential vitamins and minerals.</p>
-            </div>
-            <div class="ai-tip-actions">
-                <button class="btn-refresh-tips">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                        <path d="M1 4V10H7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M23 20V14H17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M20.49 9C19.9828 7.56678 19.1209 6.2854 17.9845 5.27542C16.8482 4.26543 15.4745 3.55976 13.9917 3.22426C12.5089 2.88875 10.9652 2.93434 9.50481 3.35677C8.04437 3.77921 6.71475 4.56471 5.64 5.64L1 10M23 14L18.36 18.36C17.2853 19.4353 15.9556 20.2208 14.4952 20.6432C13.0348 21.0657 11.4911 21.1113 10.0083 20.7757C8.52547 20.4402 7.1518 19.7346 6.01547 18.7246C4.87913 17.7146 4.01717 16.4332 3.51 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                    Refresh Tips
-                </button>
-            </div>
-        `;
-        
-        // Re-attach event listener to the new button
-        const newRefreshBtn = aiTipsContent.querySelector('.btn-refresh-tips');
-        if (newRefreshBtn) {
-            newRefreshBtn.addEventListener('click', generateAINutritionTips);
-        }
+        // Display fallback tips if something goes wrong
+        aiTipsContainers.forEach((container, index) => {
+            const fallbackTips = [
+                {
+                    icon: '✨',
+                    iconClass: 'general',
+                    tip: "Set your nutrition goals in the profile section to get personalized recommendations!"
+                },
+                {
+                    icon: '🥗',
+                    iconClass: 'nutrition',
+                    tip: "Try to include a variety of colorful fruits and vegetables in your meals for balanced nutrition."
+                },
+                {
+                    icon: '💧',
+                    iconClass: 'hydration',
+                    tip: "Staying hydrated is key! Aim to drink water throughout the day."
+                }
+            ];
+            
+            if (index < fallbackTips.length) {
+                const tip = fallbackTips[index];
+                container.innerHTML = `
+                    <div class="ai-tip-card">
+                        <div class="ai-tip-icon ${tip.iconClass}">${tip.icon}</div>
+                        <p>${tip.tip}</p>
+                    </div>
+                `;
+            }
+        });
     }
 }
 
-// Function to handle layout changes and move the AI tips section if needed
+// Function to handle layout changes and move the AI tips sections if needed
 function handleLayoutChange() {
-    const aiTipsSection = document.querySelector('.ai-tips-section');
+    const aiTipsSections = document.querySelectorAll('.ai-tips-section');
     const dashboardSidebar = document.querySelector('.dashboard-sidebar');
     const dashboardMain = document.querySelector('.dashboard-main');
     const mealGrid = document.querySelector('.meals-container');
     
-    if (!aiTipsSection || !dashboardSidebar || !dashboardMain || !mealGrid) return;
+    if (aiTipsSections.length === 0 || !dashboardSidebar || !dashboardMain || !mealGrid) return;
     
     // Check window width for mobile view
     if (window.innerWidth <= 767) {
-        // On mobile, move the AI tips section to the main content area
-        if (aiTipsSection.parentElement === dashboardSidebar) {
-            aiTipsSection.classList.add('move-to-main');
-            dashboardMain.insertBefore(aiTipsSection, null); // Insert at the end
-        }
+        // On mobile, move all AI tips sections to the main content area
+        aiTipsSections.forEach(section => {
+            if (section.parentElement === dashboardSidebar) {
+                section.classList.add('move-to-main');
+                dashboardMain.appendChild(section); // Append to the end
+            }
+        });
     } else {
-        // On desktop, move back to sidebar if it was moved
-        if (aiTipsSection.classList.contains('move-to-main')) {
-            aiTipsSection.classList.remove('move-to-main');
-            dashboardSidebar.insertBefore(aiTipsSection, null); // Insert at the end
-        }
+        // On desktop, move back to sidebar if they were moved
+        aiTipsSections.forEach(section => {
+            if (section.classList.contains('move-to-main')) {
+                section.classList.remove('move-to-main');
+                dashboardSidebar.appendChild(section); // Append to the end
+            }
+        });
     }
 }
 

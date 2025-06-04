@@ -1,0 +1,96 @@
+/* Macro nutrients styling for meal cards */
+.meal-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    background: var(--bg-subtle);
+    padding: 1.25rem;
+    border-radius: 8px;
+    margin-top: 1.25rem;
+}
+
+.stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.stat span {
+    font-size: 0.875rem;
+    color: var(--gray-600);
+    margin-bottom: 0.25rem;
+}
+
+.stat strong {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--primary);
+    background: white;
+    padding: 0.5rem;
+    border-radius: 6px;
+    min-width: 60px;
+    box-shadow: var(--shadow-sm);
+}
+
+/* Color-coding for different nutrients */
+.stat.calories strong {
+    color: #0EA5E9; /* sky blue */
+}
+
+.stat.protein strong {
+    color: #10B981; /* emerald */
+}
+
+.stat.carbs strong {
+    color: #F59E0B; /* amber */
+}
+
+.stat.fat strong {
+    color: #EC4899; /* pink */
+}
+
+/* Add hover effects */
+.stat strong {
+    transition: transform 0.2s ease;
+}
+
+.stat:hover strong {
+    transform: scale(1.05);
+}
+
+/* Progress indicators */
+.stat {
+    position: relative;
+}
+
+.stat::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 3px;
+    background: currentColor;
+    transition: width 0.3s ease;
+    border-radius: 2px;
+}
+
+.stat:hover::after {
+    width: 80%;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+    .meal-stats {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem 0.75rem;
+        padding: 1rem;
+    }
+
+    .stat strong {
+        font-size: 1rem;
+        min-width: 50px;
+    }
+}
