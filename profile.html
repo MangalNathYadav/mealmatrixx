@@ -4,478 +4,61 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MealMatrix - User Profile</title>
-    <link rel="stylesheet" href="assets/css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/new-styles.css">
     <link rel="stylesheet" href="assets/css/profile.css">
-            transition: all 0.2s ease;
-            text-decoration: none;
-            color: var(--text-color);
-            font-size: 0.875rem;
-        }
-
-        .nav-actions .btn:hover {
-            background: var(--bg-subtle);
-            border-color: var(--primary-color);
-            transform: translateY(-1px);
-        }        .profile-container {
-            max-width: 900px;
-            margin: 2rem auto;
-            padding: 2rem;
-        }
-
-        .profile-content {
-            background: white;
-            border-radius: 16px;
-            padding: 2.5rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            animation: fadeIn 0.5s ease;
-        }
-
-        .profile-content:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.08), 0 12px 18px -3px rgba(0, 0, 0, 0.12);
-        }
-
-        .profile-header {
-            text-align: center;
-            margin-bottom: 2.5rem;
-        }
-
-        .profile-header h2 {
-            font-size: 2rem;
-            color: var(--text-color);
-            margin-bottom: 0.5rem;
-        }
-
-        .profile-header p {
-            color: var(--text-muted);
-            font-size: 1.1rem;
-        }
-
-        .profile-grid {
-            display: grid;
-            grid-template-columns: 250px 1fr;
-            gap: 2.5rem;
-            margin-top: 2rem;
-        }
-
-        .profile-photo-section {
-            text-align: center;
-        }
-
-        .profile-photo {
-            width: 180px;
-            height: 180px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 4px solid white;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            margin-bottom: 1rem;
-            transition: transform 0.3s ease;
-        }
-
-        .profile-photo:hover {
-            transform: scale(1.05);
-        }
-
-        .photo-upload-btn {
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-
-        .photo-upload-btn:hover {
-            background: var(--secondary-color);
-            transform: translateY(-2px);
-        }
-
-        @media (max-width: 768px) {
-            .profile-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 640px) {
-            .navbar {
-                padding: 1rem;
-            }
-            .profile-container {
-                padding: 0 1rem 1rem;
-            }
-        }
-
-        .profile-header {
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid var(--primary-color);
-        }
-
-        .profile-header h2 {
-            color: var(--primary-color);
-            margin-bottom: 0.5rem;
-        }
-
-        .profile-header p {
-            color: var(--text-color);
-            opacity: 0.8;
-        }
-
-        .profile-section {
-            margin-bottom: 2rem;
-        }
-
-        .profile-section h3 {
-            color: var(--primary-color);
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .preferences-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
-        }
-
-        @media (max-width: 640px) {
-            .preferences-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: var(--text-color);
-            font-size: 0.875rem;
-            font-weight: 500;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            border: 1.5px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 0.95rem;
-            color: var(--text-color);
-            background: white;
-            transition: all 0.2s ease;
-        }
-
-        .form-control:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb), 0.1);
-        }
-
-        .form-group label {
-            font-weight: 600;
-            color: var(--text-color);
-            margin-bottom: 0.75rem;
-        }
-
-        .profile-grid {
-            margin-bottom: 3rem;
-        }
-
-        .profile-photo-section {
-            position: relative;
-        }
-
-        .photo-upload-btn {
-            margin-top: 1rem;
-            background: white;
-            font-weight: 500;
-            padding: 0.75rem;
-        }
-
-        .profile-header {
-            text-align: center;
-            max-width: 600px;
-            margin: 0 auto 3rem;
-        }
-
-        .profile-header h2 {
-            font-size: 2rem;
-            margin-bottom: 1rem;
-            color: var(--primary-color);
-        }
-
-        .profile-header p {
-            font-size: 1.1rem;
-            line-height: 1.6;
-        }
-
-        .dietary-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-top: 0.5rem;
-        }
-
-        .dietary-tag {
-            padding: 0.25rem 0.75rem;
-            background: var(--bg-subtle);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            font-size: 0.875rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .dietary-tag .remove {
-            color: #ef4444;
-            cursor: pointer;
-            font-weight: bold;
-        }        .btn-save {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
-            border: none;
-            padding: 0.875rem 2rem;
-            border-radius: var(--border-radius);
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: block;
-            margin: 2rem auto 0;
-            min-width: 200px;
-        }
-
-        .btn-save:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(var(--primary-color-rgb), 0.2);
-        }
-
-        .success-message {
-            background: #dcfce7;
-            color: #166534;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            animation: slideIn 0.3s ease;
-            display: none;
-        }
-
-        .success-message span {
-            font-size: 1.25rem;
-        }
-
-        .success-message.visible {
-            display: flex;
-            animation: slideInRight 0.3s ease;
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(-10px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        @keyframes slideOutRight {
-            from {
-                transform: translateX(0);
-                opacity: 1;
-            }
-            to {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-        }
-
-        .preferences-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .preferences-list li {
-            margin-bottom: 0.5rem;
-            padding: 0.5rem;
-            background: var(--bg-subtle);
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .preferences-list li:last-child {
-            margin-bottom: 0;
-        }
-
-        textarea.form-control {
-            min-height: 100px;
-            resize: vertical;
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }        .personal-info-section {
-            background: white;
-            padding: 2rem;
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            border: 1px solid var(--border-color);
-        }
-
-        .personal-info-section h3 {
-            color: var(--primary-color);
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 1.25rem;
-            font-weight: 600;
-        }
-        
-        .section-card {
-            background: white;
-            padding: 2rem;
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            border: 1px solid var(--border-color);
-        }
-
-        /* Make form controls consistent */
-        .form-control {
-            background: white;
-        }
-
-        input[type="date"].form-control,
-        input[type="number"].form-control {
-            padding: 0.7rem 0.75rem;
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* Loading overlay styles */
-        #loadingOverlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(4px);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-        }
-
-        #loadingOverlay.visible {
-            display: flex;
-        }
-
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(4px);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .loading-overlay.visible {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .loading-spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid var(--border-color);
-            border-top-color: var(--primary-color);
-            border-radius: 50%;
-            animation: spin 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-            margin-bottom: 1rem;
-        }
-
-        #loadingMessage {
-            color: var(--text-color);
-            margin: 0;
-            font-size: 1rem;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-    </style>
 </head>
-<body>    <nav class="navbar">
-        <h2>
-            <img src="assets/mealmatrixx_logo.png" alt="MealMatrix Logo" style="width: 24px; height: 24px; object-fit: contain;">
-            MealMatrix
-        </h2>
-        <div class="nav-actions">
-            <a href="dashboard.html" class="btn">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <path d="M6.5 3.5L2 8L6.5 12.5M2 8H14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                Back to Dashboard
+
+<body>    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-container container">
+            <a href="dashboard.html" class="navbar-logo">
+                <img src="assets/mealmatrixx_logo.png" alt="MealMatrix Logo">
+                <span>MealMatrix</span>
             </a>
+            <div class="navbar-actions">
+                <a href="dashboard.html" class="btn btn-outline">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path d="M6.5 3.5L2 8L6.5 12.5M2 8H14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Back to Dashboard
+                </a>
+            </div>
         </div>
-    </nav>    <div class="profile-container">
-        <div class="profile-content">
-            <div class="profile-header">
-                <h2>User Profile</h2>
-                <p>Manage your personal information and preferences</p>
+    </nav>    <div class="container">
+        <div class="profile-container">
+            <div class="welcome-section">
+                <div class="welcome-header">
+                    <div class="section-header">
+                        <h2>User Profile</h2>
+                        <p>Manage your personal information and preferences</p>
+                    </div>
+                </div>
             </div>
 
-        <div id="successMessage" class="success-message">
-            <span>✨</span> Your profile has been updated successfully!
-        </div>
+            <div id="successMessage" class="success-message">
+                <span>✨</span> Your profile has been updated successfully!
+            </div>
+
+            <div class="profile-content">
 
         <form id="profileForm">
             <div class="profile-grid">
                 <!-- Profile Photo Section -->
                 <div class="profile-photo-section">
-                    <img src="assets/default-avatar.png" alt="Profile Photo" class="profile-photo" id="profilePhoto">
-                    <input type="file" id="photoUpload" accept="image/*" style="display: none;">
-                    <button type="button" class="photo-upload-btn" onclick="document.getElementById('photoUpload').click()">
-                        Change Photo
-                    </button>
+                    <div class="photo-wrapper">
+                        <img src="assets/default-avatar.png" alt="Profile Photo" class="profile-photo" id="profilePhoto">
+                        <div class="photo-overlay">
+                            <input type="file" id="photoUpload" accept="image/*" style="display: none;">
+                            <button type="button" class="photo-upload-btn" onclick="document.getElementById('photoUpload').click()">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+                                </svg>
+                                Change Photo
+                            </button>
+                        </div>
+                    </div>
+                    <p class="photo-helper">Upload a square image for best results</p>
                 </div>
 
                 <!-- Personal Information -->
@@ -569,6 +152,14 @@
 
             <button type="submit" class="btn-save">Save Profile</button>
         </form>
+        </div>
+    </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <p id="loadingMessage">Updating profile...</p>
     </div>
 
     <!-- Firebase SDK -->

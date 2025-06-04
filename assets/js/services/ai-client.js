@@ -83,28 +83,43 @@ class AIClient {
     }
 
     async generateWeeklySummary(meals) {
-        const prompt = `Analyze these meals for nutritional patterns and health insights:
-        Meal History: ${JSON.stringify(meals)}
+        const prompt = `Analyze this week's nutrition data and provide detailed insights:
+        Meals: ${JSON.stringify(meals)}
 
-        Return a JSON object with:
+        Return a JSON object with this exact structure:
         {
-            "summary": "Weekly pattern analysis",
-            "patterns": {
-                "timing": "Meal timing analysis",
-                "portions": "Portion size analysis",
-                "variety": "Food variety analysis"
+            "overview": {
+                "summary": "Brief overview of the week's nutrition patterns",
+                "averageCalories": number,
+                "averageProtein": number,
+                "mealFrequency": number,
+                "goalProgress": "Percentage or description of goal achievement"
             },
-            "concerns": [
+            "analysis": {
+                "macroBalance": "Analysis of protein, carbs, and fat distribution",
+                "mealTiming": "Analysis of meal timing patterns",
+                "nutritionBalance": "Overall nutritional balance assessment",
+                "weeklyTrends": ["List of identified trends"]
+            },
+            "insights": [
+                "Specific insights about nutrition patterns",
+                "Notable achievements or areas for improvement",
+                "Comparison with previous weeks if available"
+            ],
+            "recommendations": [
                 {
-                    "issue": "Specific concern",
-                    "impact": "Health impact",
-                    "solution": "Solution"
+                    "area": "Specific area for improvement",
+                    "suggestion": "Actionable recommendation",
+                    "benefit": "Expected health benefit"
                 }
             ],
-            "positives": ["Good habits"],
-            "suggestions": ["Improvement suggestions"]
+            "healthMetrics": {
+                "balanceScore": number,
+                "varietyScore": number,
+                "consistencyScore": number
+            }
         }`;
-
+        
         return this.generateContent(prompt);
     }
 

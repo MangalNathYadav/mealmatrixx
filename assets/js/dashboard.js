@@ -111,7 +111,7 @@ function hideLoading() {
 // Hide initial loading overlay after a short delay to show the nice animation
 setTimeout(hideLoading, 2000);
 
-// Dashboard elements
+// DOM elements and constants setup
 const mealGrid = document.getElementById('mealGrid');
 const logoutBtn = document.getElementById('logoutBtn');
 const weeklySummaryBtn = document.getElementById('weeklySummaryBtn');
@@ -121,6 +121,173 @@ const welcomeNameElement = document.getElementById('welcomeName');
 const welcomeProfilePhoto = document.getElementById('welcomeProfilePhoto');
 const todayMealsCountElement = document.getElementById('todayMealsCount');
 const streakCountElement = document.getElementById('streakCount');
+
+// Setup event listeners for the dashboard
+function setupEventListeners() {
+    // Logout button click handler
+    logoutBtn?.addEventListener('click', async () => {
+        try {
+            await firebase.auth().signOut();
+            showToast('Logged out successfully', 'success');
+            window.location.href = 'login.html';
+        } catch (error) {
+            console.error('Logout error:', error);
+            showToast('Failed to logout. Please try again.');
+        }
+    });
+
+    // Weekly summary button click handler
+    weeklySummaryBtn?.addEventListener('click', async () => {
+        const content = popup.querySelector('.popup-content');
+        const spinner = weeklySummaryBtn.querySelector('.ai-spinner');
+        spinner.classList.add('visible');
+        
+        try {
+            const user = firebase.auth().currentUser;
+            if (!user) return;
+
+            // Get last week's meals
+            const oneWeekAgo = new Date();
+            oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+            
+            const mealsRef = firebase.database().ref(`users/${user.uid}/meals`);
+            const mealsSnap = await mealsRef.once('value');
+            const allMeals = mealsSnap.val() || {};
+            
+            // Filter for recent meals
+            const recentMeals = Object.values(allMeals).filter(meal => 
+                new Date(meal.dateTime) >= oneWeekAgo
+            );
+
+            if (recentMeals.length === 0) {
+                throw new Error('No meals logged in the past week');
+            }
+
+            // Get AI analysis
+            const ai = new MealAI();
+            const summary = await ai.generateWeeklySummary(recentMeals);
+            
+            if (!summary || typeof summary !== 'object') {
+                throw new Error('Invalid summary response from AI');
+            }
+            
+            const summaryContent = `
+                <div class="popup-header">
+                    <h2>🤖 Your Weekly Nutrition Analysis</h2>
+                </div>
+                <div class="ai-content">
+                    <!-- Overview Section -->
+                    <div class="summary-section overview">
+                        <h3>Week Overview</h3>
+                        <div class="overview-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">Avg. Calories</span>
+                                <span class="stat-value">${Math.round(summary.overview.averageCalories)} kcal</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Avg. Protein</span>
+                                <span class="stat-value">${Math.round(summary.overview.averageProtein)}g</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Meals Logged</span>
+                                <span class="stat-value">${summary.overview.mealFrequency}</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Goal Progress</span>
+                                <span class="stat-value">${summary.overview.goalProgress}</span>
+                            </div>
+                        </div>
+                        <p class="overview-summary">${summary.overview.summary}</p>
+                    </div>
+
+                    <!-- Detailed Analysis -->
+                    <div class="summary-section analysis">
+                        <h3>Detailed Analysis</h3>
+                        <div class="analysis-grid">
+                            <div class="analysis-item">
+                                <strong>Macro Balance</strong>
+                                <p>${summary.analysis.macroBalance}</p>
+                            </div>
+                            <div class="analysis-item">
+                                <strong>Meal Timing</strong>
+                                <p>${summary.analysis.mealTiming}</p>
+                            </div>
+                            <div class="analysis-item">
+                                <strong>Nutrition Balance</strong>
+                                <p>${summary.analysis.nutritionBalance}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Key Insights -->
+                    <div class="summary-section insights">
+                        <h3>Key Insights</h3>
+                        <ul class="insights-list">
+                            ${summary.insights.map(insight => `
+                                <li class="insight-item">${insight}</li>
+                            `).join('')}
+                        </ul>
+                    </div>
+
+                    <!-- Recommendations -->
+                    <div class="summary-section recommendations">
+                        <h3>Personalized Recommendations</h3>
+                        <div class="recommendations-grid">
+                            ${summary.recommendations.map(rec => `
+                                <div class="recommendation-card">
+                                    <div class="rec-header">
+                                        <strong>${rec.area}</strong>
+                                    </div>
+                                    <p class="rec-suggestion">${rec.suggestion}</p>
+                                    <p class="rec-benefit">${rec.benefit}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Health Scores -->
+                    <div class="summary-section health-metrics">
+                        <h3>Health Metrics</h3>
+                        <div class="metrics-grid">
+                            <div class="metric-item">
+                                <span class="metric-label">Balance Score</span>
+                                <div class="metric-score">${summary.healthMetrics.balanceScore}/10</div>
+                            </div>
+                            <div class="metric-item">
+                                <span class="metric-label">Variety Score</span>
+                                <div class="metric-score">${summary.healthMetrics.varietyScore}/10</div>
+                            </div>
+                            <div class="metric-item">
+                                <span class="metric-label">Consistency Score</span>
+                                <div class="metric-score">${summary.healthMetrics.consistencyScore}/10</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Update popup content and show it
+            content.innerHTML = summaryContent;
+            document.body.classList.add('popup-open');
+            popup.classList.add('visible');
+
+        } catch (error) {
+            console.error('Weekly summary error:', error);
+            showToast(error.message || 'Failed to generate weekly summary', 'error');
+        } finally {
+            spinner.classList.remove('visible');
+        }
+    });
+
+    // Window resize listener for layout changes
+    window.addEventListener('resize', handleLayoutChange);
+
+    // Firebase ready listener
+    window.addEventListener('firebaseLoaded', () => {
+        isFirebaseReady = true;
+        tryInitialize();
+    });
+}
 
 // Get elements
 const healthTipSection = document.getElementById('healthTipSection');
@@ -148,18 +315,6 @@ function closeWeeklySummary() {
         if (content) content.innerHTML = '';
     }, 300);
 }
-
-// Handle logout
-logoutBtn?.addEventListener('click', async () => {
-    try {
-        await firebase.auth().signOut();
-        showToast('Logged out successfully', 'success');
-        window.location.href = 'login.html';
-    } catch (error) {
-        console.error('Logout error:', error);
-        showToast('Failed to logout. Please try again.');
-    }
-});
 
 // Load user's meals and update stats
 async function loadMealsAndStats() {
@@ -358,38 +513,31 @@ function updateWelcomeMessage(hasGoals) {
 weeklySummaryBtn.addEventListener('click', async () => {
     const content = popup.querySelector('.popup-content');
     const spinner = weeklySummaryBtn.querySelector('.ai-spinner');
-    
-    if (!spinner || !popup || !content) {
-        console.error('Required elements not found');
-        return;
-    }
-
-    content.innerHTML = ''; // Clear previous results
+    spinner.classList.add('visible');
     
     try {
-        spinner.classList.add('visible');
-        
-        // Get last 7 days of meals
         const user = firebase.auth().currentUser;
-        if (!user) {
-            throw new Error('Please log in to view your weekly summary');
-        }
+        if (!user) return;
 
+        // Get last week's meals
+        const oneWeekAgo = new Date();
+        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+        
         const mealsRef = firebase.database().ref(`users/${user.uid}/meals`);
-        const weekAgo = new Date();
-        weekAgo.setDate(weekAgo.getDate() - 7);
-
-        const snapshot = await mealsRef.once('value');
-        const meals = snapshot.val() || {};
-        const recentMeals = Object.values(meals).filter(meal => 
-            new Date(meal.dateTime) >= weekAgo
+        const mealsSnap = await mealsRef.once('value');
+        const allMeals = mealsSnap.val() || {};
+        
+        // Filter for recent meals
+        const recentMeals = Object.values(allMeals).filter(meal => 
+            new Date(meal.dateTime) >= oneWeekAgo
         );
 
         if (recentMeals.length === 0) {
-            showToast('No meals logged in the past week', 'info');
-            return;
+            throw new Error('No meals logged in the past week');
         }
 
+        // Get AI analysis
+        const ai = new MealAI();
         const summary = await ai.generateWeeklySummary(recentMeals);
         
         if (!summary || typeof summary !== 'object') {
@@ -398,64 +546,96 @@ weeklySummaryBtn.addEventListener('click', async () => {
         
         const summaryContent = `
             <div class="popup-header">
-                <h2>🤖 Your Weekly Meal Analysis</h2>
+                <h2>🤖 Your Weekly Nutrition Analysis</h2>
             </div>
             <div class="ai-content">
-                <div class="summary-section">
-                    <h4>Overview</h4>
-                    <p>${summary.summary || 'No overview available'}</p>
+                <!-- Overview Section -->
+                <div class="summary-section overview">
+                    <h3>Week Overview</h3>
+                    <div class="overview-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">Avg. Calories</span>
+                            <span class="stat-value">${Math.round(summary.overview.averageCalories)} kcal</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Avg. Protein</span>
+                            <span class="stat-value">${Math.round(summary.overview.averageProtein)}g</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Meals Logged</span>
+                            <span class="stat-value">${summary.overview.mealFrequency}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Goal Progress</span>
+                            <span class="stat-value">${summary.overview.goalProgress}</span>
+                        </div>
+                    </div>
+                    <p class="overview-summary">${summary.overview.summary}</p>
                 </div>
-                
-                ${summary.analysis ? `
-                    <div class="summary-section">
-                        <h4>Detailed Analysis</h4>
-                        <div class="analysis-grid">
-                            ${summary.analysis.caloriesTrend ? `
-                                <div class="analysis-item">
-                                    <strong>Calories</strong>
-                                    <p>${summary.analysis.caloriesTrend}</p>
-                                </div>
-                            ` : ''}
-                            ${summary.analysis.mealTiming ? `
-                                <div class="analysis-item">
-                                    <strong>Meal Timing</strong>
-                                    <p>${summary.analysis.mealTiming}</p>
-                                </div>
-                            ` : ''}
-                            ${summary.analysis.nutritionBalance ? `
-                                <div class="analysis-item">
-                                    <strong>Nutrition</strong>
-                                    <p>${summary.analysis.nutritionBalance}</p>
-                                </div>
-                            ` : ''}
+
+                <!-- Detailed Analysis -->
+                <div class="summary-section analysis">
+                    <h3>Detailed Analysis</h3>
+                    <div class="analysis-grid">
+                        <div class="analysis-item">
+                            <strong>Macro Balance</strong>
+                            <p>${summary.analysis.macroBalance}</p>
+                        </div>
+                        <div class="analysis-item">
+                            <strong>Meal Timing</strong>
+                            <p>${summary.analysis.mealTiming}</p>
+                        </div>
+                        <div class="analysis-item">
+                            <strong>Nutrition Balance</strong>
+                            <p>${summary.analysis.nutritionBalance}</p>
                         </div>
                     </div>
-                ` : ''}
+                </div>
 
-                ${summary.insights && summary.insights.length > 0 ? `
-                    <div class="summary-section">
-                        <h4>Key Insights</h4>
-                        <ul class="insights-list">
-                            ${summary.insights.map(insight => `
-                                <li>${insight}</li>
-                            `).join('')}
-                        </ul>
-                    </div>
-                ` : ''}
+                <!-- Key Insights -->
+                <div class="summary-section insights">
+                    <h3>Key Insights</h3>
+                    <ul class="insights-list">
+                        ${summary.insights.map(insight => `
+                            <li class="insight-item">${insight}</li>
+                        `).join('')}
+                    </ul>
+                </div>
 
-                ${summary.recommendations && summary.recommendations.length > 0 ? `
-                    <div class="summary-section">
-                        <h4>Recommendations</h4>
-                        <div class="recommendations-list">
-                            ${summary.recommendations.map(rec => `
-                                <div class="recommendation-item">
-                                    <strong>${rec.area || 'Improvement Area'}</strong>
-                                    <p>${rec.suggestion || rec}</p>
+                <!-- Recommendations -->
+                <div class="summary-section recommendations">
+                    <h3>Personalized Recommendations</h3>
+                    <div class="recommendations-grid">
+                        ${summary.recommendations.map(rec => `
+                            <div class="recommendation-card">
+                                <div class="rec-header">
+                                    <strong>${rec.area}</strong>
                                 </div>
-                            `).join('')}
+                                <p class="rec-suggestion">${rec.suggestion}</p>
+                                <p class="rec-benefit">${rec.benefit}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <!-- Health Scores -->
+                <div class="summary-section health-metrics">
+                    <h3>Health Metrics</h3>
+                    <div class="metrics-grid">
+                        <div class="metric-item">
+                            <span class="metric-label">Balance Score</span>
+                            <div class="metric-score">${summary.healthMetrics.balanceScore}/10</div>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">Variety Score</span>
+                            <div class="metric-score">${summary.healthMetrics.varietyScore}/10</div>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">Consistency Score</span>
+                            <div class="metric-score">${summary.healthMetrics.consistencyScore}/10</div>
                         </div>
                     </div>
-                ` : ''}
+                </div>
             </div>
         `;
         

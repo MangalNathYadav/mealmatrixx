@@ -44,13 +44,32 @@ class GoalsManager {
             this.isLoading = false;
             this.hideLoading();
         }
-    }
-
-    setupMealsListener(userId) {
+    }    setupMealsListener(userId) {
+        // Listen for meals changes
         const mealsRef = firebase.database().ref(`users/${userId}/meals`);
         mealsRef.on('value', (snapshot) => {
             const meals = snapshot.val();
             this.updateDailyProgress(meals);
+        });
+
+        // Listen for nutrition goals changes
+        const goalsRef = firebase.database().ref(`users/${userId}/nutritionGoals`);
+        goalsRef.on('value', async (snapshot) => {
+            const newGoals = snapshot.val();
+            if (newGoals) {
+                // Update all goals, including health goals
+                this.goals = {
+                    ...this.goals,
+                    targetCalories: this.getValidatedValue(newGoals.targetCalories),
+                    proteinGoal: this.getValidatedValue(newGoals.proteinGoal),
+                    carbsGoal: this.getValidatedValue(newGoals.carbsGoal),
+                    fatGoal: this.getValidatedValue(newGoals.fatGoal),
+                    weightGoal: this.getValidatedValue(newGoals.weightGoal),
+                    goalType: newGoals.goalType || 'maintain',
+                    weeklyGoal: this.getValidatedValue(newGoals.weeklyGoal, 0)
+                };
+                this.updateGoalsUI(); // This updates both welcome section and sidebar
+            }
         });
     }
 
@@ -68,26 +87,31 @@ class GoalsManager {
             fat: 0
         };
 
-        // Calculate totals from today's meals
+        // Calculate totals from today's meals with validation
         todayMeals.forEach(meal => {
-            this.dailyProgress.calories += parseFloat(meal.calories) || 0;
-            this.dailyProgress.protein += parseFloat(meal.protein) || 0;
-            this.dailyProgress.carbs += parseFloat(meal.carbs) || 0;
-            this.dailyProgress.fat += parseFloat(meal.fat) || 0;
+            this.dailyProgress.calories += this.getValidatedValue(parseFloat(meal.calories));
+            this.dailyProgress.protein += this.getValidatedValue(parseFloat(meal.protein));
+            this.dailyProgress.carbs += this.getValidatedValue(parseFloat(meal.carbs));
+            this.dailyProgress.fat += this.getValidatedValue(parseFloat(meal.fat));
         });
 
-        // Round the values to 1 decimal place
+        // Format values to 1 decimal place
         Object.keys(this.dailyProgress).forEach(key => {
             this.dailyProgress[key] = this.formatNumber(this.dailyProgress[key]);
         });
 
+        // Update both UI elements
         this.updateGoalsUI();
     }
 
     updateGoalsUI() {
         if (!this.goals) return;
+
+        // Get all goal cards and sidebar
+        const goalsGrid = document.querySelector('.goals-grid');
         const sidebar = document.querySelector('.dashboard-sidebar');
-        
+        if (!goalsGrid) return;
+
         // Handle visibility of sidebar based on goals existence
         if (sidebar) {
             if (!this.hasAnyGoals()) {
@@ -98,35 +122,78 @@ class GoalsManager {
             }
         }
 
-        // Update goal cards in the grid
-        const elements = {
-            calories: document.getElementById('caloriesProgress'),
-            protein: document.getElementById('proteinProgress'),
-            carbs: document.getElementById('carbsProgress'),
-            fat: document.getElementById('fatProgress')
-        };
+        // Show first-time user message if no goals are set
+        if (!this.hasAnyGoals()) {
+            const allCards = goalsGrid.querySelectorAll('.goal-card');
+            allCards.forEach(card => {
+                this.showNoGoalMessage(card, 'Set up your nutrition goals to start tracking');
+            });
+            return;
+        }
 
-        // Update each progress bar
-        Object.entries(elements).forEach(([nutrient, element]) => {
-            if (element) {
-                const target = this.goals[`${nutrient}${nutrient === 'calories' ? 'Target' : 'Goal'}`];
-                const current = this.dailyProgress[nutrient];
-                const percentage = this.getPercentage(current, target);
-                
-                // Update progress bar fill
-                const fillElement = element.querySelector('.progress-fill');
-                if (fillElement) {
-                    fillElement.style.width = `${percentage}%`;
-                }
+        // Update calorie goal card
+        const calorieCard = goalsGrid.querySelector('.goal-card:nth-child(1)');
+        if (calorieCard) {
+            if (!this.validateGoalValue(this.goals.targetCalories)) {
+                this.showNoGoalMessage(calorieCard, 'Set your daily calorie goal');
+                return;
+            }
 
-                // Update stats text
-                const statsElement = element.querySelector('.goal-stats');
-                if (statsElement) {
-                    statsElement.innerHTML = `
-                        <span>${current}${nutrient === 'calories' ? '' : 'g'} consumed</span>
+            const caloriePercentage = this.getPercentage(this.dailyProgress.calories, this.goals.targetCalories);
+            const progressStyle = this.getProgressStyle(caloriePercentage);
+            const content = calorieCard.querySelector('.goal-content');
+            
+            if (content) {
+                content.innerHTML = `
+                    <div class="goal-target">
+                        <span class="goal-target-label">Target</span>
+                        <span class="goal-target-value">${this.formatValue(this.goals.targetCalories, ' kcal')}</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill ${progressStyle}" style="width: ${caloriePercentage}%"></div>
+                    </div>
+                    <div class="goal-stats">
+                        <span>${this.formatValue(this.dailyProgress.calories, ' kcal')} consumed</span>
+                        <span>${caloriePercentage}%</span>
+                    </div>
+                `;
+            }
+        }
+
+        // Update macro goal cards
+        const macroData = [
+            { name: 'Protein', icon: '🥩', current: this.dailyProgress.protein, target: this.goals.proteinGoal },
+            { name: 'Carbs', icon: '🌾', current: this.dailyProgress.carbs, target: this.goals.carbsGoal },
+            { name: 'Fat', icon: '🥑', current: this.dailyProgress.fat, target: this.goals.fatGoal }
+        ];
+
+        macroData.forEach((macro, index) => {
+            const card = goalsGrid.querySelector(`.goal-card:nth-child(${index + 2})`);
+            if (!card) return;
+
+            if (!this.validateGoalValue(macro.target)) {
+                this.showNoGoalMessage(card, `Set your ${macro.name.toLowerCase()} goal`);
+                return;
+            }
+
+            const percentage = this.getPercentage(macro.current, macro.target);
+            const progressStyle = this.getProgressStyle(percentage);
+            const content = card.querySelector('.goal-content');
+            
+            if (content) {
+                content.innerHTML = `
+                    <div class="goal-target">
+                        <span class="goal-target-label">Target</span>
+                        <span class="goal-target-value">${this.formatValue(macro.target, 'g')}</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill ${progressStyle}" style="width: ${percentage}%"></div>
+                    </div>
+                    <div class="goal-stats">
+                        <span>${this.formatValue(macro.current, 'g')} consumed</span>
                         <span>${percentage}%</span>
-                    `;
-                }
+                    </div>
+                `;
             }
         });
     }
@@ -139,20 +206,24 @@ class GoalsManager {
         const calorieProgressFill = sidebar.querySelector('.sidebar-section:nth-child(1) .progress-fill');
         const calorieStats = sidebar.querySelector('.sidebar-section:nth-child(1) .goal-stats');
 
-        if (calorieGoalValue && this.goals.targetCalories) {
+        if (calorieGoalValue && this.validateGoalValue(this.goals.targetCalories)) {
             calorieGoalValue.textContent = `${this.formatNumber(this.goals.targetCalories)} kcal`;
         }
         
-        if (calorieProgressFill && calorieStats && this.goals.targetCalories) {
+        if (calorieProgressFill && calorieStats && this.validateGoalValue(this.goals.targetCalories)) {
             const caloriePercentage = this.getPercentage(this.dailyProgress.calories, this.goals.targetCalories);
+            const progressStyle = this.getProgressStyle(caloriePercentage);
+            
             calorieProgressFill.style.width = `${caloriePercentage}%`;
+            calorieProgressFill.className = `progress-fill ${progressStyle}`;
+            
             calorieStats.innerHTML = `
                 <span>${this.formatNumber(this.dailyProgress.calories)} kcal consumed</span>
                 <span>${caloriePercentage}%</span>
             `;
         }
 
-        // Update macro goals in sidebar
+        // Update macro goals section
         const macros = ['protein', 'carbs', 'fat'];
         const macroSection = sidebar.querySelector('.sidebar-section:nth-child(2)');
         
@@ -166,13 +237,17 @@ class GoalsManager {
                 const progressFill = macroItem.querySelector('.progress-fill');
                 const stats = macroItem.querySelector('.goal-stats');
 
-                if (goalValue && value) {
+                if (goalValue && this.validateGoalValue(value)) {
                     goalValue.textContent = `${this.formatNumber(value)}g`;
                 }
 
-                if (progressFill && stats && value) {
+                if (progressFill && stats && this.validateGoalValue(value)) {
                     const percentage = this.getPercentage(this.dailyProgress[macro], value);
+                    const progressStyle = this.getProgressStyle(percentage);
+                    
                     progressFill.style.width = `${percentage}%`;
+                    progressFill.className = `progress-fill ${progressStyle}`;
+                    
                     stats.innerHTML = `
                         <span>${this.formatNumber(this.dailyProgress[macro])}g consumed</span>
                         <span>${percentage}%</span>
@@ -181,33 +256,47 @@ class GoalsManager {
             });
         }
 
-        // Update health goals in sidebar
+        // Update health goals section
         const healthSection = sidebar.querySelector('.sidebar-section:nth-child(3)');
-        if (healthSection && this.goals.weightGoal) {
+        if (healthSection) {
             const weightValue = healthSection.querySelector('.goal-item:nth-child(1) .goal-value');
             const weeklyValue = healthSection.querySelector('.goal-item:nth-child(2) .goal-value');
             const weightStats = healthSection.querySelector('.goal-item:nth-child(1) .goal-stats span');
             const weeklyStats = healthSection.querySelector('.goal-item:nth-child(2) .goal-stats span');
 
-            if (weightValue) {
-                weightValue.textContent = `${this.formatNumber(this.goals.weightGoal)} kg`;
+            // Handle target weight display
+            if (weightValue && weightStats) {
+                if (this.validateGoalValue(this.goals.weightGoal)) {
+                    weightValue.textContent = `${this.formatNumber(this.goals.weightGoal)} kg`;
+                    
+                    // Update weight goal description based on goal type
+                    const goalTypeText = this.goals.goalType === 'maintain' ? 
+                        'Maintain Weight' : 
+                        this.goals.goalType === 'gain' ? 
+                        'Gain Muscle Mass' : 
+                        'Lose Weight';
+                    weightStats.textContent = goalTypeText;
+                } else {
+                    weightValue.textContent = 'Not set';
+                    weightStats.textContent = 'Set target weight in goals';
+                }
             }
 
-            if (weeklyValue && weightStats && weeklyStats) {
-                const weeklyGoal = this.goals.weeklyGoal || 0;
-                const prefix = weeklyGoal > 0 ? '+' : '';
-                weeklyValue.textContent = `${prefix}${this.formatNumber(weeklyGoal)} kg`;
-                
-                const goalTypeText = this.goals.goalType === 'maintain' ? 
-                    'Maintain Weight' : 
-                    this.goals.goalType === 'gain' ? 
-                    'Gain Muscle Mass' : 
-                    'Lose Weight';
+            // Handle weekly goal display
+            if (weeklyValue && weeklyStats) {
+                if (this.validateGoalValue(this.goals.weeklyGoal)) {
+                    const weeklyGoal = this.getValidatedValue(this.goals.weeklyGoal, 0);
+                    const prefix = weeklyGoal > 0 ? '+' : '';
+                    weeklyValue.textContent = `${prefix}${this.formatNumber(weeklyGoal)} kg`;
                     
-                weightStats.textContent = goalTypeText;
-                weeklyStats.textContent = weeklyGoal === 0 ? 
-                    'Maintenance' : 
-                    `Healthy ${weeklyGoal > 0 ? 'weight gain' : 'weight loss'} pace`;
+                    // Update weekly goal description
+                    weeklyStats.textContent = weeklyGoal === 0 ? 
+                        'Maintenance' : 
+                        `Healthy ${weeklyGoal > 0 ? 'weight gain' : 'weight loss'} pace`;
+                } else {
+                    weeklyValue.textContent = '0 kg';
+                    weeklyStats.textContent = 'Set weekly goal in settings';
+                }
             }
         }
     }
@@ -243,6 +332,25 @@ class GoalsManager {
 
     hasAnyGoals() {
         return !!(this.goals?.targetCalories || this.goals?.proteinGoal || this.goals?.carbsGoal || this.goals?.fatGoal);
+    }
+
+    validateGoalValue(value) {
+        return value !== null && value !== undefined && !isNaN(value) && value >= 0;
+    }
+
+    getValidatedValue(value, defaultValue = 0) {
+        return this.validateGoalValue(value) ? value : defaultValue;
+    }
+
+    getProgressStyle(percentage) {
+        if (percentage >= 100) {
+            return 'over';
+        } else if (percentage >= 80) {
+            return 'good';
+        } else if (percentage >= 50) {
+            return 'warning';
+        }
+        return 'default';
     }
 }
 
