@@ -5,191 +5,344 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MealMatrix - Dashboard</title>
     <link rel="stylesheet" href="assets/css/styles.css">
-    <link rel="stylesheet" href="assets/css/goals.css">    <style>
-        /* Welcome section styles */
+    <link rel="stylesheet" href="assets/css/goals.css">    <style>        /* Welcome section styles */
+        .welcome-wrapper {
+            width: 100vw;
+            position: relative;
+            left: 50%;
+            right: 50%;
+            margin-left: -50vw;
+            margin-right: -50vw;
+            background: linear-gradient(to right, rgba(var(--primary-color-rgb), 0.03), rgba(var(--secondary-color-rgb), 0.03));
+            border-bottom: 1px solid var(--border-color);
+            padding: 2rem 0;
+            overflow-x: hidden;
+        }
+
         .welcome-section {
-            background: white;
-            padding: 2rem;
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            margin-bottom: 2rem;
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            width: 100%;
+        }
+
+        .welcome-content {
             display: flex;
             align-items: center;
+            justify-content: space-between;
             gap: 2rem;
-            animation: fadeSlideUp 0.6s ease-out;
+            margin-bottom: 2rem;
+        }
+
+        .welcome-profile {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
         }
 
         .welcome-profile-photo {
             width: 80px;
             height: 80px;
             border-radius: 50%;
-            border: 3px solid var(--primary-color);
-            padding: 2px;
-            background: white;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            object-fit: cover;
+            border: 3px solid white;
+            box-shadow: var(--box-shadow);
         }
 
-        .welcome-content {
-            flex: 1;
-        }
-
-        .welcome-content h2 {
-            color: var(--primary-color);
-            margin-bottom: 0.5rem;
-            font-size: 1.75rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .welcome-content h2 span {
-            font-size: 1.5rem;
-        }
-
-        .welcome-content p {
+        .welcome-text h1 {
+            font-size: 2.25rem;
+            font-weight: 600;
             color: var(--text-color);
-            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome-text p {
+            color: var(--text-muted);
             font-size: 1.1rem;
-            margin: 0;
         }
 
         .welcome-stats {
             display: flex;
-            gap: 2rem;
-            margin-top: 1rem;
+            gap: 1.5rem;
+            flex-wrap: wrap;
         }
 
-        .welcome-stat {
+        .stat-card {
+            background: white;
+            padding: 1rem 1.5rem;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem 1.25rem;
-            background: var(--bg-subtle);
-            border-radius: var(--border-radius);
-            font-size: 0.9rem;
+            gap: 1rem;
+            transition: var(--transition-base);
+            min-width: 200px;
         }
 
-        .welcome-stat span {
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow);
+            border-color: var(--primary-color);
+        }
+
+        .stat-card span {
+            font-size: 1.5rem;
+        }
+
+        .stat-text {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .stat-text strong {
             font-size: 1.25rem;
-        }
-
-        @keyframes fadeSlideUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            color: var(--primary-color);
         }
 
         /* Dashboard specific styles */
         .dashboard {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 2rem;
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+        }
+
+        /* Main content area */
+        .dashboard-content {
+            flex: 1;
+            min-width: 0; /* Prevent overflow */
+        }
+
+        @media (max-width: 1200px) {
+            .dashboard {
+                padding: 1.5rem;
+                grid-template-columns: 260px 1fr;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+                padding: 1.5rem;
+            }
+            
+            #mealGrid {
+                grid-column: 1;
+            }
+            
+            .goals-section {
+                height: auto;
+                position: relative;
+                top: 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .welcome-section {
+                flex-direction: column;
+                text-align: center;
+                padding: 1.5rem;
+            }
+
+            .welcome-profile-photo {
+                margin: 0 auto 1rem;
+            }
+
+            .welcome-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .meal-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 0 1rem;
+            }
+        }
+
+        /* Goals grid styles */
+.goals-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+    margin: 2rem auto 0;
+    width: 100%;
+    max-width: 100%;
+    padding: 0;
+}
+
+@media (max-width: 1200px) {
+    .goals-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .goals-grid {
+        grid-template-columns: 1fr;
+    }
+    .welcome-section {
+        padding: 0 1rem;
+    }
+}
+
+/* Reset container structure */
+        .container {
+            max-width: 1440px;
+            margin: 0 auto;
+            width: 100%;
+            padding: 0 2rem;
+        }
+
+        /* Fix for welcome section to span full width */
+        .welcome-wrapper {
+            width: 100vw;
+            position: relative;
+            left: 50%;
+            right: 50%;
+            margin-left: -50vw;
+            margin-right: -50vw;
+            background: linear-gradient(to right, rgba(var(--primary-color-rgb), 0.03), rgba(var(--secondary-color-rgb), 0.03));
+            border-bottom: 1px solid var(--border-color);
             padding: 2rem 0;
+            overflow-x: hidden;
         }
 
-        .nav-actions {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-            flex-wrap: nowrap;
-            margin-right: 1rem;
+        /* Welcome section content container */
+        .welcome-section {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            width: 100%;
         }
 
-        .summary-section {
-            margin-bottom: 1.5rem;
-            padding-bottom: 1.5rem;
-            border-bottom: 1px solid #eee;}
-        
-
-        .summary-section:last-child {
-            border-bottom: none;
-            padding-bottom: 0;
-        }
-
-        .summary-section h4 {
-            color: var(--primary-color);
-            margin-bottom: 1rem;
-        }
-
-        .analysis-grid {
+        /* Goals grid layout fix - ensure cards are side by side */
+        .goals-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(4, 1fr);
             gap: 1.5rem;
-            margin-top: 1rem;
-        }
-
-        .analysis-item {
-            background: #f8f9fa;
-            padding: 1rem;
-            border-radius: var(--border-radius);
-            border: 1px solid #eee;
-        }
-
-        .analysis-item strong {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: var(--primary-color);
-        }
-
-        .insights-list {
-            list-style: none;
+            margin: 2rem auto 0;
+            width: 100%;
+            max-width: 100%;
             padding: 0;
-            margin: 0;
         }
 
-        .insights-list li {
-            margin-bottom: 0.75rem;
-            padding-left: 1.5rem;
-            position: relative;
+        /* Responsive adjustments for goals grid */
+        @media (max-width: 1200px) {
+            .goals-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
 
-        .insights-list li:before {
-            content: "💡";
-            position: absolute;
-            left: 0;
+        @media (max-width: 768px) {
+            .goals-grid {
+                grid-template-columns: 1fr;
+            }
+            .welcome-section {
+                padding: 0 1rem;
+            }
         }
 
-        .recommendations-list {
+        /* Fixed dashboard layout */
+        .dashboard {
             display: grid;
-            gap: 1rem;
-        }
-
-        .recommendation-item {
-            background: #f0f8ff;
-            padding: 1rem;
-            border-radius: var(--border-radius);
-            border: 1px solid var(--primary-color);
-        }
-
-        .recommendation-item strong {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: var(--primary-color);
-        }
-
-        .recommendation-item p {
-            margin: 0;
-            font-size: 0.95rem;
-        }
-
-        .btn-ai {
-            white-space: nowrap;
-            padding: 0.75rem 1.25rem;
-            border-radius: 8px;
-            font-weight: 500;
-            font-size: 0.95rem;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.75rem;
-            transition: all 0.3s ease;
+            grid-template-columns: 300px 1fr;
+            gap: 2rem;
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 2rem;
             position: relative;
-            overflow: hidden;
-            border: none;
+        }
+
+        /* Card styles */
+        .goal-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 1.75rem;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .goal-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(var(--primary-color-rgb), 0.1);
+            border-color: var(--primary-color);
+        }
+
+        /* Fix for add-meal button */
+        .add-meal-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
+            box-shadow: var(--box-shadow);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            z-index: 1000;
+        }
+
+        .add-meal-btn:hover {
+            background: var(--secondary-color);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(var(--primary-color-rgb), 0.3);
+        }
+
+        /* Fix for meal grid */
+        #mealGrid {
+            width: 100%;
+            grid-column: 2;
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+                padding: 1.5rem;
+            }
+            
+            #mealGrid {
+                grid-column: 1;
+            }
+            
+            .goals-section {
+                height: auto;
+                position: relative;
+                top: 0;
+            }
+        }
+
+        /* Empty state styles */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            background: var(--bg-subtle);
+            border-radius: var(--border-radius);
+            border: 1px dashed var(--border-color);
+        }
+
+        .empty-state h3 {
+            color: var(--text-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state p {
+            color: var(--text-muted);
         }
 
         .ai-spinner {
@@ -381,159 +534,223 @@
             border-color: var(--primary-color);
         }
 
-        .meal-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 2rem;
-        }
-
-        .meal-card {
+        /* Goals section styles */
+        .goals-section {
+            position: sticky;
+            top: 90px;
+            height: calc(100vh - 90px);
+            overflow-y: auto;
+            padding: 1.5rem;
             background: white;
             border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .daily-goals-card {
+            background: linear-gradient(145deg, #fff, var(--bg-subtle));
+            border-radius: var(--border-radius);
             padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border-color);
+            transition: var(--transition-base);
+        }
+
+        .daily-goals-card:hover {
+            transform: translateY(-2px);
             box-shadow: var(--box-shadow);
         }
 
-        .meal-card h3 {
-            color: var(--primary-color);
+        .daily-goals-card h3 {
+            color: var(--text-color);
+            font-size: 1.25rem;
             margin-bottom: 1rem;
-        }
-
-        .meal-actions {
             display: flex;
-            gap: 1rem;
-            margin-top: 1rem;
+            align-items: center;
+            gap: 0.75rem;
         }
 
-        .btn {
-            padding: 0.5rem 1rem;
+        .daily-goals-card h3::before {
+            content: '🎯';
+            font-size: 1.5rem;
+        }
+
+        .goal-item {
+            padding: 1rem;
+            background: white;
             border-radius: var(--border-radius);
-            border: none;
-            cursor: pointer;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-color);
+            transition: var(--transition-base);
+        }
+
+        .goal-item:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 4px 12px rgba(var(--primary-color-rgb), 0.1);
+        }
+
+        .goal-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .goal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .goal-label {
+            font-weight: 600;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .goal-value {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .goal-progress {
+            margin-top: 0.75rem;
+        }
+
+        .goal-progress-bar {
+            height: 8px;
+            background: var(--bg-subtle);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 0.5rem 0;
+        }
+
+        .goal-progress-fill {
+            height: 100%;
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            border-radius: 10px;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .goal-progress-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .goal-status {
             font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
         }
 
-        .btn-edit {
-            background: var(--primary-color);
-            color: white;
+        .macro-goals {
+            margin-top: 2rem;
         }
 
-        .btn-delete {
-            background: #ff4444;
-            color: white;
+        .macro-goals h3 {
+            color: var(--text-color);
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
         }
 
-        .add-meal-btn {
+        .macro-goals h3::before {
+            content: '📊';
+            font-size: 1.5rem;
+        }
+
+        .health-goals {
+            margin-top: 2rem;
+        }
+
+        .health-goals h3 {
+            color: var(--text-color);
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .health-goals h3::before {
+            content: '💪';
+            font-size: 1.5rem;
+        }
+
+        .add-meal-button {
             position: fixed;
             bottom: 2rem;
             right: 2rem;
+            z-index: 1000;
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
             background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             color: white;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
+            border: none;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 2rem;
-            box-shadow: var(--box-shadow);
             cursor: pointer;
+            box-shadow: 0 4px 12px rgba(var(--primary-color-rgb), 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .add-meal-button:hover {
+            transform: scale(1.1) rotate(90deg);
+            box-shadow: 0 8px 24px rgba(var(--primary-color-rgb), 0.4);
+        }
+
+        .add-meal-button::before {
+            content: '+';
             transition: transform 0.3s ease;
         }
 
-        .add-meal-btn:hover {
-            transform: scale(1.1);
+        /* Pulse animation for the add meal button */
+        @keyframes buttonPulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(var(--primary-color-rgb), 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 20px rgba(var(--primary-color-rgb), 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(var(--primary-color-rgb), 0);
+            }
         }
 
-        .empty-state {
-            text-align: center;
-            padding: 4rem 2rem;
-            color: #666;
+        .close-popup {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: var(--box-shadow);
+            transition: all 0.3s ease;
+            z-index: 1010;
         }
 
-        .meal-metadata {
-            color: #666;
-            font-size: 0.9rem;
-            margin: 0.5rem 0;
+        .close-popup:hover {
+            transform: rotate(90deg) scale(1.1);
+            background: var(--secondary-color);
         }
 
-        .summary-section {
-            margin-bottom: 1.5rem;
-            padding-bottom: 1.5rem;
-            border-bottom: 1px solid #eee;
-        }
-
-        .summary-section:last-child {
-            border-bottom: none;
-            padding-bottom: 0;
-        }
-
-        .summary-section h4 {
-            color: var(--primary-color);
-            margin-bottom: 1rem;
-        }
-
-        .analysis-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            margin-top: 1rem;
-        }
-
-        .analysis-item {
-            background: #f8f9fa;
-            padding: 1rem;
-            border-radius: var(--border-radius);
-            border: 1px solid #eee;
-        }
-
-        .analysis-item strong {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: var(--primary-color);
-        }
-
-        .insights-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .insights-list li {
-            margin-bottom: 0.75rem;
-            padding-left: 1.5rem;
-            position: relative;
-        }
-
-        .insights-list li:before {
-            content: "💡";
-            position: absolute;
-            left: 0;
-        }
-
-        .recommendations-list {
-            display: grid;
-            gap: 1rem;
-        }
-
-        .recommendation-item {
-            background: #f0f8ff;
-            padding: 1rem;
-            border-radius: var(--border-radius);
-            border: 1px solid var(--primary-color);
-        }
-
-        .recommendation-item strong {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: var(--primary-color);
-        }
-
-        .recommendation-item p {
-            margin: 0;
-            font-size: 0.95rem;
-        }
-
+        /* Fullscreen popup styles */
         .fullscreen-popup {
             position: fixed;
             top: 0;
@@ -541,11 +758,13 @@
             width: 100%;
             height: 100%;
             background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(8px);
             z-index: 1000;
             opacity: 0;
             visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
+            transition: all 0.3s ease;
             overflow-y: auto;
+            padding: 2rem;
         }
 
         .fullscreen-popup.visible {
@@ -553,268 +772,786 @@
             visibility: visible;
         }
 
-        .popup-content {
-            max-width: 1000px;
-            margin: 2rem auto;
+        /* Desktop and responsive layout improvements */
+        .container {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .dashboard {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 2rem;
+        }
+
+        /* Goals sidebar */
+        .goals-section {
+            position: sticky;
+            top: 90px;
+            height: calc(100vh - 90px);
+            overflow-y: auto;
+            padding: 1.5rem;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        /* Main content area */
+        .main-content {
+            flex: 1;
+        }
+
+        /* Welcome section improvements */
+        .welcome-section {
+            margin-bottom: 2rem;
+            padding: 2rem;
+        }
+
+        .welcome-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .welcome-profile {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .welcome-profile-photo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid white;
+            box-shadow: var(--box-shadow);
+        }
+
+        .welcome-text h1 {
+            font-size: 2.25rem;
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome-text p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        .welcome-stats {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1rem 1.5rem;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: var(--transition-base);
+            min-width: 200px;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow);
+            border-color: var(--primary-color);
+        }
+
+        @media (max-width: 992px) {
+            .welcome-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .welcome-stats {
+                width: 100%;
+            }
+            
+            .stat-card {
+                flex: 1;
+                min-width: 180px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .welcome-content {
+                align-items: center;
+                text-align: center;
+            }
+            
+            .welcome-profile {
+                flex-direction: column;
+                margin: 0 auto;
+            }
+            
+            .stat-card {
+                width: 100%;
+            }
+        }
+
+        /* Goals grid layout fix - ensure cards are side by side */
+        .goals-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin: 2rem auto 0;
+            width: 100%;
+            max-width: 100%;
+            padding: 0;
+        }
+
+        /* Responsive adjustments for goals grid */
+        @media (max-width: 1200px) {
+            .goals-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .goals-grid {
+                grid-template-columns: 1fr;
+            }
+            .welcome-section {
+                padding: 0 1rem;
+            }
+        }
+
+        /* Fixed dashboard layout */
+        .dashboard {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 2rem;
+            max-width: 1440px;
+            margin: 0 auto;
             padding: 2rem;
             position: relative;
         }
 
-        .close-popup {
+        /* Card styles */
+        .goal-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 1.75rem;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .goal-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(var(--primary-color-rgb), 0.1);
+            border-color: var(--primary-color);
+        }
+
+        /* Fix for add-meal button */
+        .add-meal-btn {
             position: fixed;
-            top: 1.5rem;
-            right: 1.5rem;
+            bottom: 2rem;
+            right: 2rem;
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
             background: var(--primary-color);
             color: white;
-            border: none;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
+            font-size: 2rem;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            font-size: 1.5rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            transition: transform 0.2s ease, background-color 0.2s ease;
+            box-shadow: var(--box-shadow);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            z-index: 1000;
         }
 
-        .close-popup:hover {
-            transform: scale(1.1);
+        .add-meal-btn:hover {
             background: var(--secondary-color);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(var(--primary-color-rgb), 0.3);
         }
 
-        .popup-header {
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid var(--primary-color);
-        }
-
-        /* Loading overlay styles */
-        .loading-overlay {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0.95);
-            min-width: 280px;
-            padding: 2rem;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1),
-                        0 5px 15px rgba(0, 0, 0, 0.05);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
-            border: 1px solid rgba(var(--primary-color-rgb), 0.1);
-        }
-
-        .loading-overlay::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
+        /* Fix for meal grid */
+        #mealGrid {
             width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(8px);
-            z-index: -1;
-            opacity: 0;
-            transition: opacity 0.4s ease;
+            grid-column: 2;
         }
 
-        .loading-overlay.visible {
-            opacity: 1;
-            visibility: visible;
-            transform: translate(-50%, -50%) scale(1);
+        @media (max-width: 1024px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+                padding: 1.5rem;
+            }
+            
+            #mealGrid {
+                grid-column: 1;
+            }
+            
+            .goals-section {
+                height: auto;
+                position: relative;
+                top: 0;
+            }
         }
 
-        .loading-overlay.visible::before {
-            opacity: 1;
-        }
-
-        .loading-spinner {
-            width: 56px;
-            height: 56px;
-            border: 3px solid rgba(var(--primary-color-rgb), 0.1);
-            border-top-color: var(--primary-color);
-            border-radius: 50%;
-            animation: spin 1s cubic-bezier(0.76, 0.35, 0.2, 0.75) infinite;
-            margin-bottom: 1.5rem;
-            position: relative;
-        }
-
-        .loading-spinner::after {
-            content: '';
-            position: absolute;
-            top: -3px;
-            left: -3px;
-            right: -3px;
-            bottom: -3px;
-            border-radius: 50%;
-            border: 3px solid transparent;
-            border-top-color: rgba(var(--primary-color-rgb), 0.2);
-            animation: spin 2s linear infinite;
-        }
-
-        .loading-text {
-            color: var(--primary-color);
-            font-size: 1.25rem;
-            font-weight: 600;
+        /* Empty state styles */
+        .empty-state {
             text-align: center;
-            white-space: nowrap;
-            margin-bottom: 0.75rem;
-            opacity: 0;
-            transform: translateY(10px);
-            animation: fadeInUp 0.5s ease forwards 0.2s;
+            padding: 3rem;
+            background: var(--bg-subtle);
+            border-radius: var(--border-radius);
+            border: 1px dashed var(--border-color);
         }
 
-        .loading-subtext {
+        .empty-state h3 {
             color: var(--text-color);
-            font-size: 0.95rem;
-            opacity: 0;
-            text-align: center;
-            line-height: 1.5;
-            transform: translateY(10px);
-            animation: fadeInUp 0.5s ease forwards 0.4s;
+            margin-bottom: 0.5rem;
         }
 
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 0.8;
-                transform: translateY(0);
-            }
+        .empty-state p {
+            color: var(--text-muted);
+        }
+
+        .ai-spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: none;
+            flex-shrink: 0;
+        }
+
+        .ai-spinner.visible {
+            display: block;
         }
 
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
 
-        /* Goals Progress Styles */
-        .goals-section {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        .goals-card {
-            background: white;
-            padding: 1.75rem;
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            transition: all 0.3s ease;
-        }
-
-        .goals-card:hover {
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+        .btn-ai:hover {
             transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(var(--primary-color-rgb), 0.3);
         }
 
-        .goals-card-header {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            margin-bottom: 1.5rem;
+        .btn-ai svg {
+            flex-shrink: 0;
+            width: 16px;
+            height: 16px;
         }
 
-        .goals-card-header h3 {
-            color: var(--primary-color);
-            font-size: 1.25rem;
-            margin: 0;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+        .weekly-summary {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--box-shadow);
+            display: none;
         }
 
-        .goals-card-header .icon {
-            font-size: 1.5rem;
+        .weekly-summary.visible {
+            display: block;
+            animation: slideDown 0.3s ease;
         }
 
-        .goals-card-content {
-            display: flex;
-            flex-direction: column;
-            gap: 1.25rem;
-        }
-
-        .goal-item {
-            animation: fadeIn 0.5s ease forwards;
-            opacity: 0;
-        }
-
-        .goal-item-label {
-            font-weight: 500;
-            color: var(--text-color);
-            margin-bottom: 0.5rem;
-            font-size: 0.95rem;
-        }
-
-        .goal-item-value {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--primary-color);
-        }
-
-        .goal-item-subtitle {
-            font-size: 0.9rem;
-            color: var(--text-color);
-            opacity: 0.8;
-            margin-top: 0.25rem;
-        }
-
-        .goal-progress {
+        .suggest-better {
+            background: #f0f8ff;
+            padding: 1rem;
             margin-top: 1rem;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--primary-color);
+            cursor: pointer;
+            transition: background-color 0.3s ease;
         }
 
-        .goal-progress-bar {
-            height: 8px;
-            background: rgba(var(--primary-color-rgb), 0.1);
-            border-radius: 4px;
-            overflow: hidden;
-            position: relative;
+        .suggest-better:hover {
+            background: #e0f0ff;
         }
 
-        .goal-progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-            border-radius: 4px;
-            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
+        .suggestion-list {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: white;
+            border-radius: var(--border-radius);
+            display: none;
         }
 
-        .goal-progress-labels {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 0.5rem;
-            font-size: 0.9rem;
-            color: var(--text-color);
+        .suggestion-list.visible {
+            display: block;
+            animation: slideDown 0.3s ease;
         }
 
-        @keyframes fadeIn {
+        @keyframes slideDown {
             from {
                 opacity: 0;
-                transform: translateY(10px);
+                transform: translateY(-10px);
             }
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
         }
+        
+        .navbar {
+            background: white;
+            padding: 1.25rem 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .navbar h2 {
+            color: var(--primary-color);
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .navbar h2 img {
+            width: 32px;
+            height: 32px;
+            object-fit: contain;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: nowrap;
+            margin-right: 1rem;
+        }
+
+        .nav-actions .btn {
+            padding: 0.75rem 1.25rem;
+            border-radius: 8px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            min-width: fit-content;
+        }
+
+        .nav-actions .btn-primary {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            margin: 0 0.5rem;
+        }
+
+        .nav-actions .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(var(--primary-color-rgb), 0.2);
+        }
+
+        .nav-actions .btn-ai {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-actions .btn-ai::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .nav-actions .btn-ai:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(var(--primary-color-rgb), 0.3);
+        }
+
+        .nav-actions .btn-ai:hover::before {
+            opacity: 1;
+        }
+
+        .nav-actions .btn-ai > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .nav-actions #logoutBtn {
+            background: var(--bg-subtle);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+        }
+
+        .nav-actions #logoutBtn:hover {
+            background: #f3f4f6;
+            border-color: var(--primary-color);
+        }
+
+        /* Goals section styles */
+        .goals-section {
+            position: sticky;
+            top: 90px;
+            height: calc(100vh - 90px);
+            overflow-y: auto;
+            padding: 1.5rem;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .daily-goals-card {
+            background: linear-gradient(145deg, #fff, var(--bg-subtle));
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border-color);
+            transition: var(--transition-base);
+        }
+
+        .daily-goals-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow);
+        }
+
+        .daily-goals-card h3 {
+            color: var(--text-color);
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .daily-goals-card h3::before {
+            content: '🎯';
+            font-size: 1.5rem;
+        }
+
+        .goal-item {
+            padding: 1rem;
+            background: white;
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-color);
+            transition: var(--transition-base);
+        }
+
+        .goal-item:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 4px 12px rgba(var(--primary-color-rgb), 0.1);
+        }
+
+        .goal-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .goal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .goal-label {
+            font-weight: 600;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .goal-value {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .goal-progress {
+            margin-top: 0.75rem;
+        }
+
+        .goal-progress-bar {
+            height: 8px;
+            background: var(--bg-subtle);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 0.5rem 0;
+        }
+
+        .goal-progress-fill {
+            height: 100%;
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            border-radius: 10px;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .goal-progress-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .goal-status {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        .macro-goals {
+            margin-top: 2rem;
+        }
+
+        .macro-goals h3 {
+            color: var(--text-color);
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .macro-goals h3::before {
+            content: '📊';
+            font-size: 1.5rem;
+        }
+
+        .health-goals {
+            margin-top: 2rem;
+        }
+
+        .health-goals h3 {
+            color: var(--text-color);
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .health-goals h3::before {
+            content: '💪';
+            font-size: 1.5rem;
+        }
+
+        .add-meal-button {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 1000;
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(var(--primary-color-rgb), 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .add-meal-button:hover {
+            transform: scale(1.1) rotate(90deg);
+            box-shadow: 0 8px 24px rgba(var(--primary-color-rgb), 0.4);
+        }
+
+        .add-meal-button::before {
+            content: '+';
+            transition: transform 0.3s ease;
+        }
+
+        /* Pulse animation for the add meal button */
+        @keyframes buttonPulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(var(--primary-color-rgb), 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 20px rgba(var(--primary-color-rgb), 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(var(--primary-color-rgb), 0);
+            }
+        }
+
+        .close-popup {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: var(--box-shadow);
+            transition: all 0.3s ease;
+            z-index: 1010;
+        }
+
+        .close-popup:hover {
+            transform: rotate(90deg) scale(1.1);
+            background: var(--secondary-color);
+        }
+
+        /* Fullscreen popup styles */
+        .fullscreen-popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Main content area */
+        .main-content {
+            flex: 1;
+        }
+
+        /* Welcome section improvements */
+        .welcome-section {
+            margin-bottom: 2rem;
+            padding: 2rem;
+        }
+
+        .welcome-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        /* Meal grid improvements */
+        .meal-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .meal-card {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Goal card layout and design updates */
+        .goal-card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .goal-card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: rgba(var(--primary-color-rgb), 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        
+        .goal-card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-color);
+            margin: 0;
+        }
+        
+        .goal-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        .goal-target {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+        
+        .goal-target-value {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .goal-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+        
+        .goal-progress {
+            margin-top: auto;
+            width: 100%;
+        }
+        
+        .goal-progress-bar {
+            height: 8px;
+            background: var(--bg-subtle);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 0.5rem 0;
+        }
+        
+        .goal-progress-fill {
+            height: 100%;
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            border-radius: 10px;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
     </style>
 </head>
 <body>    <!-- Loading Overlay -->
-    <div id="app-loading-overlay">
-        <div id="app-loading-spinner"></div>
-        <div id="app-loading-text">Loading MealMatrix</div>
-        <div id="app-loading-subtext">Please wait while we prepare your dashboard</div>
+    <div id="app-loading-overlay" class="loading-overlay">
+        <div id="app-loading-spinner" class="loading-spinner"></div>
+        <div id="app-loading-text" class="loading-text">Loading MealMatrix</div>
+        <div id="app-loading-subtext" class="loading-subtext">Please wait while we prepare your dashboard</div>
     </div>
 
     <!-- Rest of the body content -->
@@ -866,22 +1603,123 @@
         </div>
     </div>    <div class="container dashboard">
         <!-- Welcome Section -->
-        <div class="welcome-section">
-            <img src="assets/default-avatar.png" alt="Profile Photo" class="welcome-profile-photo" id="welcomeProfilePhoto">
-            <div class="welcome-content">
-                <h2>Welcome back, <span id="welcomeName">there</span> 👋</h2>
-                <p>Here's your meal tracking overview for today</p>
-                <div class="welcome-stats">
-                    <div class="welcome-stat">
-                        <span>📊</span>
-                        <div class="stat-text">
-                            <strong id="todayMealsCount">0</strong> meals logged today
+        <div class="welcome-wrapper">
+            <div class="welcome-section">
+                <div class="welcome-content">
+                    <div class="welcome-profile">
+                        <img src="assets/mealmatrixx_logo.png" alt="Profile Photo" class="welcome-profile-photo" id="welcomeProfilePhoto">
+                        <div class="welcome-text">
+                            <h1>Welcome back, <span id="welcomeName">there</span> 👋</h1>
+                            <p>Here's your meal tracking overview for today</p>
                         </div>
                     </div>
-                    <div class="welcome-stat">
-                        <span>✨</span>
-                        <div class="stat-text">
-                            <strong id="streakCount">0</strong> day streak
+                    <div class="welcome-stats">
+                        <div class="stat-card">
+                            <span>📊</span>
+                            <div class="stat-text">
+                                <strong id="todayMealsCount">0</strong> meals logged today
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <span>✨</span>
+                            <div class="stat-text">
+                                <strong id="streakCount">0</strong> day streak
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Goals Grid -->
+                <div class="goals-grid">
+                    <!-- Daily Calorie Goals -->
+                    <div class="goal-card">
+                        <div class="goal-card-header">
+                            <div class="goal-card-icon">🔥</div>
+                            <h3 class="goal-card-title">Daily Calories</h3>
+                        </div>
+                        <div class="goal-info">
+                            <div class="goal-target">
+                                <span>Target</span>
+                                <span class="goal-target-value">5000 kcal</span>
+                            </div>
+                            <div class="goal-progress">
+                                <div class="goal-progress-bar">
+                                    <div class="goal-progress-fill" style="width: 22%"></div>
+                                </div>
+                                <div class="goal-stats">
+                                    <span>1087 kcal consumed</span>
+                                    <span>22%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Protein Goals -->
+                    <div class="goal-card">
+                        <div class="goal-card-header">
+                            <div class="goal-card-icon">🥩</div>
+                            <h3 class="goal-card-title">Protein</h3>
+                        </div>
+                        <div class="goal-info">
+                            <div class="goal-target">
+                                <span>Target</span>
+                                <span class="goal-target-value">200g</span>
+                            </div>
+                            <div class="goal-progress">
+                                <div class="goal-progress-bar">
+                                    <div class="goal-progress-fill" style="width: 8%"></div>
+                                </div>
+                                <div class="goal-stats">
+                                    <span>16.8g consumed</span>
+                                    <span>8%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Carbs Goals -->
+                    <div class="goal-card">
+                        <div class="goal-card-header">
+                            <div class="goal-card-icon">🌾</div>
+                            <h3 class="goal-card-title">Carbs</h3>
+                        </div>
+                        <div class="goal-info">
+                            <div class="goal-target">
+                                <span>Target</span>
+                                <span class="goal-target-value">250g</span>
+                            </div>
+                            <div class="goal-progress">
+                                <div class="goal-progress-bar">
+                                    <div class="goal-progress-fill" style="width: 38%"></div>
+                                </div>
+                                <div class="goal-stats">
+                                    <span>95.5g consumed</span>
+                                    <span>38%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fat Goals -->
+                    <div class="goal-card">
+                        <div class="goal-card-header">
+                            <div class="goal-card-icon">🥑</div>
+                            <h3 class="goal-card-title">Fat</h3>
+                        </div>
+                        <div class="goal-info">
+                            <div class="goal-target">
+                                <span>Target</span>
+                                <span class="goal-target-value">70g</span>
+                            </div>
+                            <div class="goal-progress">
+                                <div class="goal-progress-bar">
+                                    <div class="goal-progress-fill" style="width: 15%"></div>
+                                </div>
+                                <div class="goal-stats">
+                                    <span>10.5g consumed</span>
+                                    <span>15%</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

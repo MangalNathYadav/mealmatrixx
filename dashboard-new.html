@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MealMatrix - Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/new-styles.css">
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js" defer></script>
+    <script src="firebase-config.js" defer></script>
+    <script src="assets/js/auth.js" defer></script>
+    <script type="module" src="assets/js/dashboard.js" defer></script>
+</head>
+<body>    <!-- Loading Overlay -->
+    <div id="app-loading-overlay" class="visible">
+        <div id="app-loading-spinner"></div>
+        <div id="app-loading-text">Loading MealMatrix</div>
+        <div id="app-loading-subtext">Please wait while we prepare your dashboard</div>
+    </div>
+
+    <!-- Main Navigation -->
+    <nav class="navbar">
+        <div class="container navbar-container">
+            <a href="dashboard.html" class="navbar-logo">
+                <img src="assets/mealmatrixx_logo.png" alt="MealMatrix Logo">
+                MealMatrix
+            </a>
+            <div class="navbar-actions">
+                <a href="nutrition-goals.html" class="btn btn-primary">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path d="M8 1.5L14 5.5V10.5L8 14.5L2 10.5V5.5L8 1.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                        <path d="M8 7.5L8 14.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        <path d="M14 5.5L8 7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        <path d="M2 5.5L8 7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                    My Goals
+                </a>
+                <button id="weeklySummaryBtn" class="btn btn-secondary">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path d="M2 13.5H14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        <path d="M4 13.5V7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        <path d="M8 13.5V3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        <path d="M12 13.5V5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                    Weekly Summary
+                    <div class="ai-spinner"></div>
+                </button>
+                <a href="profile.html" class="btn btn-outline">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path d="M8 8C9.65685 8 11 6.65685 11 5C11 3.34315 9.65685 2 8 2C6.34315 2 5 3.34315 5 5C5 6.65685 6.34315 8 8 8Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M13 14C13 11.7909 10.7614 10 8 10C5.23858 10 3 11.7909 3 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Profile
+                </a>
+                <button id="logoutBtn" class="btn btn-outline">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path d="M6 14H3.33333C2.97971 14 2.64057 13.8595 2.39052 13.6095C2.14048 13.3594 2 13.0203 2 12.6667V3.33333C2 2.97971 2.14048 2.64057 2.39052 2.39052C2.64057 2.14048 2.97971 2 3.33333 2H6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M10.6667 11.3333L14 8L10.6667 4.66667" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M14 8H6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Logout
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Welcome Section -->
+    <section class="welcome-section">
+        <div class="container">
+            <div class="welcome-content">
+                <div class="welcome-user">
+                    <img src="assets/mealmatrixx_logo.png" alt="Profile Photo" class="welcome-avatar" id="welcomeProfilePhoto">
+                    <div class="welcome-text">
+                        <h1>Welcome back, <span id="welcomeName">there</span> 👋</h1>
+                        <p>Here's your meal tracking overview for today</p>
+                    </div>
+                </div>
+                <div class="welcome-stats">
+                    <div class="stat-card">
+                        <span class="stat-icon">📊</span>
+                        <div class="stat-text">
+                            <span class="stat-value" id="todayMealsCount">0</span>
+                            <span class="stat-label">meals logged today</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-icon">✨</span>
+                        <div class="stat-text">
+                            <span class="stat-value" id="streakCount">0</span>
+                            <span class="stat-label">day streak</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Goals Grid -->
+            <div class="goals-grid">
+                <!-- Daily Calorie Goals -->
+                <div class="goal-card">
+                    <div class="goal-card-header">
+                        <div class="goal-icon">🔥</div>
+                        <h3 class="goal-title">Daily Calories</h3>
+                    </div>
+                    <div class="goal-content">
+                        <div class="goal-target">
+                            <span class="goal-target-label">Target</span>
+                            <span class="goal-target-value">5000 kcal</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 22%"></div>
+                        </div>
+                        <div class="goal-stats">
+                            <span>1087 kcal consumed</span>
+                            <span>22%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Protein Goals -->
+                <div class="goal-card">
+                    <div class="goal-card-header">
+                        <div class="goal-icon">🥩</div>
+                        <h3 class="goal-title">Protein</h3>
+                    </div>
+                    <div class="goal-content">
+                        <div class="goal-target">
+                            <span class="goal-target-label">Target</span>
+                            <span class="goal-target-value">200g</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 8%"></div>
+                        </div>
+                        <div class="goal-stats">
+                            <span>16.8g consumed</span>
+                            <span>8%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Carbs Goals -->
+                <div class="goal-card">
+                    <div class="goal-card-header">
+                        <div class="goal-icon">🌾</div>
+                        <h3 class="goal-title">Carbs</h3>
+                    </div>
+                    <div class="goal-content">
+                        <div class="goal-target">
+                            <span class="goal-target-label">Target</span>
+                            <span class="goal-target-value">250g</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 38%"></div>
+                        </div>
+                        <div class="goal-stats">
+                            <span>95.5g consumed</span>
+                            <span>38%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fat Goals -->
+                <div class="goal-card">
+                    <div class="goal-card-header">
+                        <div class="goal-icon">🥑</div>
+                        <h3 class="goal-title">Fat</h3>
+                    </div>
+                    <div class="goal-content">
+                        <div class="goal-target">
+                            <span class="goal-target-label">Target</span>
+                            <span class="goal-target-value">70g</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 15%"></div>
+                        </div>
+                        <div class="goal-stats">
+                            <span>10.5g consumed</span>
+                            <span>15%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Dashboard Main Content -->
+    <div class="dashboard-layout container">
+        <!-- Sidebar with Goals -->
+        <aside class="sidebar">
+            <!-- Daily Calorie Goals Section -->
+            <div class="sidebar-section">
+                <h3 class="sidebar-title">Daily Calorie Goals</h3>
+                <div class="goal-item">
+                    <div class="goal-header">
+                        <span class="goal-label">Target Daily Calories</span>
+                        <span class="goal-value">5000 kcal</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 45%"></div>
+                    </div>
+                    <div class="goal-stats">
+                        <span>2250 kcal consumed</span>
+                        <span>45%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Macro Goals Section -->
+            <div class="sidebar-section">
+                <h3 class="sidebar-title">Macro Goals</h3>
+                <div class="goal-item">
+                    <div class="goal-header">
+                        <span class="goal-label">Protein</span>
+                        <span class="goal-value">200g</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 35%"></div>
+                    </div>
+                    <div class="goal-stats">
+                        <span>70g consumed</span>
+                        <span>35%</span>
+                    </div>
+                </div>
+                <div class="goal-item">
+                    <div class="goal-header">
+                        <span class="goal-label">Carbs</span>
+                        <span class="goal-value">250g</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 40%"></div>
+                    </div>
+                    <div class="goal-stats">
+                        <span>100g consumed</span>
+                        <span>40%</span>
+                    </div>
+                </div>
+                <div class="goal-item">
+                    <div class="goal-header">
+                        <span class="goal-label">Fat</span>
+                        <span class="goal-value">55g</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 50%"></div>
+                    </div>
+                    <div class="goal-stats">
+                        <span>27.5g consumed</span>
+                        <span>50%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Health Goals Section -->
+            <div class="sidebar-section">
+                <h3 class="sidebar-title">Health Goals</h3>
+                <div class="goal-item">
+                    <div class="goal-header">
+                        <span class="goal-label">Target Weight</span>
+                        <span class="goal-value">56 kg</span>
+                    </div>
+                    <div class="goal-stats">
+                        <span>Gain Muscle Mass</span>
+                    </div>
+                </div>
+                <div class="goal-item">
+                    <div class="goal-header">
+                        <span class="goal-label">Weekly Goal</span>
+                        <span class="goal-value">+0.2 kg</span>
+                    </div>
+                    <div class="goal-stats">
+                        <span>Healthy weight gain pace</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <div class="meals-section">
+                <div class="meals-header">
+                    <h2 class="meals-title">Today's Meals</h2>
+                </div>
+                
+                <div id="mealGrid" class="meal-grid">
+                    <!-- Empty state - will be replaced by actual meals when available -->
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🍽️</div>
+                        <h3 class="empty-state-title">No meals added yet</h3>
+                        <p class="empty-state-text">Click the + button to add your first meal</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add Meal Button -->
+    <a href="add-meal.html" class="add-button">+</a>
+
+    <!-- Weekly Summary Modal -->
+    <div id="weeklySummaryModal" class="modal-backdrop">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Weekly Nutrition Summary</h3>
+                <button class="modal-close" onclick="closeWeeklySummary()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- Content will be dynamically inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add basic JavaScript to toggle modal visibility
+        function closeWeeklySummary() {
+            document.getElementById('weeklySummaryModal').classList.remove('visible');
+            document.querySelector('#weeklySummaryModal .modal').classList.remove('visible');
+        }
+
+        document.getElementById('weeklySummaryBtn').addEventListener('click', function() {
+            document.getElementById('weeklySummaryModal').classList.add('visible');
+            setTimeout(() => {
+                document.querySelector('#weeklySummaryModal .modal').classList.add('visible');
+            }, 50);
+        });        // Loading overlay handling
+        function showLoading() {
+            document.getElementById('app-loading-overlay').classList.add('visible');
+        }
+
+        function hideLoading() {
+            document.getElementById('app-loading-overlay').classList.remove('visible');
+        }
+
+        // Loading is already visible on page load from the class
+        // Hide loading after a short delay
+        setTimeout(hideLoading, 1500);
+    </script>
+</body>
+</html>

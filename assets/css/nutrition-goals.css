@@ -1,8 +1,8 @@
 /* Navigation styles */
 .navbar {
-    background: white;
-    padding: 1.25rem 2rem;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    background: rgba(255, 255, 255, 0.9);
+    padding: 1rem 2.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     margin-bottom: 2rem;
     display: flex;
     justify-content: space-between;
@@ -10,22 +10,29 @@
     position: sticky;
     top: 0;
     z-index: 100;
+    backdrop-filter: blur(8px);
     border-bottom: 1px solid var(--border-color);
 }
 
 .navbar h2 {
-    color: var(--primary-color);
-    font-size: 1.75rem;
+    color: var(--text-color);
+    font-size: 1.5rem;
     font-weight: 600;
     margin: 0;
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    transition: var(--transition-base);
 }
 
-.navbar h2::before {
-    content: '🍽️';
-    font-size: 1.5rem;
+.navbar h2 img {
+    width: 32px;
+    height: 32px;
+    transition: transform 0.3s ease;
+}
+
+.navbar h2:hover img {
+    transform: scale(1.1) rotate(-5deg);
 }
 
 .nav-actions {
@@ -37,22 +44,35 @@
 .nav-actions .btn {
     background: var(--bg-subtle);
     color: var(--text-color);
-    padding: 0.75rem 1.25rem;
-    border-radius: 8px;
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px;
     text-decoration: none;
     font-weight: 500;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    transition: all 0.2s ease;
-    border: 1px solid var(--border-color);
+    gap: 0.75rem;
+    transition: var(--transition-base);
+    border: 1px solid transparent;
+    font-size: 0.95rem;
 }
 
 .nav-actions .btn:hover {
+    background: var(--card-background);
+    border-color: var(--border-color);
+    transform: translateY(-1px);
+    box-shadow: var(--box-shadow);
+}
+
+.nav-actions .btn-primary {
     background: var(--primary-color);
     color: white;
+    border: none;
+}
+
+.nav-actions .btn-primary:hover {
+    background: var(--secondary-color);
     transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 12px rgba(var(--primary-color-rgb), 0.2);
 }
 
 /* Nutrition Goals specific styles */
