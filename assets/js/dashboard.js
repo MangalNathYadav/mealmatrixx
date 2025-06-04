@@ -322,23 +322,16 @@ async function initializeDashboard() {
             throw new Error('User not authenticated');
         }
 
-        // Load user profile first to get basic info
-        await loadUserProfile();
-
-        // Load goals and check if they're set up
-        await goalsManager.loadGoals();
-
-        // Load meals and stats (this will trigger goal progress updates)
-        await loadMealsAndStats();
-
-        // Show welcome message based on goals status
-        updateWelcomeMessage(goalsManager.hasAnyGoals());
+        // Load all data in parallel
+        await Promise.all([
+            loadUserProfile(),
+            loadMealsAndStats(),
+            goalsManager.loadGoals()
+        ]);
         
-        // Load AI health tip only if goals are set up
-        if (goalsManager.hasAnyGoals()) {
-            await loadHealthTip();
-        }
-
+        // Load AI tips based on the loaded data
+        await generateAINutritionTips();
+        
         // Hide loading after a slight delay to ensure smooth transition
         setTimeout(hideLoading, 500);
     } catch (error) {
@@ -553,30 +546,53 @@ function initializeAINutritionTips() {
 
 // Function to generate AI nutrition tips based on user data
 async function generateAINutritionTips() {
-    const aiTipsContainers = document.querySelectorAll('.ai-tips-content');
-    if (!aiTipsContainers.length) return;
+    const tipSections = {
+        general: document.querySelector('.ai-tips-section:nth-child(1) .ai-tips-content'),
+        protein: document.querySelector('.ai-tips-section:nth-child(2) .ai-tips-content'),
+        hydration: document.querySelector('.ai-tips-section:nth-child(3) .ai-tips-content')
+    };
+    
+    if (!tipSections.general || !tipSections.protein || !tipSections.hydration) return;
     
     try {
         const user = firebase.auth().currentUser;
         if (!user) return;
 
         // Get user data and meals
-        const [userSnap, mealsSnap] = await Promise.all([
-            firebase.database().ref(`users/${user.uid}`).once('value'),
-            firebase.database().ref(`users/${user.uid}/meals`).once('value')
+        const [userSnap, mealsSnap, goalsSnap] = await Promise.all([
+            firebase.database().ref(`users/${user.uid}/profile`).once('value'),
+            firebase.database().ref(`users/${user.uid}/meals`).once('value'),
+            firebase.database().ref(`users/${user.uid}/nutritionGoals`).once('value')
         ]);
 
-        const userData = userSnap.val() || {};
+        const userData = {
+            profile: userSnap.val() || {},
+            nutritionGoals: goalsSnap.val() || {},
+        };
         const mealsData = mealsSnap.val() || {};
 
-        // Use the NutritionTipGenerator to generate personalized tips
+        if (!goalsManager.hasAnyGoals()) {
+            // If no goals are set, show setup prompts in each section
+            const setupPrompt = `
+                <div class="ai-tip-card">
+                    <div class="ai-tip-icon general">✨</div>
+                    <p>Set up your nutrition goals to get personalized AI tips and tracking!
+                    <a href="nutrition-goals.html" class="btn btn-primary btn-small">Set Goals Now</a></p>
+                </div>
+            `;
+            Object.values(tipSections).forEach(container => {
+                container.innerHTML = setupPrompt;
+            });
+            return;
+        }
+
+        // Generate personalized tips
         const tips = await nutritionTipGenerator.generateTips(userData, mealsData);
-        
-        // Update each tip container with the personalized tips
-        aiTipsContainers.forEach((container, index) => {
-            if (index < tips.length) {
-                const tip = tips[index];
-                container.innerHTML = `
+
+        // Update each section with its corresponding tip
+        Object.entries(tips).forEach(([category, tip]) => {
+            if (tip && tipSections[category]) {
+                tipSections[category].innerHTML = `
                     <div class="ai-tip-card">
                         <div class="ai-tip-icon ${tip.iconClass}">${tip.icon}</div>
                         <p>${tip.tip}</p>
@@ -584,83 +600,49 @@ async function generateAINutritionTips() {
                 `;
             }
         });
-        
+
     } catch (error) {
         console.error('Failed to generate AI nutrition tips:', error);
-        
-        // Display fallback tips if something goes wrong
-        aiTipsContainers.forEach((container, index) => {
-            const fallbackTips = [
-                {
-                    icon: '✨',
-                    iconClass: 'general',
-                    tip: "Set your nutrition goals in the profile section to get personalized recommendations!"
-                },
-                {
-                    icon: '🥗',
-                    iconClass: 'nutrition',
-                    tip: "Try to include a variety of colorful fruits and vegetables in your meals for balanced nutrition."
-                },
-                {
-                    icon: '💧',
-                    iconClass: 'hydration',
-                    tip: "Staying hydrated is key! Aim to drink water throughout the day."
-                }
-            ];
-            
-            if (index < fallbackTips.length) {
-                const tip = fallbackTips[index];
-                container.innerHTML = `
-                    <div class="ai-tip-card">
-                        <div class="ai-tip-icon ${tip.iconClass}">${tip.icon}</div>
-                        <p>${tip.tip}</p>
-                    </div>
-                `;
-            }
-        });
+        showToast('Failed to update nutrition tips', 'error');
     }
 }
 
 // Function to handle layout changes and move the AI tips sections if needed
 function handleLayoutChange() {
+    const mainContainer = document.querySelector('.dashboard-main');
+    const sidebar = document.querySelector('.dashboard-sidebar');
     const aiTipsSections = document.querySelectorAll('.ai-tips-section');
-    const dashboardSidebar = document.querySelector('.dashboard-sidebar');
-    const dashboardMain = document.querySelector('.dashboard-main');
-    const mealGrid = document.querySelector('.meals-container');
     
-    if (aiTipsSections.length === 0 || !dashboardSidebar || !dashboardMain || !mealGrid) return;
-    
-    // Check window width for mobile view
-    if (window.innerWidth <= 767) {
-        // On mobile, move all AI tips sections to the main content area
-        aiTipsSections.forEach(section => {
-            if (section.parentElement === dashboardSidebar) {
-                section.classList.add('move-to-main');
-                dashboardMain.appendChild(section); // Append to the end
-            }
-        });
-    } else {
-        // On desktop, move back to sidebar if they were moved
-        aiTipsSections.forEach(section => {
-            if (section.classList.contains('move-to-main')) {
-                section.classList.remove('move-to-main');
-                dashboardSidebar.appendChild(section); // Append to the end
-            }
-        });
-    }
+    if (!mainContainer || !aiTipsSections.length) return;
+
+    // Move AI tips based on screen size and goals availability
+    const isMobile = window.innerWidth < 768;
+    const hasGoals = goalsManager.hasAnyGoals();
+
+    aiTipsSections.forEach(section => {
+        if (isMobile || !hasGoals) {
+            mainContainer.appendChild(section);
+        } else if (sidebar && hasGoals) {
+            sidebar.appendChild(section);
+        }
+    });
 }
 
-// Event Listeners
-function setupEventListeners() {
-    // Health tip refresh button
-    if (refreshHealthTipBtn) {
-        refreshHealthTipBtn.addEventListener('click', () => {
-            loadHealthTip();
-        });
-    }
+// Update tips when meals or goals change
+function setupAITipsListeners() {
+    const user = firebase.auth().currentUser;
+    if (!user) return;
 
-    // Initialize AI Nutrition Tips
-    initializeAINutritionTips();
+    // Listen for changes in meals
+    firebase.database().ref(`users/${user.uid}/meals`).on('value', () => {
+        generateAINutritionTips();
+    });
+
+    // Listen for changes in goals
+    firebase.database().ref(`users/${user.uid}/nutritionGoals`).on('value', () => {
+        generateAINutritionTips();
+        handleLayoutChange();
+    });
 }
 
 // Wait for both DOM and Firebase to be ready

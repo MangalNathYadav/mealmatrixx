@@ -1,192 +1,147 @@
+import GeminiClient from '../gemini-client-latest.js';
+
 // Nutrition Tip Generator Service
 class NutritionTipGenerator {
     constructor() {
+        this.gemini = new GeminiClient();
         this.tipCategories = {
-            nutrition: { icon: '🥗', iconClass: 'nutrition' },
+            general: { icon: '✨', iconClass: 'general' },
             protein: { icon: '🥩', iconClass: 'protein' },
-            hydration: { icon: '💧', iconClass: 'hydration' },
-            wellness: { icon: '✨', iconClass: 'wellness' },
-            fitness: { icon: '🏋️‍♂️', iconClass: 'fitness' },
-            mindfulness: { icon: '🧘‍♀️', iconClass: 'mindfulness' }
+            hydration: { icon: '💧', iconClass: 'hydration' }
         };
     }
 
     // Generate personalized tips based on user data and meals
     async generateTips(userData, mealsData) {
         try {
-            const tips = [];
+            const prompt = this.constructPrompt(userData, mealsData);
+            if (!prompt) {
+                return this.getFallbackTips();
+            }
 
-            // Profile-based tips
-            if (userData.profile) {
-                const profile = userData.profile;
-                const dietType = profile.dietType;
-
-                // Diet-specific tips
-                if (dietType) {
-                    tips.push(this.getDietTypeTip(dietType));
+            const result = await this.gemini.generateContent(prompt);
+            
+            // Parse the result and ensure proper structure
+            let tips;
+            if (typeof result === 'string') {
+                try {
+                    tips = JSON.parse(result);
+                } catch {
+                    console.error('Failed to parse Gemini response');
+                    return this.getFallbackTips();
                 }
+            } else {
+                tips = result;
+            }
 
-                // Health condition tips
-                if (profile.healthConditions) {
-                    tips.push(this.getHealthConditionTip(profile.healthConditions));
+            // Validate and format tips
+            return {
+                general: {
+                    icon: '🎯',
+                    iconClass: 'general',
+                    tip: tips.general || "Maintain a balanced diet with variety of nutrients."
+                },
+                protein: {
+                    icon: '🥩',
+                    iconClass: 'protein',
+                    tip: tips.protein || "Include lean proteins in your meals for muscle health."
+                },
+                hydration: {
+                    icon: '💧',
+                    iconClass: 'hydration',
+                    tip: tips.hydration || "Stay hydrated throughout the day."
                 }
-            }
+            };
 
-            // Goal-based tips
-            if (userData.nutritionGoals) {
-                const goals = userData.nutritionGoals;
-                tips.push(this.getGoalBasedTip(goals));
-            }
-
-            // Meal pattern tips
-            if (mealsData) {
-                const mealPatterns = this.analyzeMealPatterns(mealsData);
-                tips.push(this.getMealPatternTip(mealPatterns));
-            }
-
-            // Add some general tips if we don't have enough
-            while (tips.length < 3) {
-                tips.push(this.getGeneralTip());
-            }
-
-            return tips;
         } catch (error) {
             console.error('Error generating nutrition tips:', error);
             return this.getFallbackTips();
         }
     }
 
-    getDietTypeTip(dietType) {
-        const tips = {
-            vegan: {
-                icon: '🌱',
-                iconClass: 'nutrition',
-                tip: "Remember to include B12 supplements and iron-rich foods like leafy greens in your vegan diet."
-            },
-            vegetarian: {
-                icon: '🥗',
-                iconClass: 'nutrition',
-                tip: "Include a variety of plant-based proteins like legumes, nuts, and quinoa for complete nutrition."
-            },
-            pescatarian: {
-                icon: '🐟',
-                iconClass: 'nutrition',
-                tip: "Fatty fish like salmon and mackerel are great sources of omega-3 fatty acids."
-            },
-            default: {
-                icon: '🥘',
-                iconClass: 'nutrition',
-                tip: "Aim for a balanced plate with lean proteins, whole grains, and plenty of vegetables."
-            }
-        };
+    constructPrompt(userData, mealsData) {
+        if (!userData?.nutritionGoals) return null;
 
-        return tips[dietType] || tips.default;
-    }
-
-    getHealthConditionTip(conditions) {
-        // Simple condition-based tips
-        return {
-            icon: '❤️',
-            iconClass: 'wellness',
-            tip: "Work with your healthcare provider to ensure your diet supports your health conditions."
-        };
-    }
-
-    getGoalBasedTip(goals) {
-        const { goalType, weeklyGoal } = goals;
+        const goals = userData.nutritionGoals;
+        const profile = userData.profile || {};
         
-        const tips = {
-            lose: {
-                icon: '⚖️',
-                iconClass: 'fitness',
-                tip: `Focus on nutrient-dense, low-calorie foods to support your weight loss goal of ${weeklyGoal}kg per week.`
-            },
-            gain: {
-                icon: '💪',
-                iconClass: 'fitness',
-                tip: "Include healthy calorie-dense foods like nuts, avocados, and lean proteins for muscle gain."
-            },
-            maintain: {
-                icon: '✓',
-                iconClass: 'check',
-                tip: "Keep tracking your meals consistently to maintain your healthy weight."
-            }
+        // Calculate today's totals
+        const today = new Date().toDateString();
+        const todayMeals = mealsData ? Object.values(mealsData).filter(meal => 
+            new Date(meal.dateTime).toDateString() === today
+        ) : [];
+
+        const dailyTotals = {
+            calories: 0,
+            protein: 0,
+            carbs: 0,
+            fat: 0
         };
 
-        return tips[goalType] || tips.maintain;
-    }
+        todayMeals.forEach(meal => {
+            dailyTotals.calories += parseFloat(meal.calories) || 0;
+            dailyTotals.protein += parseFloat(meal.protein) || 0;
+            dailyTotals.carbs += parseFloat(meal.carbs) || 0;
+            dailyTotals.fat += parseFloat(meal.fat) || 0;
+        });
 
-    analyzeMealPatterns(meals) {
-        // Simple pattern analysis
-        const totalMeals = Object.keys(meals).length;
-        const recentMeals = Object.values(meals)
-            .sort((a, b) => new Date(b.dateTime) - new Date(a.dateTime))
-            .slice(0, 7);
-
-        return {
-            frequency: totalMeals / 7, // meals per day
-            recentMeals
+        // Calculate percentages
+        const getPercentage = (current, target) => {
+            if (!target || !current) return 0;
+            return Math.round((current / target) * 100);
         };
-    }
 
-    getMealPatternTip(patterns) {
-        const { frequency } = patterns;
-
-        if (frequency < 3) {
-            return {
-                icon: '⏰',
-                iconClass: 'timing',
-                tip: "Try to eat regular meals throughout the day to maintain stable energy levels."
-            };
-        }
-
-        return {
-            icon: '✓',
-            iconClass: 'check',
-            tip: "Great job maintaining regular meal times! This helps regulate metabolism."
+        const percentages = {
+            calories: getPercentage(dailyTotals.calories, goals.targetCalories),
+            protein: getPercentage(dailyTotals.protein, goals.proteinGoal),
+            carbs: getPercentage(dailyTotals.carbs, goals.carbsGoal),
+            fat: getPercentage(dailyTotals.fat, goals.fatGoal)
         };
-    }
 
-    getGeneralTip() {
-        const generalTips = [
-            {
-                icon: '🌈',
-                iconClass: 'nutrition',
-                tip: "Eat a rainbow of fruits and vegetables to get diverse nutrients."
-            },
-            {
-                icon: '💧',
-                iconClass: 'hydration',
-                tip: "Stay hydrated! Aim for 8 glasses of water daily."
-            },
-            {
-                icon: '🏃‍♂️',
-                iconClass: 'fitness',
-                tip: "Combine healthy eating with regular physical activity for best results."
-            }
-        ];
+        return `You are a professional nutritionist AI. Based on the user's current daily progress and goals, generate three personalized nutrition tips.
 
-        return generalTips[Math.floor(Math.random() * generalTips.length)];
+User Profile:
+- Diet Type: ${profile.dietType || 'Not specified'}
+- Goal Type: ${goals.goalType} (${goals.weeklyGoal > 0 ? 'gain' : 'lose'} ${Math.abs(goals.weeklyGoal)}kg/week)
+- Target Weight: ${goals.weightGoal}kg
+
+Daily Goals vs Progress:
+- Calories: ${goals.targetCalories}kcal (Current: ${dailyTotals.calories}kcal, ${percentages.calories}%)
+- Protein: ${goals.proteinGoal}g (Current: ${dailyTotals.protein}g, ${percentages.protein}%)
+- Carbs: ${goals.carbsGoal}g (Current: ${dailyTotals.carbs}g, ${percentages.carbs}%)
+- Fat: ${goals.fatGoal}g (Current: ${dailyTotals.fat}g, ${percentages.fat}%)
+
+Today's Meals:
+${todayMeals.map(meal => `- ${meal.name} (${meal.calories}kcal)`).join('\n')}
+
+Return a JSON object with exactly these three tips:
+{
+    "general": "A tip about overall nutrition strategy based on their goal type (${goals.goalType}) and current calorie balance",
+    "protein": "A specific protein-related tip based on their current protein intake and goal",
+    "hydration": "A hydration tip considering their calorie intake and activity level"
+}
+
+Make tips specific, actionable, and personalized to their current progress. Consider their diet type and goals.`;
     }
 
     getFallbackTips() {
-        return [
-            {
+        return {
+            general: {
                 icon: '✨',
                 iconClass: 'general',
-                tip: "Set your nutrition goals in the profile section to get personalized recommendations!"
+                tip: "Focus on eating a balanced diet with a variety of nutrients to meet your goals."
             },
-            {
-                icon: '🥗',
-                iconClass: 'nutrition',
-                tip: "Try to include a variety of colorful fruits and vegetables in your meals for balanced nutrition."
+            protein: {
+                icon: '🥩',
+                iconClass: 'protein',
+                tip: "Include a good source of protein with each meal to support your health goals."
             },
-            {
+            hydration: {
                 icon: '💧',
                 iconClass: 'hydration',
-                tip: "Staying hydrated is key! Aim to drink water throughout the day."
+                tip: "Stay hydrated! Aim for 8 glasses of water daily."
             }
-        ];
+        };
     }
 }
 

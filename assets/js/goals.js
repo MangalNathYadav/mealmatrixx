@@ -231,6 +231,47 @@ class GoalsManager {
             }
         });
     }
+
+    generateAIPrompt() {
+        if (!this.goals || !this.hasAnyGoals()) return null;
+
+        // Calculate percentages for each goal
+        const caloriePercentage = this.getPercentage(this.dailyProgress.calories, this.goals.targetCalories);
+        const proteinPercentage = this.getPercentage(this.dailyProgress.protein, this.goals.proteinGoal);
+        const carbsPercentage = this.getPercentage(this.dailyProgress.carbs, this.goals.carbsGoal);
+        const fatPercentage = this.getPercentage(this.dailyProgress.fat, this.goals.fatGoal);
+
+        let lowestMacro = 'protein';
+        let lowestPercentage = proteinPercentage;
+        
+        if (carbsPercentage < lowestPercentage) {
+            lowestMacro = 'carbs';
+            lowestPercentage = carbsPercentage;
+        }
+        if (fatPercentage < lowestPercentage) {
+            lowestMacro = 'fat';
+            lowestPercentage = fatPercentage;
+        }
+
+        return `Based on the user's current daily progress and goals:
+
+Daily Goals:
+- Calories: ${this.goals.targetCalories} kcal (Currently: ${this.dailyProgress.calories} kcal, ${caloriePercentage}%)
+- Protein: ${this.goals.proteinGoal}g (Currently: ${this.dailyProgress.protein}g, ${proteinPercentage}%)
+- Carbs: ${this.goals.carbsGoal}g (Currently: ${this.dailyProgress.carbs}g, ${carbsPercentage}%)
+- Fat: ${this.goals.fatGoal}g (Currently: ${this.dailyProgress.fat}g, ${fatPercentage}%)
+
+Goal Type: ${this.goals.goalType}
+Weight Goal: ${this.goals.weightGoal}kg (${this.goals.weeklyGoal > 0 ? 'gain' : 'lose'} ${Math.abs(this.goals.weeklyGoal)}kg per week)
+Lowest macro: ${lowestMacro} at ${lowestPercentage}%
+
+Provide 3 personalized nutrition tips focused on:
+1. Overall nutrition strategy for ${this.goals.goalType} goal
+2. Improving ${lowestMacro} intake which is currently low
+3. Hydration recommendations based on ${this.dailyProgress.calories} calories consumed
+
+Keep tips actionable and specific to their current progress.`;
+    }
 }
 
 // Create and export a single instance
