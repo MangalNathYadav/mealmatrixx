@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MealMatrix - User Profile</title>
+    <link rel="stylesheet" href="assets/css/styles.css">    <style>
+        body {
+            background: var(--bg-subtle);
+            min-height: 100vh;
+        }
+
+        /* Navbar styles */
+        .navbar {
+            background: white;
+            padding: 1.25rem 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar h2 {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .nav-actions .btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            transition: all 0.2s ease;
+            text-decoration: none;
+            color: var(--text-color);
+            font-size: 0.875rem;
+        }
+
+        .nav-actions .btn:hover {
+            background: var(--bg-subtle);
+            border-color: var(--primary-color);
+            transform: translateY(-1px);
+        }        .profile-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .profile-content {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }        .profile-photo-section {
+            text-align: center;
+            background: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            border: 1px solid var(--border-color);
+            height: fit-content;
+        }
+
+        .profile-photo {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            margin-bottom: 1.5rem;
+            border: 4px solid var(--primary-color);
+            padding: 4px;
+            background: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .photo-upload-btn {
+            background: var(--bg-subtle);
+            border: 1px dashed var(--border-color);
+            padding: 0.5rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            width: 100%;
+            font-size: 0.875rem;
+            color: var(--text-color);
+            transition: all 0.2s ease;
+        }
+
+        .photo-upload-btn:hover {
+            border-color: var(--primary-color);
+            background: white;
+        }
+
+        @media (max-width: 768px) {
+            .profile-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .navbar {
+                padding: 1rem;
+            }
+            .profile-container {
+                padding: 0 1rem 1rem;
+            }
+        }
+
+        .profile-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        .profile-header h2 {
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-header p {
+            color: var(--text-color);
+            opacity: 0.8;
+        }
+
+        .profile-section {
+            margin-bottom: 2rem;
+        }
+
+        .profile-section h3 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .preferences-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 640px) {
+            .preferences-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 0.875rem;
+            background: var(--bg-subtle);
+            color: var(--text-color);
+            transition: all 0.2s ease;
+        }
+
+        .form-control:focus {
+            background: white;
+            transform: translateY(-1px);
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 0.75rem;
+        }
+
+        .profile-grid {
+            margin-bottom: 3rem;
+        }
+
+        .profile-photo-section {
+            position: relative;
+        }
+
+        .photo-upload-btn {
+            margin-top: 1rem;
+            background: white;
+            font-weight: 500;
+            padding: 0.75rem;
+        }
+
+        .profile-header {
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto 3rem;
+        }
+
+        .profile-header h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        .profile-header p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        .dietary-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .dietary-tag {
+            padding: 0.25rem 0.75rem;
+            background: var(--bg-subtle);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .dietary-tag .remove {
+            color: #ef4444;
+            cursor: pointer;
+            font-weight: bold;
+        }        .btn-save {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            padding: 0.875rem 2rem;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+            margin: 2rem auto 0;
+            min-width: 200px;
+        }
+
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(var(--primary-color-rgb), 0.2);
+        }
+
+        .success-message {
+            background: #ecfdf5;
+            border: 1px solid #6ee7b7;
+            color: #065f46;
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .success-message.visible {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .preferences-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .preferences-list li {
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            background: var(--bg-subtle);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .preferences-list li:last-child {
+            margin-bottom: 0;
+        }
+
+        textarea.form-control {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }        .personal-info-section {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .personal-info-section h3 {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        
+        .section-card {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        /* Make form controls consistent */
+        .form-control {
+            background: white;
+        }
+
+        input[type="date"].form-control,
+        input[type="number"].form-control {
+            padding: 0.7rem 0.75rem;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>    <nav class="navbar">
+        <h2>
+            <img src="assets/mealmatrixx_logo.png" alt="MealMatrix Logo" style="width: 24px; height: 24px; object-fit: contain;">
+            MealMatrix
+        </h2>
+        <div class="nav-actions">
+            <a href="dashboard.html" class="btn">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M6.5 3.5L2 8L6.5 12.5M2 8H14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Back to Dashboard
+            </a>
+        </div>
+    </nav>    <div class="profile-container">
+        <div class="profile-content">
+            <div class="profile-header">
+                <h2>User Profile</h2>
+                <p>Manage your personal information and preferences</p>
+            </div>
+
+        <div id="successMessage" class="success-message">
+            <span>✨</span> Your profile has been updated successfully!
+        </div>
+
+        <form id="profileForm">
+            <div class="profile-grid">
+                <!-- Profile Photo Section -->
+                <div class="profile-photo-section">
+                    <img src="assets/default-avatar.png" alt="Profile Photo" class="profile-photo" id="profilePhoto">
+                    <input type="file" id="photoUpload" accept="image/*" style="display: none;">
+                    <button type="button" class="photo-upload-btn" onclick="document.getElementById('photoUpload').click()">
+                        Change Photo
+                    </button>
+                </div>
+
+                <!-- Personal Information -->
+                <div class="personal-info-section">
+                    <h3><span>👤</span> Personal Information</h3>
+                    <div class="form-group">
+                        <label for="fullName">Full Name</label>
+                        <input type="text" id="fullName" class="form-control" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="dob">Date of Birth</label>
+                            <input type="date" id="dob" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="gender">Gender</label>
+                            <select id="gender" class="form-control">
+                                <option value="">Select gender</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                                <option value="other">Other</option>
+                                <option value="prefer-not">Prefer not to say</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="height">Height (cm)</label>
+                            <input type="number" id="height" class="form-control" min="0" step="0.1">
+                        </div>
+                        <div class="form-group">
+                            <label for="weight">Weight (kg)</label>
+                            <input type="number" id="weight" class="form-control" min="0" step="0.1">
+                        </div>
+                    </div>
+                </div>
+            </div>            <div class="preferences-grid">
+                <div class="profile-section section-card">
+                    <h3>
+                        <span>🥗</span>
+                        Dietary Preferences
+                    </h3>
+                    <div class="form-group">
+                        <label for="dietType">Diet Type</label>
+                        <select id="dietType" class="form-control">
+                            <option value="none">No specific diet</option>
+                            <option value="vegetarian">Vegetarian</option>
+                            <option value="vegan">Vegan</option>
+                            <option value="pescatarian">Pescatarian</option>
+                            <option value="keto">Ketogenic</option>
+                            <option value="paleo">Paleo</option>
+                            <option value="mediterranean">Mediterranean</option>
+                            <option value="lowCarb">Low Carb</option>
+                            <option value="lowFat">Low Fat</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="foodPreferences">Food Preferences</label>
+                        <textarea id="foodPreferences" class="form-control" 
+                            placeholder="List foods you particularly enjoy..."></textarea>
+                    </div>
+                </div>                <div class="profile-section section-card">
+                    <h3>
+                        <span>⚠️</span>
+                        Allergies & Restrictions
+                    </h3>
+                    <div class="form-group">
+                        <label for="allergies">Food Allergies</label>
+                        <textarea id="allergies" class="form-control" 
+                            placeholder="List any food allergies..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="restrictions">Dietary Restrictions</label>
+                        <textarea id="restrictions" class="form-control" 
+                            placeholder="List any other dietary restrictions..."></textarea>
+                    </div>
+                </div>
+            </div>            <div class="profile-section section-card">
+                <h3>
+                    <span>🎯</span>
+                    Health Conditions
+                </h3>
+                <div class="form-group">
+                    <label for="healthConditions">Relevant Health Conditions</label>
+                    <textarea id="healthConditions" class="form-control" 
+                        placeholder="List any health conditions that affect your diet (e.g., diabetes, high blood pressure)..."></textarea>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-save">Save Profile</button>
+        </form>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    
+    <!-- App Scripts -->
+    <script src="firebase-config.js"></script>
+    <script src="assets/js/auth.js"></script>
+    <script src="assets/js/profile.js"></script>
+</body>
+</html>

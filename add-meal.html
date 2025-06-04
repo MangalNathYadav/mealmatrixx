@@ -450,6 +450,38 @@
             border: 1px solid var(--border-color);
         }
 
+        .warnings-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .warning-item {
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            background: #fff5f5;
+            border: 1px solid #feb2b2;
+            border-radius: 4px;
+            color: #c53030;
+            font-size: 0.875rem;
+        }
+
+        .warning-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .analysis-section.warnings {
+            margin-top: 1rem;
+            background: #fff5f5;
+            border: 1px solid #feb2b2;
+            border-radius: 4px;
+            padding: 1rem;
+        }
+
+        .analysis-section.warnings h4 {
+            color: #c53030;
+        }
+
         @media (max-width: 768px) {
             .form-columns {
                 grid-template-columns: 1fr;
@@ -593,10 +625,19 @@
                         <ul class="food-list">
                             ${result.foods.map(food => `<li>${food}</li>`).join('')}
                         </ul>
-                        ${result.suggestions || result.assessment ? `
-                            <div class="analysis-section">
+                        ${result.suggestions || result.assessment ? `                            <div class="analysis-section">
                                 <h4>Analysis</h4>
                                 <p>${result.suggestions || result.assessment}</p>
+                            </div>
+                        ` : ''}
+                        ${result.warnings && result.warnings.length > 0 ? `
+                            <div class="analysis-section warnings">
+                                <h4>⚠️ Important Notices</h4>
+                                <ul class="warnings-list">
+                                    ${result.warnings.map(warning => `
+                                        <li class="warning-item">${warning}</li>
+                                    `).join('')}
+                                </ul>
                             </div>
                         ` : ''}
                     </div>
