@@ -5,6 +5,18 @@ class GoalsManager {
         this.isLoading = false;
     }
 
+    async checkGoalsExist(userId) {
+        try {
+            const snapshot = await firebase.database()
+                .ref(`users/${userId}/nutritionGoals`)
+                .once('value');
+            return snapshot.exists();
+        } catch (error) {
+            console.error('Error checking goals:', error);
+            return false;
+        }
+    }
+
     async loadGoals() {
         if (this.isLoading) return this.goals;
         this.isLoading = true;
