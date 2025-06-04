@@ -2,22 +2,35 @@
 class GoalsManager {
     constructor() {
         this.goals = null;
-        this.loadGoals();
+        this.isLoading = false;
     }
 
     async loadGoals() {
-        const user = firebase.auth().currentUser;
-        if (!user) return null;
+        if (this.isLoading) return this.goals;
+        this.isLoading = true;
 
         try {
+            const user = firebase.auth().currentUser;
+            if (!user) {
+                throw new Error('Please log in to view your goals');
+            }
+
             const snapshot = await firebase.database()
                 .ref(`users/${user.uid}/nutritionGoals`)
                 .once('value');
+            
             this.goals = snapshot.val();
+            
+            if (!this.goals) {
+                throw new Error('No nutrition goals set. Click "Configure Goals" to get started!');
+            }
+            
             return this.goals;
         } catch (error) {
             console.error('Error loading goals:', error);
-            return null;
+            throw error;
+        } finally {
+            this.isLoading = false;
         }
     }
 
@@ -33,7 +46,7 @@ class GoalsManager {
         const progress = {
             calories: {
                 current: todaysMeals.reduce((sum, meal) => sum + (meal.calories || 0), 0),
-                target: this.goals.targetCalories,
+                target: this.getRecommendedCalories(),
                 percentage: 0
             },
             macros: {
@@ -56,16 +69,16 @@ class GoalsManager {
         };
 
         // Calculate percentages
-        if (this.goals.targetCalories) {
+        if (progress.calories.target) {
             progress.calories.percentage = Math.round(
                 (progress.calories.current / progress.calories.target) * 100
             );
         }
 
-        ['protein', 'carbs', 'fat'].forEach(macro => {
-            if (this.goals[`${macro}Goal`]) {
-                progress.macros[macro].percentage = Math.round(
-                    (progress.macros[macro].current / progress.macros[macro].target) * 100
+        Object.entries(progress.macros).forEach(([macro, data]) => {
+            if (data.target) {
+                data.percentage = Math.round(
+                    (data.current / data.target) * 100
                 );
             }
         });
@@ -74,7 +87,7 @@ class GoalsManager {
     }
 
     getRecommendedCalories() {
-        if (!this.goals) return null;
+        if (!this.goals?.targetCalories) return null;
 
         const activityMultipliers = {
             sedentary: 1.2,
@@ -91,39 +104,64 @@ class GoalsManager {
     }
 
     async updateGoalProgress(element) {
-        const user = firebase.auth().currentUser;
-        if (!user) return;
-
+        if (!element) return;
+        
+        const loadingEl = element.querySelector('.goals-loading');
+        const emptyEl = element.querySelector('.goals-empty');
+        const dataEl = element.querySelector('.goals-data');
+        
         try {
+            // Show loading state initially
+            if (loadingEl) loadingEl.style.display = 'block';
+            if (emptyEl) emptyEl.style.display = 'none';
+            if (dataEl) dataEl.style.display = 'none';
+            
+            const user = firebase.auth().currentUser;
+            if (!user) {
+                throw new Error('Please log in to view your goals');
+            }
+
+            // First ensure goals are loaded
+            if (!this.goals) {
+                await this.loadGoals();
+            }
+            
+            // Load meals for today
             const mealsRef = firebase.database().ref(`users/${user.uid}/meals`);
             const snapshot = await mealsRef.once('value');
-            const meals = Object.values(snapshot.val() || {});
+            const meals = snapshot.val() ? Object.values(snapshot.val()) : [];
 
+            // Calculate and render progress
             const progress = await this.calculateDailyProgress(meals);
-            if (!progress) return;
+            await this.renderProgressUI(element, progress);
 
-            this.renderProgressUI(element, progress);
         } catch (error) {
             console.error('Error updating goal progress:', error);
+            if (loadingEl) loadingEl.style.display = 'none';
+            if (dataEl) dataEl.style.display = 'none';
+            
+            // Show empty state with error message
+            if (emptyEl) {
+                emptyEl.style.display = 'block';
+                const message = emptyEl.querySelector('p');
+                if (message) {
+                    message.textContent = error.message || 'Failed to load goals. Please try again.';
+                }
+            }
         }
-    }    renderProgressUI(element, progress) {
+    }
+
+    async renderProgressUI(element, progress) {
         if (!element || !progress) return;
 
-        // Show loading state
-        element.querySelector('.goals-loading').style.display = 'block';
-        element.querySelector('.goals-empty').style.display = 'none';
-        element.querySelector('.goals-data').style.display = 'none';
-
-        // If no goals are set, show empty state
-        if (!this.goals || (!this.goals.targetCalories && !this.goals.proteinGoal && !this.goals.carbsGoal && !this.goals.fatGoal)) {
-            element.querySelector('.goals-loading').style.display = 'none';
-            element.querySelector('.goals-empty').style.display = 'block';
-            return;
+        // Check if we have any goals to display
+        if (!this.goals || (!this.goals.targetCalories && !Object.values(progress.macros).some(macro => macro.target))) {
+            throw new Error('No nutrition goals set. Click "Configure Goals" to get started!');
         }
 
         // Prepare the goals data HTML
         const goalsDataHTML = `
-            ${this.goals.targetCalories ? `
+            ${progress.calories.target ? `
                 <div class="goal-stat-card">
                     <div class="goal-stat-header">
                         <h4 class="goal-stat-title">Daily Calories</h4>
@@ -177,12 +215,16 @@ class GoalsManager {
         `;
 
         // Update the UI
-        const goalsData = element.querySelector('.goals-data');
-        goalsData.innerHTML = goalsDataHTML;
-        
-        element.querySelector('.goals-loading').style.display = 'none';
-        element.querySelector('.goals-empty').style.display = 'none';
-        goalsData.style.display = 'grid';
+        const loadingEl = element.querySelector('.goals-loading');
+        const emptyEl = element.querySelector('.goals-empty');
+        const dataEl = element.querySelector('.goals-data');
+
+        if (dataEl) {
+            dataEl.innerHTML = goalsDataHTML;
+            dataEl.style.display = 'grid';
+        }
+        if (loadingEl) loadingEl.style.display = 'none';
+        if (emptyEl) emptyEl.style.display = 'none';
     }
 
     getProgressClass(percentage) {
@@ -199,199 +241,8 @@ class GoalsManager {
         };
         return icons[macro] || '📊';
     }
-
-    // Additional tracking features
-    async getWeeklyStats() {
-        const user = firebase.auth().currentUser;
-        if (!user) return null;
-
-        try {
-            const weekAgo = new Date();
-            weekAgo.setDate(weekAgo.getDate() - 7);
-
-            const mealsRef = firebase.database().ref(`users/${user.uid}/meals`);
-            const snapshot = await mealsRef.once('value');
-            const meals = Object.values(snapshot.val() || {});
-            const recentMeals = meals.filter(meal => new Date(meal.dateTime) >= weekAgo);
-
-            return {
-                averageCalories: this.calculateAverageCalories(recentMeals),
-                macroDistribution: this.calculateMacroDistribution(recentMeals),
-                goalCompletion: this.calculateGoalCompletion(recentMeals),
-                streaks: this.calculateStreaks(recentMeals),
-                trends: this.analyzeTrends(recentMeals)
-            };
-        } catch (error) {
-            console.error('Error getting weekly stats:', error);
-            return null;
-        }
-    }
-
-    calculateAverageCalories(meals) {
-        if (!meals.length) return 0;
-        const totalCalories = meals.reduce((sum, meal) => sum + (meal.calories || 0), 0);
-        return Math.round(totalCalories / meals.length);
-    }
-
-    calculateMacroDistribution(meals) {
-        const totals = {
-            protein: 0,
-            carbs: 0,
-            fat: 0
-        };
-
-        meals.forEach(meal => {
-            totals.protein += meal.protein || 0;
-            totals.carbs += meal.carbs || 0;
-            totals.fat += meal.fat || 0;
-        });
-
-        const total = totals.protein + totals.carbs + totals.fat;
-        return {
-            protein: total ? Math.round((totals.protein / total) * 100) : 0,
-            carbs: total ? Math.round((totals.carbs / total) * 100) : 0,
-            fat: total ? Math.round((totals.fat / total) * 100) : 0
-        };
-    }
-
-    calculateGoalCompletion(meals) {
-        if (!this.goals) return null;
-
-        const daysInPeriod = 7;
-        const dailyGoals = {
-            calories: this.goals.targetCalories,
-            protein: this.goals.proteinGoal,
-            carbs: this.goals.carbsGoal,
-            fat: this.goals.fatGoal
-        };
-
-        const successfulDays = {
-            calories: 0,
-            protein: 0,
-            carbs: 0,
-            fat: 0
-        };
-
-        // Group meals by day
-        const mealsByDay = meals.reduce((acc, meal) => {
-            const day = new Date(meal.dateTime).toDateString();
-            if (!acc[day]) acc[day] = [];
-            acc[day].push(meal);
-            return acc;
-        }, {});
-
-        Object.values(mealsByDay).forEach(dayMeals => {
-            const dayTotals = dayMeals.reduce((totals, meal) => {
-                totals.calories += meal.calories || 0;
-                totals.protein += meal.protein || 0;
-                totals.carbs += meal.carbs || 0;
-                totals.fat += meal.fat || 0;
-                return totals;
-            }, { calories: 0, protein: 0, carbs: 0, fat: 0 });
-
-            if (dayTotals.calories >= dailyGoals.calories * 0.9 && 
-                dayTotals.calories <= dailyGoals.calories * 1.1) {
-                successfulDays.calories++;
-            }
-            if (dayTotals.protein >= dailyGoals.protein) successfulDays.protein++;
-            if (dayTotals.carbs >= dailyGoals.carbs) successfulDays.carbs++;
-            if (dayTotals.fat >= dailyGoals.fat) successfulDays.fat++;
-        });
-
-        return {
-            calories: Math.round((successfulDays.calories / daysInPeriod) * 100),
-            protein: Math.round((successfulDays.protein / daysInPeriod) * 100),
-            carbs: Math.round((successfulDays.carbs / daysInPeriod) * 100),
-            fat: Math.round((successfulDays.fat / daysInPeriod) * 100)
-        };
-    }
-
-    calculateStreaks(meals) {
-        if (!meals.length || !this.goals) return { current: 0, longest: 0 };
-
-        const dayStatuses = new Array(7).fill(false);
-        const today = new Date().toDateString();
-
-        meals.forEach(meal => {
-            const mealDate = new Date(meal.dateTime).toDateString();
-            const daysAgo = Math.floor((new Date(today) - new Date(mealDate)) / (1000 * 60 * 60 * 24));
-            
-            if (daysAgo < 7 && meal.calories >= this.goals.targetCalories * 0.9 && 
-                meal.calories <= this.goals.targetCalories * 1.1) {
-                dayStatuses[daysAgo] = true;
-            }
-        });
-
-        let currentStreak = 0;
-        let longestStreak = 0;
-        let tempStreak = 0;
-
-        dayStatuses.forEach((status, index) => {
-            if (status) {
-                tempStreak++;
-                if (index === 0) currentStreak = tempStreak;
-                longestStreak = Math.max(longestStreak, tempStreak);
-            } else {
-                tempStreak = 0;
-            }
-        });
-
-        return { current: currentStreak, longest: longestStreak };
-    }
-
-    analyzeTrends(meals) {
-        if (!meals.length) return null;
-
-        // Sort meals by date
-        const sortedMeals = meals.sort((a, b) => new Date(a.dateTime) - new Date(b.dateTime));
-        
-        // Calculate daily averages
-        const dailyAverages = {};
-        sortedMeals.forEach(meal => {
-            const day = new Date(meal.dateTime).toDateString();
-            if (!dailyAverages[day]) {
-                dailyAverages[day] = {
-                    calories: 0,
-                    protein: 0,
-                    carbs: 0,
-                    fat: 0,
-                    count: 0
-                };
-            }
-            dailyAverages[day].calories += meal.calories || 0;
-            dailyAverages[day].protein += meal.protein || 0;
-            dailyAverages[day].carbs += meal.carbs || 0;
-            dailyAverages[day].fat += meal.fat || 0;
-            dailyAverages[day].count++;
-        });
-
-        // Calculate trends
-        const trends = {
-            calories: this.calculateTrend(Object.values(dailyAverages).map(day => day.calories)),
-            protein: this.calculateTrend(Object.values(dailyAverages).map(day => day.protein)),
-            carbs: this.calculateTrend(Object.values(dailyAverages).map(day => day.carbs)),
-            fat: this.calculateTrend(Object.values(dailyAverages).map(day => day.fat))
-        };
-
-        return trends;
-    }
-
-    calculateTrend(values) {
-        if (values.length < 2) return 'neutral';
-        
-        const firstHalf = values.slice(0, Math.floor(values.length / 2));
-        const secondHalf = values.slice(Math.floor(values.length / 2));
-        
-        const firstAvg = firstHalf.reduce((a, b) => a + b, 0) / firstHalf.length;
-        const secondAvg = secondHalf.reduce((a, b) => a + b, 0) / secondHalf.length;
-        
-        const difference = ((secondAvg - firstAvg) / firstAvg) * 100;
-        
-        if (difference > 5) return 'increasing';
-        if (difference < -5) return 'decreasing';
-        return 'stable';
-    }
 }
 
-// Export the goals manager
-export default new GoalsManager();
+// Create and export a single instance
+const goalsManager = new GoalsManager();
+export default goalsManager;

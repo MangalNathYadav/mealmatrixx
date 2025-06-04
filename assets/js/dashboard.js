@@ -1,9 +1,38 @@
-// Dashboard functionality
+// Import required modules
+import goalsManager from './goals.js';
+import ai from './ai-features.js';
+
+// Toast notification helper
+function showToast(message, type = 'info') {
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
+
+// Dashboard elements
 const mealGrid = document.getElementById('mealGrid');
 const logoutBtn = document.getElementById('logoutBtn');
+const weeklySummaryBtn = document.getElementById('weeklySummaryBtn');
+const popup = document.getElementById('weeklySummaryPopup');
+const goalsProgressElement = document.getElementById('goalsProgress');
+
+// Close weekly summary function
+function closeWeeklySummary() {
+    if (!popup) return;
+    
+    const content = popup.querySelector('.popup-content');
+    document.body.classList.remove('popup-open');
+    popup.classList.remove('visible');
+    // Clear content after animation
+    setTimeout(() => {
+        if (content) content.innerHTML = '';
+    }, 300);
+}
 
 // Handle logout
-logoutBtn.addEventListener('click', async () => {
+logoutBtn?.addEventListener('click', async () => {
     try {
         await firebase.auth().signOut();
         showToast('Logged out successfully', 'success');
@@ -15,73 +44,213 @@ logoutBtn.addEventListener('click', async () => {
 });
 
 // Load user's meals
-function loadMeals() {
+async function loadMeals() {
     const user = firebase.auth().currentUser;
     if (!user) return;
 
-    const mealsRef = firebase.database().ref(`users/${user.uid}/meals`);
-    mealsRef.on('value', (snapshot) => {
-        const meals = snapshot.val();
-        
-        // Clear current meals
-        mealGrid.innerHTML = '';
-        
-        if (!meals) {            // Show empty state
-            mealGrid.innerHTML = `
-                <div class="empty-state">
-                    <h3>No meals added yet</h3>
-                    <p>Click the + button to add your first meal</p>
-                </div>
-            `;
+    try {
+        const mealsRef = firebase.database().ref(`users/${user.uid}/meals`);
+        mealsRef.on('value', (snapshot) => {
+            const meals = snapshot.val();
+            if (mealGrid) {
+                if (!meals) {
+                    mealGrid.innerHTML = `
+                        <div class="empty-state">
+                            <h3>No meals added yet</h3>
+                            <p>Click the + button to add your first meal</p>
+                        </div>
+                    `;
+                    return;
+                }
 
-            // Hide weekly summary when no meals
-            document.getElementById('weeklySummary').classList.remove('visible');
-            return;
-        }
+                // Convert meals object to array and sort by date (newest first)
+                const mealsArray = Object.values(meals).sort((a, b) => 
+                    new Date(b.dateTime) - new Date(a.dateTime)
+                );
 
-        // Display meals
-        Object.entries(meals).forEach(([mealId, meal]) => {
-            const mealCard = document.createElement('div');
-            mealCard.className = 'meal-card';
-            mealCard.innerHTML = `
-                <h3>${meal.name}</h3>
-                <div class="meal-metadata">
-                    <p>Calories: ${meal.calories}</p>
-                    <p>Date: ${new Date(meal.dateTime).toLocaleString()}</p>
-                </div>
-                ${meal.notes ? `<p>${meal.notes}</p>` : ''}
-                <div class="meal-actions">
-                    <button onclick="editMeal('${mealId}')" class="btn btn-edit">Edit</button>
-                    <button onclick="deleteMeal('${mealId}')" class="btn btn-delete">Delete</button>
-                </div>
-            `;
-            mealGrid.appendChild(mealCard);
+                mealGrid.innerHTML = mealsArray.map(meal => `
+                    <div class="meal-card">
+                        <div class="meal-header">
+                            <h3>${meal.name}</h3>
+                            <span class="meal-time">${new Date(meal.dateTime).toLocaleString()}</span>
+                        </div>
+                        <div class="meal-content">
+                            <div class="meal-stats">
+                                <div class="stat">
+                                    <span>Calories</span>
+                                    <strong>${meal.calories || 0}</strong>
+                                </div>
+                                <div class="stat">
+                                    <span>Protein</span>
+                                    <strong>${meal.protein || 0}g</strong>
+                                </div>
+                                <div class="stat">
+                                    <span>Carbs</span>
+                                    <strong>${meal.carbs || 0}g</strong>
+                                </div>
+                                <div class="stat">
+                                    <span>Fat</span>
+                                    <strong>${meal.fat || 0}g</strong>
+                                </div>
+                            </div>
+                            ${meal.notes ? `<p class="meal-notes">${meal.notes}</p>` : ''}
+                        </div>
+                    </div>
+                `).join('');
+            }
         });
-    });
-}
-
-// Edit meal
-function editMeal(mealId) {
-    window.location.href = `add-meal.html?id=${mealId}`;
-}
-
-// Delete meal
-function deleteMeal(mealId) {
-    if (confirm('Are you sure you want to delete this meal?')) {
-        const user = firebase.auth().currentUser;
-        firebase.database().ref(`users/${user.uid}/meals/${mealId}`).remove()
-            .then(() => {
-                showToast('Meal deleted successfully', 'success');
-            })
-            .catch((error) => {
-                showToast(error.message);
-            });
+    } catch (error) {
+        console.error('Error loading meals:', error);
+        showToast('Failed to load meals', 'error');
     }
 }
 
 // Initialize dashboard
-firebase.auth().onAuthStateChanged((user) => {
-    if (user) {
-        loadMeals();
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        // Initialize goals progress
+        if (goalsProgressElement) {
+            await goalsManager.updateGoalProgress(goalsProgressElement);
+        }
+
+        if (!weeklySummaryBtn || !popup) {
+            console.error('Weekly summary elements not found');
+            return;
+        }
+
+        // Add keyboard event listener for closing popup with Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeWeeklySummary();
+            }
+        });
+
+        // Load meals
+        await loadMeals();
+
+        // Weekly Summary Button Click Handler
+        weeklySummaryBtn.addEventListener('click', async () => {
+            const content = popup.querySelector('.popup-content');
+            const spinner = weeklySummaryBtn.querySelector('.ai-spinner');
+            
+            if (!spinner || !popup || !content) {
+                console.error('Required elements not found');
+                return;
+            }
+
+            content.innerHTML = ''; // Clear previous results
+            
+            try {
+                spinner.classList.add('visible');
+                
+                // Get last 7 days of meals
+                const user = firebase.auth().currentUser;
+                if (!user) {
+                    throw new Error('Please log in to view your weekly summary');
+                }
+
+                const mealsRef = firebase.database().ref(`users/${user.uid}/meals`);
+                const weekAgo = new Date();
+                weekAgo.setDate(weekAgo.getDate() - 7);
+
+                const snapshot = await mealsRef.once('value');
+                const meals = snapshot.val() || {};
+                const recentMeals = Object.values(meals).filter(meal => 
+                    new Date(meal.dateTime) >= weekAgo
+                );
+
+                if (recentMeals.length === 0) {
+                    showToast('No meals logged in the past week', 'info');
+                    return;
+                }
+
+                const summary = await ai.generateWeeklySummary(recentMeals);
+                
+                if (!summary || typeof summary !== 'object') {
+                    throw new Error('Invalid summary response from AI');
+                }
+                
+                const summaryContent = `
+                    <div class="popup-header">
+                        <h2>🤖 Your Weekly Meal Analysis</h2>
+                    </div>
+                    <div class="ai-content">
+                        <div class="summary-section">
+                            <h4>Overview</h4>
+                            <p>${summary.summary || 'No overview available'}</p>
+                        </div>
+                        
+                        ${summary.analysis ? `
+                            <div class="summary-section">
+                                <h4>Detailed Analysis</h4>
+                                <div class="analysis-grid">
+                                    ${summary.analysis.caloriesTrend ? `
+                                        <div class="analysis-item">
+                                            <strong>Calories</strong>
+                                            <p>${summary.analysis.caloriesTrend}</p>
+                                        </div>
+                                    ` : ''}
+                                    ${summary.analysis.mealTiming ? `
+                                        <div class="analysis-item">
+                                            <strong>Meal Timing</strong>
+                                            <p>${summary.analysis.mealTiming}</p>
+                                        </div>
+                                    ` : ''}
+                                    ${summary.analysis.nutritionBalance ? `
+                                        <div class="analysis-item">
+                                            <strong>Nutrition</strong>
+                                            <p>${summary.analysis.nutritionBalance}</p>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        ` : ''}
+
+                        ${summary.insights && summary.insights.length > 0 ? `
+                            <div class="summary-section">
+                                <h4>Key Insights</h4>
+                                <ul class="insights-list">
+                                    ${summary.insights.map(insight => `
+                                        <li>${insight}</li>
+                                    `).join('')}
+                                </ul>
+                            </div>
+                        ` : ''}
+
+                        ${summary.recommendations && summary.recommendations.length > 0 ? `
+                            <div class="summary-section">
+                                <h4>Recommendations</h4>
+                                <div class="recommendations-list">
+                                    ${summary.recommendations.map(rec => `
+                                        <div class="recommendation-item">
+                                            <strong>${rec.area || 'Improvement Area'}</strong>
+                                            <p>${rec.suggestion || rec}</p>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+                
+                // Update popup content and show it
+                content.innerHTML = summaryContent;
+                document.body.classList.add('popup-open');
+                popup.classList.add('visible');
+
+            } catch (error) {
+                console.error('Weekly summary error:', error);
+                showToast(error.message || 'Failed to generate weekly summary', 'error');
+            } finally {
+                spinner.classList.remove('visible');
+            }
+        });
+
+    } catch (error) {
+        console.error('Dashboard initialization error:', error);
+        showToast('Failed to initialize dashboard', 'error');
     }
 });
+
+// Expose closeWeeklySummary to window for HTML onclick handler
+window.closeWeeklySummary = closeWeeklySummary;
