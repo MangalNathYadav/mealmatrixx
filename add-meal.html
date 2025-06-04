@@ -504,30 +504,46 @@
 
                 <!-- Manual Input Form -->
                 <form id="mealForm" class="manual-form">
-                <h3>Manual Input</h3>
-                <div class="form-group">
-                    <label for="mealName">Meal Name</label>
-                    <input type="text" id="mealName" required>
+                    <h3>Manual Input</h3>
+                    <div class="form-group">
+                        <label for="mealName">Meal Name</label>
+                        <input type="text" id="mealName" required>
+                    </div>
                 
-                <div class="form-group">
-                    <label for="calories">Calories</label>
-                    <input type="number" id="calories" required min="0">
-                </div>
-                
-                <div class="form-group">
-                    <label for="dateTime">Date & Time</label>
-                    <input type="datetime-local" id="dateTime" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="notes">Notes (Optional)</label>
-                    <textarea id="notes"></textarea>
-                </div>
-                
-                <button type="submit" class="btn-primary" id="submitBtn">Add Meal</button>
-            </form>
-        </div>
-    </div>    <!-- Firebase SDK -->
+                    <div class="form-group">
+                        <label for="calories">Calories</label>
+                        <input type="number" id="calories" required min="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="protein">Protein (g)</label>
+                        <input type="number" id="protein" required min="0" step="0.1">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="carbs">Carbs (g)</label>
+                        <input type="number" id="carbs" required min="0" step="0.1">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fat">Fat (g)</label>
+                        <input type="number" id="fat" required min="0" step="0.1">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="dateTime">Date & Time</label>
+                        <input type="datetime-local" id="dateTime" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="notes">Notes</label>
+                        <textarea id="notes" placeholder="Any additional notes about the meal..."></textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn-primary" id="submitBtn">Add Meal</button>
+                </form>
+            </div>
+        </div>    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
@@ -567,14 +583,19 @@
                 resultDiv.innerHTML = `
                     <div class="analysis-content">
                         <h4>Analysis Results</h4>
-                        <p><strong>Estimated Calories:</strong> ${result.calories?.total || result.calories}</p>
+                        <div class="nutrition-info">
+                            <p><strong>Calories:</strong> ${result.calories?.total || result.calories}</p>
+                            <p><strong>Protein:</strong> ${result.macros?.protein || 0}g</p>
+                            <p><strong>Carbs:</strong> ${result.macros?.carbs || 0}g</p>
+                            <p><strong>Fat:</strong> ${result.macros?.fat || 0}g</p>
+                        </div>
                         <p><strong>Identified Foods:</strong></p>
                         <ul class="food-list">
                             ${result.foods.map(food => `<li>${food}</li>`).join('')}
                         </ul>
                         ${result.suggestions || result.assessment ? `
                             <div class="analysis-section">
-                                <h4>Suggestions</h4>
+                                <h4>Analysis</h4>
                                 <p>${result.suggestions || result.assessment}</p>
                             </div>
                         ` : ''}
@@ -589,6 +610,15 @@
                 // Auto-fill form fields
                 if (result.calories?.total || result.calories) {
                     document.getElementById('calories').value = result.calories?.total || result.calories;
+                }
+                if (result.macros?.protein) {
+                    document.getElementById('protein').value = result.macros.protein;
+                }
+                if (result.macros?.carbs) {
+                    document.getElementById('carbs').value = result.macros.carbs;
+                }
+                if (result.macros?.fat) {
+                    document.getElementById('fat').value = result.macros.fat;
                 }
                 if (result.foods?.length) {
                     document.getElementById('mealName').value = result.foods.join(', ');
@@ -610,11 +640,12 @@
         };
 
         // Initialize event listeners when DOM is ready
-        document.addEventListener('DOMContentLoaded', () => {
-            // Set default date time to current
+        document.addEventListener('DOMContentLoaded', () => {            // Set default date time to current with proper timezone handling
             const dateTimeInput = document.getElementById('dateTime');
             if (dateTimeInput) {
-                dateTimeInput.value = new Date().toISOString().slice(0, 16);
+                const now = new Date();
+                now.setMinutes(now.getMinutes() - now.getTimezoneOffset()); // Convert to local time
+                dateTimeInput.value = now.toISOString().slice(0, 16);
             }
             
             const analyzeButton = document.getElementById('analyzeButton');
@@ -624,6 +655,7 @@
                 window.analyzeMeal();
             });
         });
-    </script>    <script src="assets/js/addMeal.js"></script>
+    </script>
+    <script src="assets/js/addMeal.js"></script>
 </body>
 </html>

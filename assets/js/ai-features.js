@@ -11,7 +11,35 @@ class MealAI {
     async analyzeMeal(mealText) {
         try {
             console.log('Analyzing meal:', mealText);
-            const result = await this.client.analyzeMeal(mealText);
+            const prompt = `Analyze this meal: "${mealText}"
+            Return a JSON object with exactly this structure:
+            {
+                "foods": ["list of foods with portions"],
+                "calories": number,
+                "macros": {
+                    "protein": number,
+                    "carbs": number,
+                    "fat": number
+                },
+                "suggestions": "nutrition advice",
+                "assessment": "health assessment"
+            }
+            
+            Must include numerical values for calories and all macros in grams.
+            Example: 
+            {
+                "foods": ["banana (medium)", "apple (large)"],
+                "calories": 210,
+                "macros": {
+                    "protein": 2.5,
+                    "carbs": 54,
+                    "fat": 0.5
+                },
+                "suggestions": "Add protein source for better balance",
+                "assessment": "Good source of carbs and fiber"
+            }`;
+
+            const result = await this.client.generateContent(prompt);
             console.log('Raw analysis result:', result);
             
             // Extract JSON from markdown code blocks if present
@@ -27,9 +55,18 @@ class MealAI {
                         throw new Error('Invalid response format from AI service');
                     }
                 }
+                
+                // Try parsing the entire response as JSON if no code blocks found
+                try {
+                    const parsedResult = JSON.parse(result.text);
+                    console.log('Parsed full response as JSON:', parsedResult);
+                    return parsedResult;
+                } catch (parseError) {
+                    console.error('Failed to parse full response as JSON:', parseError);
+                }
             }
             
-            return result;
+            throw new Error('Invalid response format from AI service');
         } catch (error) {
             console.error('Meal analysis failed:', error);
             throw new Error('Failed to analyze meal: ' + error.message);
