@@ -13,11 +13,13 @@
     <script src="assets/js/auth.js" defer></script>
     <script type="module" src="assets/js/dashboard.js" defer></script>
 </head>
-<body>    <!-- Loading Overlay -->
-    <div id="app-loading-overlay" class="visible">
-        <div id="app-loading-spinner"></div>
-        <div id="app-loading-text">Loading MealMatrix</div>
+<body>    <!-- Loading Overlay -->    <div id="app-loading-overlay" class="visible">
+        <div class="goal-card-header">
+            <div id="app-loading-spinner"></div>
+            <div id="app-loading-text">Loading MealMatrix</div>
+        </div>
         <div id="app-loading-subtext">Please wait while we prepare your dashboard</div>
+        <div class="progress-animation"></div>
     </div>
 
     <!-- Main Navigation -->
@@ -323,12 +325,18 @@
         });        // Loading overlay handling
         function showLoading() {
             document.getElementById('app-loading-overlay').classList.add('visible');
+        }        function hideLoading() {
+            const overlay = document.getElementById('app-loading-overlay');
+            overlay.style.animation = 'cardExit 0.6s ease-in forwards';
+            setTimeout(() => {
+                overlay.classList.remove('visible');
+                overlay.style.animation = '';
+            }, 550);
         }
-
-        function hideLoading() {
-            document.getElementById('app-loading-overlay').classList.remove('visible');
-        }        // Loading is already visible on page load from the class        // Hide loading after a short delay
-        setTimeout(hideLoading, 1500);
+        
+        // Loading is already visible on page load from the class
+        // Hide loading after a short delay - using longer delay to show the nice animation
+        setTimeout(hideLoading, 2000);
     </script>
     </main>
 
