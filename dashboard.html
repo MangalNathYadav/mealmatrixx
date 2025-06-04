@@ -5,23 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MealMatrix - Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">    <link rel="stylesheet" href="assets/css/new-styles.css">
+    <link rel="stylesheet" href="assets/css/new-goals.css">
     <link rel="stylesheet" href="assets/css/ai-tips-separator.css">
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js" defer></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js" defer></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js" defer></script>
     <script src="firebase-config.js" defer></script>
-    <script src="assets/js/auth.js" defer></script>
+    <script src="assets/js/auth.js" type="module" defer></script>
     <script type="module" src="assets/js/dashboard.js" defer></script>
 </head>
-<body>    <!-- Loading Overlay -->    <div id="app-loading-overlay" class="visible">
-<div class="goal-card">
-        <div class="goal-card-header">
-            <div id="app-loading-spinner"></div>
-            <div id="app-loading-text">Loading MealMatrix</div>
+<body>    <!-- Loading Overlay -->
+    <div id="app-loading-overlay" class="visible">
+        <div class="loading-container">
+            <div class="goal-card">
+                <div class="goal-card-header">
+                    <div id="app-loading-spinner"></div>
+                    <div id="app-loading-text">Loading MealMatrix</div>
+                </div>
+                <div id="app-loading-subtext">Please wait while we prepare your dashboard</div>
+                <div class="progress-animation"></div>
+            </div>
         </div>
-        <div id="app-loading-subtext">Please wait while we prepare your dashboard</div>
-        <div class="progress-animation"></div>
-    </div>
     </div>
 
     <!-- Main Navigation -->
@@ -313,6 +317,14 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- No Goals State Example (Hidden by default) -->
+                    <div class="sidebar-section no-goals-state" style="display: none;">
+                        <div class="no-goal-message">
+                            <p class="no-goal-text">It looks like you don't have any goals set yet. Let's get started by adding some goals!</p>
+                            <a href="nutrition-goals.html" class="btn btn-primary btn-small">Set Your Goals</a>
+                        </div>
+                    </div>
                 </aside>
 
                 <!-- Main Content Area -->
@@ -342,42 +354,568 @@
     <div id="weeklySummaryModal" class="modal-backdrop">
         <div class="modal">
             <div class="modal-header">
-                <h3 class="modal-title">Weekly Nutrition Summary</h3>
-                <button class="modal-close" onclick="closeWeeklySummary()">&times;</button>
+                <div class="modal-title-section">
+                    <h3 class="modal-title">Weekly Nutrition Summary</h3>
+                    <p class="modal-subtitle">Your nutrition insights for the past 7 days</p>
+                </div>
+                <button class="modal-close" onclick="closeWeeklySummary()" aria-label="Close">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
             </div>
             <div class="modal-body">
-                <!-- Content will be dynamically inserted here -->
+                <!-- Loading State -->
+                <div class="modal-loading-state">
+                    <div class="loading-spinner"></div>
+                    <p>Analyzing your weekly nutrition data...</p>
+                </div>
+
+                <!-- Summary Content -->
+                <div class="weekly-summary-content" style="display: none;">
+                    <!-- Stats Grid -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">🔥</div>
+                            <div class="stat-info">
+                                <h4>Average Daily Calories</h4>
+                                <div class="stat-value" id="avgCalories">-</div>
+                                <div class="stat-trend positive">+5% from last week</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon">🥩</div>
+                            <div class="stat-info">
+                                <h4>Average Protein</h4>
+                                <div class="stat-value" id="avgProtein">-</div>
+                                <div class="stat-trend negative">-2% from last week</div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-icon">🏆</div>
+                            <div class="stat-info">
+                                <h4>Goal Achievement</h4>
+                                <div class="stat-value" id="goalAchievement">-</div>
+                                <div class="stat-trend positive">Great progress!</div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-icon">📊</div>
+                            <div class="stat-info">
+                                <h4>Meals Logged</h4>
+                                <div class="stat-value" id="mealsLogged">-</div>
+                                <div class="stat-trend">Total this week</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chart Section -->
+                    <div class="chart-section">
+                        <div class="chart-header">
+                            <h4>Daily Nutrition Overview</h4>
+                            <div class="chart-legend">
+                                <span class="legend-item">
+                                    <span class="legend-color" style="background: var(--primary-color)"></span>
+                                    Calories
+                                </span>
+                                <span class="legend-item">
+                                    <span class="legend-color" style="background: var(--secondary-color)"></span>
+                                    Protein
+                                </span>
+                            </div>
+                        </div>
+                        <div class="chart-container" id="weeklyChart">
+                            <!-- Chart will be rendered here -->
+                        </div>
+                    </div>
+
+                    <!-- AI Insights Section -->
+                    <div class="insights-section">
+                        <h4>
+                            <span class="ai-badge">AI</span>
+                            Nutrition Insights
+                        </h4>
+                        <div class="insights-grid" id="aiInsights">
+                            <!-- Insights will be dynamically added here -->
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <script>
-        // Add basic JavaScript to toggle modal visibility
-        function closeWeeklySummary() {
-            document.getElementById('weeklySummaryModal').classList.remove('visible');
-            document.querySelector('#weeklySummaryModal .modal').classList.remove('visible');
+    <style>
+        :root {
+            /* Colors */
+            --primary-color: #6366F1;
+            --secondary-color: #8B5CF6;
+            --text-color: #1E293B;
+            --text-muted: #64748B;
+            --border-color: #E2E8F0;
+            --bg-subtle: #F3F4F6;
         }
 
-        document.getElementById('weeklySummaryBtn').addEventListener('click', function() {
-            document.getElementById('weeklySummaryModal').classList.add('visible');
-            setTimeout(() => {
-                document.querySelector('#weeklySummaryModal .modal').classList.add('visible');
-            }, 50);
-        });        // Loading overlay handling
-        function showLoading() {
-            document.getElementById('app-loading-overlay').classList.add('visible');
-        }        function hideLoading() {
-            const overlay = document.getElementById('app-loading-overlay');
-            overlay.style.animation = 'cardExit 0.6s ease-in forwards';
-            setTimeout(() => {
-                overlay.classList.remove('visible');
-                overlay.style.animation = '';
-            }, 550);
+        /* Loading Overlay */
+#app-loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(8px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+#app-loading-overlay.visible {
+    opacity: 1;
+}
+
+#app-loading-overlay .goal-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 16px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    max-width: 400px;
+    width: 90%;
+    transform: translateY(20px);
+    opacity: 0;
+    animation: slideUp 0.6s ease forwards;
+}
+
+#app-loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--border-color);
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    margin: 0 auto 1rem;
+    animation: spin 1s linear infinite;
+}
+
+#app-loading-text {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 0.5rem;
+}
+
+#app-loading-subtext {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+}
+
+.progress-animation {
+    height: 3px;
+    background: var(--bg-subtle);
+    border-radius: 3px;
+    margin-top: 1.5rem;
+    overflow: hidden;
+    position: relative;
+}
+
+.progress-animation::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 30%;
+    background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+    animation: progress 2s ease infinite;
+}
+
+@keyframes slideUp {
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes progress {
+    0% {
+        left: -30%;
+    }
+    100% {
+        left: 100%;
+    }
+}
+
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
         }
-        
-        // Loading is already visible on page load from the class
-        // Hide loading after a short delay - using longer delay to show the nice animation
-        setTimeout(hideLoading, 2000);
+
+        .modal-backdrop.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 900px;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: scale(0.95) translateY(20px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .modal-backdrop.visible .modal {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+
+        .modal-loading-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            animation: fadeSlideUp 0.5s ease;
+        }
+
+        .stat-card {
+            background: var(--bg-subtle);
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            display: inline-block;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover .stat-icon {
+            transform: scale(1.1);
+        }
+
+        .stat-info h4 {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin: 0 0 0.5rem 0;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-color);
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .chart-section {
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: white;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .insights-section {
+            margin-top: 2rem;
+        }
+
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            animation: fadeSlideUp 0.5s ease 0.2s both;
+        }
+
+        .insight-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .insight-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border-color: var(--primary-color);
+        }
+
+        /* No Goals Message Styles */
+        .no-goal-message {
+            text-align: center;
+            padding: 2rem 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .no-goal-text {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .no-goal-message .btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            border-radius: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .no-goal-message .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .goal-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .goal-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Sidebar No Goals State */
+        .sidebar-section .no-goal-message {
+            text-align: center;
+            padding: 1.5rem;
+            background: var(--bg-subtle);
+            border-radius: 0.75rem;
+            margin: 0.5rem 0;
+        }
+
+        .sidebar-section .no-goal-text {
+            display: block;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+            line-height: 1.4;
+        }
+
+        .sidebar-section .btn-primary.btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            border-radius: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            transition: all 0.2s;
+            display: inline-block;
+            border: none;
+            cursor: pointer;
+        }
+
+        .sidebar-section .btn-primary.btn-small:hover {
+            background: var(--secondary-color);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Existing sidebar styles remain unchanged */
+        .sidebar-section .goal-item {
+            margin-bottom: 1rem;
+            background: white;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+
+        @keyframes fadeSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .modal-close {
+                position: absolute;
+                top: 1rem;
+                right: 1rem;
+            }
+
+            .chart-header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+    </style>
+
+    <script>
+        let currentSummaryData = null;
+
+        function closeWeeklySummary() {
+            const modal = document.getElementById('weeklySummaryModal');
+            modal.classList.remove('visible');
+        }
+
+        document.getElementById('weeklySummaryBtn').addEventListener('click', async function() {
+            const modal = document.getElementById('weeklySummaryModal');
+            modal.classList.add('visible');
+            
+            // Show loading state with animation
+            document.querySelector('.modal-loading-state').style.display = 'flex';
+            document.querySelector('.weekly-summary-content').style.display = 'none';
+            
+            // Load data
+            await loadWeeklySummaryData();
+        });
+
+        async function loadWeeklySummaryData() {
+            try {
+                const loadingState = document.querySelector('.modal-loading-state');
+                const content = document.querySelector('.weekly-summary-content');
+                
+                // Simulate data loading delay (remove this in production)
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                // Update UI with data
+                loadingState.style.display = 'none';
+                content.style.display = 'block';
+                
+                // Animate content in
+                requestAnimationFrame(() => {
+                    content.style.opacity = '0';
+                    content.style.transform = 'translateY(20px)';
+                    
+                    requestAnimationFrame(() => {
+                        content.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+                        content.style.opacity = '1';
+                        content.style.transform = 'translateY(0)';
+                    });
+                });
+                
+                // TODO: Implement actual data loading from Firebase
+                updateWeeklySummaryUI({
+                    avgCalories: '2,150',
+                    avgProtein: '85g',
+                    goalAchievement: '92%',
+                    mealsLogged: '21'
+                });
+            } catch (error) {
+                console.error('Error loading weekly summary:', error);
+                showToast('Failed to load weekly summary', 'error');
+            }
+        }
+
+        function updateWeeklySummaryUI(data) {
+            currentSummaryData = data;
+            
+            // Update stats with animations
+            const stats = {
+                'avgCalories': data.avgCalories,
+                'avgProtein': data.avgProtein,
+                'goalAchievement': data.goalAchievement,
+                'mealsLogged': data.mealsLogged
+            };
+            
+            Object.entries(stats).forEach(([id, value], index) => {
+                const element = document.getElementById(id);
+                if (element) {
+                    setTimeout(() => {
+                        element.style.transform = 'translateY(-10px)';
+                        element.style.opacity = '0';
+                        
+                        setTimeout(() => {
+                            element.textContent = value;
+                            element.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+                            element.style.transform = 'translateY(0)';
+                            element.style.opacity = '1';
+                        }, 100);
+                    }, index * 100);
+                }
+            });
+            
+            // Animate progress bars
+            document.querySelectorAll('.progress-bar').forEach((bar, index) => {
+                setTimeout(() => {
+                    const fill = bar.querySelector('.progress-fill');
+                    if (fill) {
+                        fill.style.transition = 'width 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+                        fill.style.width = fill.getAttribute('data-target') + '%';
+                    }
+                }, (index + 4) * 100); // Start after stats animations
+            });
+        }
     </script>
     </main>
 
@@ -426,7 +964,7 @@
                 <p>&copy; <span id="copyright-year">2023</span> MealMatrix. All rights reserved.</p>
                 <div class="footer-social">
                     <a href="#" aria-label="Facebook"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M18 2H15C13.6739 2 12.4021 2.52678 11.4645 3.46447C10.5268 4.40215 10 5.67392 10 7V10H7V14H10V22H14V14H17L18 10H14V7C14 6.73478 14.1054 6.48043 14.2929 6.29289C14.4804 6.10536 14.7348 6 15 6H18V2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></a>
-                    <a href="#" aria-label="Twitter"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M22 4.01C21 4.5 20.02 4.69 19 4.82C20.05 4.27 20.82 3.27 21.2 2.1C20.22 2.68 19.14 3.1 18 3.28C17.25 2.38 16.18 1.9 15 1.9C12.79 1.9 11 3.69 11 5.9C11 6.22 11.03 6.52 11.09 6.8C7.99 6.63 5.22 5.1 3.39 2.68C3.05 3.3 2.85 4.02 2.85 4.77C2.85 6.22 3.59 7.5 4.68 8.2C3.99 8.2 3.35 8.02 2.8 7.7V7.74C2.8 9.73 4.15 11.43 6 11.8C5.68 11.9 5.34 11.95 5 11.95C4.75 11.95 4.5 11.93 4.25 11.9C4.75 13.5 6.25 14.7 8 14.73C6.6 15.8 4.8 16.43 2.9 16.43C2.6 16.43 2.3 16.41 2 16.37C3.77 17.53 5.85 18.17 8.05 18.17C15 18.17 18.84 12.5 18.84 7.58C18.84 7.4 18.84 7.22 18.83 7.04C19.82 6.42 20.68 5.61 21.39 4.68C20.5 5.01 19.57 5.24 18.6 5.34C19.63 4.76 20.37 3.8 20.74 2.68C19.8 3.22 18.75 3.62 17.67 3.82C16.65 2.82 15.23 2.2 13.67 2.2C10.68 2.2 8.26 4.62 8.26 7.61C8.26 7.93 8.29 8.24 8.36 8.53C3.9 8.36 0 6.1 0 2.2C0 1.6 0.12 1.03 0.33 0.5C1.25 2.12 3.01 3.25 5.02 3.47C3.63 3.24 2.38 2.61 1.41 1.7C1.7 3.71 3.47 5.25 5.62 5.45C4.04 5.75 2.42 5.44 1.06 4.6C1.65 6.43 3.37 7.76 5.41 7.78C3.15 8.3 0.7 7.68 0 6.4C1.25 8.18 3.47 9.3 5.92 9.3C12.74 9.3 16.28 3.3 16.06 0C17.28 0.7 18.33 1.7 19.13 2.85" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+                    <a href="#" aria-label="Twitter"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M22 4.01C21 4.5 20.02 4.69 19 4.82C20.05 4.27 20.82 3.27 21.2 2.1C20.22 2.68 19.14 3.1 18 3.28C17.25 2.38 16.18 1.9 15 1.9C12.79 1.9 11 3.69 11 5.9C11 6.22 11.03 6.52 11.09 6.8C7.99 6.63 5.22 5.1 3.39 2.68C3.05 3.3 2.85 4.02 2.85 4.77C2.85 6.22 3.59 7.5 4.68 8.2C3.99 8.2 3.35 8.02 2.8 7.7V7.74C2.8 9.73 4.15 11.43 6 11.8C5.68 11.9 5.34 11.95 5 11.95C4.75 11.95 4.5 11.93 4.25 11.9C4.75 13.5 6.25 14.7 8 14.73C6.6 15.8 4.8 16.43 2.9 16.43C2.6 16.43 2.3 16.41 2 16.37C3.77 17.53 5.85 18.17 8.05 18.17C15 18.17 18.84 12.5 18.84 7.58C18.84 7.4 18.84 7.22 18.83 7.04C19.82 6.42 20.68 5.61 21.39 4.68C20.5 5.01 19.57 5.24 18.6 5.34C19.63 4.76 20.37 3.8 20.74 2.68C19.8 3.22 18.75 3.62 17.67 3.82C16.65 2.82 15.23 2.2 13.67 2.2C10.68 2.2 8.26 4.62 8.26 7.61C8.26 7.93 8.29 8.24 8.36 8.53C3.9 8.36 0 6.1 0 2.2C0 1.6 0.12 1.03 0.33 0.5C1.25 2.12 3.01 3.25 5.02 3.47C3.63 3.24 2.38 2.61 1.41 1.7C1.7 3.71 3.47 5.25 5.62 5.45C4.04 5.75 2.42 5.44 1.06 4.6C1.65 6.43 3.37 7.76 5.41 7.78C3.15 8.3 0.7 7.68 0 6.4C1.25 8.18 3.47 9.3 5.92 9.3C12.74 9.3 16.28 3.3 16.06 0C17.28 0.7 18.33 1.7 19.13 2.85" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></a>
                     <a href="#" aria-label="Instagram"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="2" y="2" width="20" height="20" rx="5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 11.37C16.1234 12.2022 15.9813 13.0522 15.5938 13.799C15.2063 14.5458 14.5931 15.1514 13.8416 15.5297C13.0901 15.9079 12.2384 16.0396 11.4078 15.9059C10.5771 15.7723 9.80976 15.3801 9.21484 14.7852C8.61991 14.1902 8.22773 13.4229 8.09406 12.5922C7.9604 11.7615 8.09206 10.9099 8.47032 10.1584C8.84858 9.40685 9.45418 8.79374 10.201 8.40624C10.9478 8.01874 11.7978 7.87659 12.63 8C13.4789 8.12588 14.2648 8.52146 14.8717 9.12831C15.4785 9.73515 15.8741 10.5211 16 11.37Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16.5" cy="7.5" r="1.5" fill="currentColor"/></svg></a>
                     <a href="#" aria-label="LinkedIn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M16 8C17.5913 8 19.1174 8.63214 20.2426 9.75736C21.3679 10.8826 22 12.4087 22 14V21H18V14C18 13.4696 17.7893 12.9609 17.4142 12.5858C17.0391 12.2107 16.5304 12 16 12C15.4696 12 14.9609 12.2107 14.5858 12.5858C14.2107 12.9609 14 13.4696 14 14V21H10V14C10 12.4087 10.6321 10.8826 11.7574 9.75736C12.8826 8.63214 14.4087 8 16 8Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 9H2V21H6V9Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 6C5.10457 6 6 5.10457 6 4C6 2.89543 5.10457 2 4 2C2.89543 2 2 2.89543 2 4C2 5.10457 2.89543 6 4 6Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
                 </div>

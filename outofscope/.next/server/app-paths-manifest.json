@@ -1,0 +1,12 @@
+{
+  "/_not-found/page": "app/_not-found/page.js",
+  "/favicon.ico/route": "app/favicon.ico/route.js",
+  "/auth/signup/page": "app/auth/signup/page.js",
+  "/auth/login/page": "app/auth/login/page.js",
+  "/page": "app/page.js",
+  "/dashboard/meals/[id]/edit/page": "app/dashboard/meals/[id]/edit/page.js",
+  "/dashboard/meals/new/page": "app/dashboard/meals/new/page.js",
+  "/dashboard/meals/page": "app/dashboard/meals/page.js",
+  "/dashboard/profile/page": "app/dashboard/profile/page.js",
+  "/dashboard/page": "app/dashboard/page.js"
+}

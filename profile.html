@@ -22,6 +22,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            backdrop-filter: blur(8px);
+            background: rgba(255, 255, 255, 0.95);
         }
 
         .navbar h2 {
@@ -56,60 +58,81 @@
             border-color: var(--primary-color);
             transform: translateY(-1px);
         }        .profile-container {
-            max-width: 1200px;
+            max-width: 900px;
             margin: 2rem auto;
-            padding: 0 2rem;
+            padding: 2rem;
         }
 
         .profile-content {
             background: white;
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            padding: 2rem;
-            margin-bottom: 2rem;
+            border-radius: 16px;
+            padding: 2.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .profile-content:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.08), 0 12px 18px -3px rgba(0, 0, 0, 0.12);
+        }
+
+        .profile-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .profile-header h2 {
+            font-size: 2rem;
+            color: var(--text-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-header p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
         }
 
         .profile-grid {
             display: grid;
-            grid-template-columns: 300px 1fr;
-            gap: 2rem;
-            margin-bottom: 2rem;
-        }        .profile-photo-section {
+            grid-template-columns: 250px 1fr;
+            gap: 2.5rem;
+            margin-top: 2rem;
+        }
+
+        .profile-photo-section {
             text-align: center;
-            background: white;
-            padding: 2rem;
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            border: 1px solid var(--border-color);
-            height: fit-content;
         }
 
         .profile-photo {
             width: 180px;
             height: 180px;
             border-radius: 50%;
-            margin-bottom: 1.5rem;
-            border: 4px solid var(--primary-color);
-            padding: 4px;
-            background: white;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            object-fit: cover;
+            border: 4px solid white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1rem;
+            transition: transform 0.3s ease;
+        }
+
+        .profile-photo:hover {
+            transform: scale(1.05);
         }
 
         .photo-upload-btn {
-            background: var(--bg-subtle);
-            border: 1px dashed var(--border-color);
-            padding: 0.5rem;
-            border-radius: var(--border-radius);
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
             cursor: pointer;
-            width: 100%;
-            font-size: 0.875rem;
-            color: var(--text-color);
-            transition: all 0.2s ease;
+            font-weight: 500;
+            transition: all 0.3s ease;
         }
 
         .photo-upload-btn:hover {
-            border-color: var(--primary-color);
-            background: white;
+            background: var(--secondary-color);
+            transform: translateY(-2px);
         }
 
         @media (max-width: 768px) {
@@ -181,18 +204,19 @@
 
         .form-control {
             width: 100%;
-            padding: 0.75rem;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            font-size: 0.875rem;
-            background: var(--bg-subtle);
+            padding: 0.75rem 1rem;
+            border: 1.5px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.95rem;
             color: var(--text-color);
+            background: white;
             transition: all 0.2s ease;
         }
 
         .form-control:focus {
-            background: white;
-            transform: translateY(-1px);
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb), 0.1);
         }
 
         .form-group label {
@@ -276,19 +300,16 @@
         }
 
         .success-message {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #22c55e;
-            color: white;
-            padding: 1rem 2rem;
-            border-radius: var(--border-radius);
-            display: none;
+            background: #dcfce7;
+            color: #166534;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            display: flex;
             align-items: center;
-            gap: 0.75rem;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            font-weight: 500;
-            z-index: 1000;
+            gap: 0.5rem;
+            animation: slideIn 0.3s ease;
+            display: none;
         }
 
         .success-message span {
@@ -300,9 +321,9 @@
             animation: slideInRight 0.3s ease;
         }
 
-        @keyframes slideInRight {
+        @keyframes slideIn {
             from {
-                transform: translateX(100%);
+                transform: translateX(-10px);
                 opacity: 0;
             }
             to {
@@ -402,7 +423,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(4px);
             display: none;
             justify-content: center;
@@ -414,24 +435,37 @@
             display: flex;
         }
 
-        .loading-content {
-            background: white;
-            padding: 2rem;
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            text-align: center;
-            max-width: 300px;
-            width: 90%;
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(4px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .loading-overlay.visible {
+            opacity: 1;
+            visibility: visible;
         }
 
         .loading-spinner {
             width: 40px;
             height: 40px;
-            border: 3px solid var(--bg-subtle);
-            border-top: 3px solid var(--primary-color);
+            border: 3px solid var(--border-color);
+            border-top-color: var(--primary-color);
             border-radius: 50%;
-            margin: 0 auto 1rem;
-            animation: spin 1s linear infinite;
+            animation: spin 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+            margin-bottom: 1rem;
         }
 
         #loadingMessage {
@@ -442,6 +476,11 @@
 
         @keyframes spin {
             to { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
     </style>
 </head>

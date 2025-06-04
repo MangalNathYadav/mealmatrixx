@@ -1,5 +1,6 @@
 // Auth state management
 let currentUser = null;
+let authInitialized = false;
 
 // Toast notification function
 function showToast(message, type = 'error') {
@@ -13,8 +14,17 @@ function showToast(message, type = 'error') {
     }, 3000);
 }
 
-// Check if user is logged in
-firebase.auth().onAuthStateChanged((user) => {
+// Initialize auth when Firebase is ready
+window.addEventListener('firebaseLoaded', () => {
+    if (!authInitialized) {
+        initializeAuth();
+    }
+});
+
+// Initialize auth
+function initializeAuth() {
+    authInitialized = true;
+    firebase.auth().onAuthStateChanged((user) => {
     if (user) {
         currentUser = user;
         // If on login/register page, redirect to dashboard
@@ -31,7 +41,8 @@ firebase.auth().onAuthStateChanged((user) => {
             window.location.href = 'login.html';
         }
     }
-});
+    });
+}
 
 // Login form handler
 if (document.getElementById('loginForm')) {

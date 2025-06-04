@@ -14,34 +14,102 @@ function showToast(message, type = 'info') {
 
 // Loading overlay control
 let loadingCount = 0;
+let loadingTimeout;
 
-function showLoading(message = 'Loading...', section = null) {
+// Initialize Firebase Auth
+let firebaseInitialized = false;
+
+// Initialize dashboard and Firebase
+async function initializeFirebase() {
+    if (firebaseInitialized) return;
+    
+    try {
+        // Wait for Firebase to be available
+        let attempts = 0;
+        while (typeof firebase === 'undefined' && attempts < 10) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+            attempts++;
+        }
+
+        if (typeof firebase === 'undefined') {
+            throw new Error('Firebase failed to initialize');
+        }
+
+        // Initialize auth listener
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                initializeDashboard();
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
+
+        firebaseInitialized = true;
+    } catch (error) {
+        console.error('Firebase initialization error:', error);
+        showToast('Failed to initialize application', 'error');
+    }
+}
+
+// Initialize loading state
+document.addEventListener('DOMContentLoaded', () => {
+    const overlay = document.getElementById('app-loading-overlay');
+    if (!overlay) return;
+
+    // Initialize Firebase first
+    initializeFirebase().catch(error => {
+        console.error('Failed to initialize Firebase:', error);
+        showToast('Failed to initialize application', 'error');
+    });
+});
+
+// Loading overlay handling
+function showLoading(message = 'Loading...', subtext = 'Please wait...') {
+    const overlay = document.getElementById('app-loading-overlay');
+    const textElement = overlay?.querySelector('#app-loading-text');
+    const subtextElement = overlay?.querySelector('#app-loading-subtext');
+    
+    if (!overlay) return;
+    
     loadingCount++;
-    const overlay = document.querySelector('.loading-overlay');
-    const textElement = overlay?.querySelector('.loading-text');
+    clearTimeout(loadingTimeout);
+    
+    // Update text content
     if (textElement) {
         textElement.textContent = message;
     }
-    if (overlay) {
-        if (section) {
-            const rect = section.getBoundingClientRect();
-            overlay.style.top = `${rect.top + rect.height/2}px`;
-            overlay.style.left = `${rect.left + rect.width/2}px`;
-        }
-        overlay.classList.add('visible');
+    if (subtextElement) {
+        subtextElement.textContent = subtext;
     }
+    
+    // Show overlay with proper animation
+    requestAnimationFrame(() => {
+        overlay.style.display = 'flex';
+        overlay.style.opacity = '1';
+        overlay.classList.add('visible');
+    });
 }
 
 function hideLoading() {
     loadingCount--;
     if (loadingCount <= 0) {
-        loadingCount = 0;
-        const overlay = document.querySelector('.loading-overlay');
-        if (overlay) {
-            overlay.classList.remove('visible');
-        }
+        loadingCount = 0; // Reset to prevent negative counts
+        const overlay = document.getElementById('app-loading-overlay');
+        if (!overlay) return;
+        
+        // Smooth fade out
+        overlay.classList.remove('visible');
+        
+        // Hide after transition
+        loadingTimeout = setTimeout(() => {
+            overlay.style.opacity = '0';
+            overlay.style.display = 'none';
+        }, 300);
     }
 }
+
+// Hide initial loading overlay after a short delay to show the nice animation
+setTimeout(hideLoading, 2000);
 
 // Dashboard elements
 const mealGrid = document.getElementById('mealGrid');
@@ -247,27 +315,49 @@ async function loadUserProfile() {
 
 // Initialize dashboard
 async function initializeDashboard() {
-    showLoading('Loading your dashboard...');
+    showLoading('Loading your dashboard...', 'This may take a moment');
     try {
         const user = firebase.auth().currentUser;
         if (!user) {
-            window.location.href = 'login.html';
-            return;
+            throw new Error('User not authenticated');
         }
 
-        await Promise.all([
-            loadUserProfile(),
-            loadMealsAndStats(),
-            goalsManager.loadGoals()
-        ]);
+        // Load user profile first to get basic info
+        await loadUserProfile();
+
+        // Load goals and check if they're set up
+        await goalsManager.loadGoals();
+
+        // Load meals and stats (this will trigger goal progress updates)
+        await loadMealsAndStats();
+
+        // Show welcome message based on goals status
+        updateWelcomeMessage(goalsManager.hasAnyGoals());
         
-        // Load health tip after initial dashboard load
-        loadHealthTip();
+        // Load AI health tip only if goals are set up
+        if (goalsManager.hasAnyGoals()) {
+            await loadHealthTip();
+        }
+
+        // Hide loading after a slight delay to ensure smooth transition
+        setTimeout(hideLoading, 500);
     } catch (error) {
         console.error('Dashboard initialization error:', error);
         showToast('Some dashboard features failed to load');
-    } finally {
         hideLoading();
+        throw error;
+    }
+}
+
+// Update welcome message based on goals status
+function updateWelcomeMessage(hasGoals) {
+    const welcomeText = document.querySelector('.welcome-text p');
+    if (welcomeText) {
+        if (hasGoals) {
+            welcomeText.textContent = "Here's your meal tracking overview for today";
+        } else {
+            welcomeText.innerHTML = 'Get started by <a href="nutrition-goals.html" class="text-primary">setting up your nutrition goals</a>';
+        }
     }
 }
 
@@ -561,15 +651,8 @@ function handleLayoutChange() {
 }
 
 // Event Listeners
-document.addEventListener('DOMContentLoaded', () => {
-    firebase.auth().onAuthStateChanged((user) => {
-        if (user) {
-            initializeDashboard();
-        } else {
-            window.location.href = 'login.html';
-        }
-    });
-      // Health tip refresh button
+function setupEventListeners() {
+    // Health tip refresh button
     if (refreshHealthTipBtn) {
         refreshHealthTipBtn.addEventListener('click', () => {
             loadHealthTip();
@@ -578,4 +661,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize AI Nutrition Tips
     initializeAINutritionTips();
+}
+
+// Wait for both DOM and Firebase to be ready
+let isDomReady = false;
+let isFirebaseReady = false;
+
+function tryInitialize() {
+    if (isDomReady && isFirebaseReady) {
+        // Check if user is authenticated
+        const user = firebase.auth().currentUser;
+        if (user) {
+            initializeDashboard().catch(error => {
+                console.error('Dashboard initialization error:', error);
+                showToast('Failed to load dashboard. Please refresh the page.', 'error');
+                hideLoading();
+            });
+        } else {
+            hideLoading();
+            window.location.href = 'login.html';
+        }
+    }
+}
+
+// DOM ready listener
+document.addEventListener('DOMContentLoaded', () => {
+    isDomReady = true;
+    setupEventListeners();
+    tryInitialize();
+});
+
+// Firebase ready listener
+window.addEventListener('firebaseLoaded', () => {
+    isFirebaseReady = true;
+    tryInitialize();
 });

@@ -3,32 +3,333 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MealMatrix - Register</title>
-    <link rel="stylesheet" href="assets/css/styles.css">
+    <title>MealMatrix - Sign Up</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/new-styles.css">
+    <style>
+        :root {
+            --primary-color: #4f46e5;
+            --secondary-color: #6366f1;
+            --text-color: #111827;
+            --text-muted: #6b7280;
+            --border-color: #e5e7eb;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9fafb;
+        }
+
+        /* Auth Container */
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        /* Auth Card */
+        .auth-card {
+            width: 100%;
+            max-width: 420px;
+            background: white;
+            border-radius: 12px;
+            padding: 2.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            transform: translateY(0);
+            transition: all 0.3s ease;
+        }
+
+        .auth-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15), 0 12px 18px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Auth Logo */
+        .auth-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+            justify-content: center;
+        }
+
+        .auth-logo img {
+            width: 40px;
+            height: 40px;
+        }
+
+        .auth-logo span {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        /* Auth Title */
+        .auth-title {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: var(--text-color);
+        }
+
+        .auth-title h1 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .auth-title p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        /* Form Group */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1.5px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            color: var(--text-color);
+            background: white;
+            transition: all 0.2s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb), 0.1);
+        }
+
+        /* Primary Button */
+        .btn-primary {
+            width: 100%;
+            padding: 0.875rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(var(--primary-color-rgb), 0.2);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Auth Links */
+        .auth-links {
+            text-align: center;
+            margin-top: 1.5rem;
+        }
+
+        .auth-links a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .auth-links a:hover {
+            color: var(--secondary-color);
+        }
+
+        /* Password strength indicator */
+        .password-strength {
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .password-strength::before {
+            content: '';
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .strength-weak {
+            color: #dc2626;
+        }
+
+        .strength-weak::before {
+            background-color: #dc2626;
+        }
+
+        .strength-medium {
+            color: #d97706;
+        }
+
+        .strength-medium::before {
+            background-color: #d97706;
+        }
+
+        .strength-strong {
+            color: #059669;
+        }
+
+        .strength-strong::before {
+            background-color: #059669;
+        }
+
+        /* Loading Overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(4px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .loading-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+            margin-bottom: 1rem;
+        }
+
+        .loading-text {
+            color: var(--text-color);
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+            z-index: 10000;
+            animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .toast::before {
+            content: '🔔';
+            font-size: 1.2rem;
+        }
+
+        .toast.error::before {
+            content: '❌';
+        }
+
+        .toast.success::before {
+            content: '✅';
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
 </head>
-<body class="auth-page">
-    <div class="container">
+<body>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Creating your account...</div>
+    </div>
+
+    <div class="auth-container">
         <div class="auth-card">
-            <h1>Create Account</h1>
-            <div class="auth-form">
-                <form id="registerForm">
-                    <div class="form-group">
-                        <label for="email">Email</label>
-                        <input type="email" id="email" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="password">Password</label>
-                        <input type="password" id="password" required minlength="6">
-                    </div>
-                    <div class="form-group">
-                        <label for="confirmPassword">Confirm Password</label>
-                        <input type="password" id="confirmPassword" required minlength="6">
-                    </div>
-                    <button type="submit" class="btn-primary">Sign Up</button>
-                </form>
-                <p class="auth-switch">
-                    Already have an account? <a href="login.html">Login</a>
-                </p>
+            <div class="auth-logo">
+                <img src="assets/mealmatrixx_logo.png" alt="MealMatrix Logo">
+                <span>MealMatrix</span>
+            </div>
+            
+            <div class="auth-title">
+                <h1>Create Account</h1>
+                <p>Join MealMatrix to start tracking your nutrition</p>
+            </div>
+
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="email">Email address</label>
+                    <input type="email" id="email" name="email" required placeholder="Enter your email">
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required minlength="6" placeholder="Choose a password">
+                    <div class="password-strength" id="passwordStrength"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm password</label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" required minlength="6" placeholder="Confirm your password">
+                </div>
+                
+                <button type="submit" class="btn-primary">
+                    <span class="btn-text">Create account</span>
+                </button>
+            </form>
+
+            <div class="auth-links">
+                <p>Already have an account? <a href="login.html">Log in</a></p>
             </div>
         </div>
     </div>
@@ -39,26 +340,86 @@
     
     <!-- App Scripts -->
     <script src="firebase-config.js"></script>
-    <script src="assets/js/auth.js"></script>
     <script>
-        // Register form handler
+        function showLoading() {
+            document.getElementById('loadingOverlay').classList.add('visible');
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.remove('visible');
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        function checkPasswordStrength(password) {
+            const strengthDiv = document.getElementById('passwordStrength');
+            if (password.length === 0) {
+                strengthDiv.textContent = '';
+                return;
+            }
+
+            let strength = 0;
+            if (password.length >= 8) strength++;
+            if (password.match(/[a-z]/) && password.match(/[A-Z]/)) strength++;
+            if (password.match(/\d/)) strength++;
+            if (password.match(/[^a-zA-Z\d]/)) strength++;
+
+            switch (strength) {
+                case 0:
+                case 1:
+                    strengthDiv.textContent = 'Weak password';
+                    strengthDiv.className = 'password-strength strength-weak';
+                    break;
+                case 2:
+                case 3:
+                    strengthDiv.textContent = 'Medium strength password';
+                    strengthDiv.className = 'password-strength strength-medium';
+                    break;
+                case 4:
+                    strengthDiv.textContent = 'Strong password';
+                    strengthDiv.className = 'password-strength strength-strong';
+                    break;
+            }
+        }
+
+        document.getElementById('password').addEventListener('input', (e) => {
+            checkPasswordStrength(e.target.value);
+        });
+
         document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
 
             if (password !== confirmPassword) {
-                showToast('Passwords do not match');
+                showToast('Passwords do not match', 'error');
                 return;
             }
 
             try {
+                showLoading();
                 await firebase.auth().createUserWithEmailAndPassword(email, password);
-                showToast('Registration successful!', 'success');
+                showToast('Account created successfully!', 'success');
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 1000);
             } catch (error) {
-                showToast(error.message);
+                console.error('Registration error:', error);
+                hideLoading();
+                showToast(error.message, 'error');
+            }
+        });
+
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                window.location.href = 'dashboard.html';
             }
         });
     </script>

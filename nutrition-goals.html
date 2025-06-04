@@ -8,20 +8,15 @@
     <style>
         /* Loading Overlay Styles */
         .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(4px);
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
             z-index: 9999;
             opacity: 0;
             visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .loading-overlay.visible {
@@ -35,18 +30,269 @@
             border: 4px solid var(--primary-color);
             border-top-color: transparent;
             border-radius: 50%;
-            animation: spin 1s linear infinite;
+            animation: spin 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
             margin-bottom: 1rem;
         }
 
         .loading-text {
-            color: var(--primary-color);
+            color: var(--text-color);
             font-size: 1.1rem;
             font-weight: 500;
+            opacity: 0.9;
         }
 
         @keyframes spin {
             to { transform: rotate(360deg); }
+        }
+        
+        .goals-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 3rem;
+            background: linear-gradient(to bottom right, white, var(--bg-subtle));
+            border-radius: 16px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border-color);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .goals-container:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.08), 0 12px 18px -3px rgba(0, 0, 0, 0.12);
+        }
+
+        .goals-header {
+            text-align: center;
+            margin-bottom: 3.5rem;
+            animation: fadeSlideDown 0.6s ease-out;
+            position: relative;
+            padding-bottom: 2rem;
+        }
+
+        .goals-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            border-radius: 2px;
+        }
+
+        .goals-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            animation: fadeSlideUp 0.6s ease-out 0.2s both;
+        }
+
+        .goal-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            height: 100%;
+        }
+
+        .goal-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .goal-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .goal-card:hover::before {
+            opacity: 1;
+        }
+
+        .goal-header {
+            color: var(--primary-color);
+            font-size: 1.25rem;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .goal-input-group {
+            margin-bottom: 1.75rem;
+            position: relative;
+        }
+
+        .goal-input-group label {
+            display: block;
+            margin-bottom: 0.75rem;
+            color: var(--text-color);
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .goal-input-group input,
+        .goal-input-group select {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            background: var(--bg-subtle);
+        }
+
+        .goal-input-group input:hover,
+        .goal-input-group select:hover {
+            border-color: var(--primary-color);
+        }
+
+        .goal-input-group input:focus,
+        .goal-input-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(var(--primary-color-rgb), 0.1);
+        }
+
+        .input-hint {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.2s ease;
+        }
+
+        .goal-input-group input:focus + .input-hint,
+        .goal-input-group select:focus + .input-hint {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .save-goals-container {
+            margin-top: 3rem;
+            text-align: center;
+            animation: fadeSlideUp 0.6s ease-out 0.4s both;
+        }
+
+        .save-goals {
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            padding: 1rem 2.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(var(--primary-color-rgb), 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .save-goals::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease-out, height 0.6s ease-out;
+        }
+
+        .save-goals:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(var(--primary-color-rgb), 0.3);
+        }
+
+        .save-goals:active::after {
+            width: 200px;
+            height: 200px;
+            opacity: 0;
+        }
+
+        .success-message {
+            display: none;
+            background: linear-gradient(to right, #dcfce7, #bbf7d0);
+            color: #166534;
+            padding: 1.25rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            text-align: center;
+            font-weight: 500;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .success-message.visible {
+            display: block;
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        @keyframes fadeSlideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 1024px) {
+            .goals-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .goals-container {
+                margin: 1rem;
+                padding: 2rem;
+            }
+
+            .goals-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .goal-card {
+                padding: 1.5rem;
+            }
         }
     </style>
 </head>
@@ -156,44 +402,108 @@
     <script src="firebase-config.js"></script>
     <script src="assets/js/auth.js"></script>
     <script>
-        // Check authentication
-        firebase.auth().onAuthStateChanged((user) => {
-            if (!user) {
-                window.location.href = 'login.html';
-            } else {
-                loadUserGoals();
-            }
-        });
+        // Show loading spinner
+        function showLoading() {
+            document.querySelector('.loading-overlay').classList.add('visible');
+        }
 
+        // Hide loading spinner
+        function hideLoading() {
+            document.querySelector('.loading-overlay').classList.remove('visible');
+        }
+
+        // Show toast notifications
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            // Add appropriate icon
+            const icon = type === 'error' ? '❌' : type === 'success' ? '✅' : 'ℹ️';
+            toast.innerHTML = `<span class="toast-icon">${icon}</span><span class="toast-message">${message}</span>`;
+            
+            document.body.appendChild(toast);
+            
+            // Animate in
+            requestAnimationFrame(() => {
+                toast.style.opacity = '1';
+                toast.style.transform = 'translateY(0)';
+            });
+
+            // Remove after delay
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(-20px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Load user's goals
         async function loadUserGoals() {
             const user = firebase.auth().currentUser;
             if (!user) return;
 
+            showLoading();
+
             try {
                 const goalsRef = firebase.database().ref(`users/${user.uid}/nutritionGoals`);
                 const snapshot = await goalsRef.once('value');
-                const goals = snapshot.val();
+                const goals = snapshot.val() || {};
 
-                if (goals) {
-                    document.getElementById('targetCalories').value = goals.targetCalories || '';
-                    document.getElementById('activityLevel').value = goals.activityLevel || 'moderate';
-                    document.getElementById('proteinGoal').value = goals.proteinGoal || '';
-                    document.getElementById('carbsGoal').value = goals.carbsGoal || '';
-                    document.getElementById('fatGoal').value = goals.fatGoal || '';
-                    document.getElementById('weightGoal').value = goals.weightGoal || '';
-                    document.getElementById('goalType').value = goals.goalType || 'maintain';
-                    document.getElementById('weeklyGoal').value = goals.weeklyGoal || '';
-                }
+                // Set input values with smooth transitions
+                const inputs = {
+                    'targetCalories': goals.targetCalories || '',
+                    'activityLevel': goals.activityLevel || 'moderate',
+                    'proteinGoal': goals.proteinGoal || '',
+                    'carbsGoal': goals.carbsGoal || '',
+                    'fatGoal': goals.fatGoal || '',
+                    'weightGoal': goals.weightGoal || '',
+                    'goalType': goals.goalType || 'maintain',
+                    'weeklyGoal': goals.weeklyGoal || ''
+                };
+
+                Object.entries(inputs).forEach(([id, value]) => {
+                    const input = document.getElementById(id);
+                    if (input) {
+                        input.style.transition = 'all 0.3s ease';
+                        input.value = value;
+                        input.classList.add('populated');
+                    }
+                });
+
             } catch (error) {
                 console.error('Error loading goals:', error);
                 showToast('Failed to load goals', 'error');
+            } finally {
+                hideLoading();
             }
         }
 
+        // Save nutrition goals
         async function saveNutritionGoals() {
             const user = firebase.auth().currentUser;
             if (!user) {
                 showToast('Please log in to save goals', 'error');
+                return;
+            }
+
+            // Validate inputs
+            const inputs = ['targetCalories', 'proteinGoal', 'carbsGoal', 'fatGoal', 'weightGoal'];
+            let isValid = true;
+
+            inputs.forEach(id => {
+                const input = document.getElementById(id);
+                const value = parseFloat(input.value);
+                
+                if (input.value && (isNaN(value) || value < 0)) {
+                    input.classList.add('error');
+                    isValid = false;
+                } else {
+                    input.classList.remove('error');
+                }
+            });
+
+            if (!isValid) {
+                showToast('Please check your inputs', 'error');
                 return;
             }
 
@@ -209,26 +519,66 @@
                 updatedAt: firebase.database.ServerValue.TIMESTAMP
             };
 
+            // Show loading state
+            const saveButton = document.querySelector('.save-goals');
+            const originalText = saveButton.textContent;
+            saveButton.innerHTML = '<span class="loading-dots">Saving</span>';
+            saveButton.disabled = true;
+
             try {
                 await firebase.database().ref(`users/${user.uid}/nutritionGoals`).set(goals);
+                
+                // Show success message with animation
                 const successMessage = document.getElementById('successMessage');
                 successMessage.classList.add('visible');
+                
                 setTimeout(() => {
                     successMessage.classList.remove('visible');
                 }, 3000);
+
+                showToast('Goals saved successfully!', 'success');
+
             } catch (error) {
                 console.error('Error saving goals:', error);
                 showToast('Failed to save goals', 'error');
+            } finally {
+                // Restore button state
+                saveButton.innerHTML = originalText;
+                saveButton.disabled = false;
             }
         }
 
-        function showToast(message, type = 'info') {
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.textContent = message;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
-        }
+        // Add input validation and auto-calculation
+        document.querySelectorAll('input[type="number"]').forEach(input => {
+            input.addEventListener('input', (e) => {
+                const value = parseFloat(e.target.value);
+                if (e.target.value && (isNaN(value) || value < 0)) {
+                    input.classList.add('error');
+                } else {
+                    input.classList.remove('error');
+                }
+            });
+        });
+
+        // Handle goal type changes
+        document.getElementById('goalType').addEventListener('change', (e) => {
+            const weeklyGoalInput = document.getElementById('weeklyGoal');
+            if (e.target.value === 'maintain') {
+                weeklyGoalInput.value = '0';
+                weeklyGoalInput.disabled = true;
+            } else {
+                weeklyGoalInput.disabled = false;
+            }
+        });
+
+        // Initialize page
+        firebase.auth().onAuthStateChanged((user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+            } else {
+                loadUserGoals();
+            }
+        });
     </script>
 </body>
 </html>
