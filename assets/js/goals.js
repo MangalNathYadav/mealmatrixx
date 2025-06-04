@@ -144,21 +144,26 @@ class GoalsManager {
     updateGoalsUI() {
         if (!this.goals) return;
 
-        // Get all goal cards
+        // Get all goal cards and sidebar
         const goalsGrid = document.querySelector('.goals-grid');
         const sidebar = document.querySelector('.dashboard-sidebar');
-        if (!goalsGrid || !sidebar) return;
+        if (!goalsGrid) return;
+
+        // Handle visibility of sidebar based on goals existence
+        if (sidebar) {
+            if (!this.hasAnyGoals()) {
+                sidebar.style.display = 'none';
+            } else {
+                sidebar.style.display = 'block';
+            }
+        }
 
         // Show first-time user message if no goals are set
         if (!this.hasAnyGoals()) {
-            // Update main goals grid
             const allCards = goalsGrid.querySelectorAll('.goal-card');
             allCards.forEach(card => {
                 this.showNoGoalMessage(card, 'Set up your nutrition goals to start tracking');
             });
-
-            // Update sidebar sections
-            this.updateSidebarNoGoals(sidebar);
             return;
         }
 
@@ -225,151 +230,6 @@ class GoalsManager {
                 `;
             }
         });
-
-        // Update sidebar sections
-        this.updateSidebarWithGoals(sidebar);
-    }
-
-    updateSidebarNoGoals(sidebar) {
-        const sections = sidebar.querySelectorAll('.sidebar-section');
-        sections.forEach(section => {
-            const title = section.querySelector('.sidebar-title')?.textContent?.toLowerCase() || '';
-            
-            // Skip the AI tips section
-            if (title.includes('ai') || title.includes('tip')) return;
-
-            const content = `
-                <div class="goal-item">
-                    <div class="no-goal-message">
-                        <span class="no-goal-text">Set up your goals to start tracking your progress</span>
-                        <a href="nutrition-goals.html" class="btn btn-primary btn-small">Set Goals</a>
-                    </div>
-                </div>
-            `;
-
-            // Clear existing items and add no-goals message
-            const items = section.querySelectorAll('.goal-item');
-            if (items.length) {
-                items[0].innerHTML = content;
-                // Remove any additional items
-                for (let i = 1; i < items.length; i++) {
-                    items[i].remove();
-                }
-            } else {
-                // If no items exist, create one
-                const newItem = document.createElement('div');
-                newItem.className = 'goal-item';
-                newItem.innerHTML = content;
-                section.appendChild(newItem);
-            }
-        });
-    }
-
-    updateSidebarWithGoals(sidebar) {
-        // Update daily calorie goals section
-        const calorieSection = sidebar.querySelector('.sidebar-section');
-        if (calorieSection && this.goals.targetCalories) {
-            const caloriePercentage = this.getPercentage(this.dailyProgress.calories, this.goals.targetCalories);
-            const calorieContent = `
-                <div class="goal-item">
-                    <div class="goal-header">
-                        <span class="goal-label">Target Daily Calories</span>
-                        <span class="goal-value">${this.formatValue(this.goals.targetCalories, ' kcal')}</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: ${caloriePercentage}%"></div>
-                    </div>
-                    <div class="goal-stats">
-                        <span>${this.formatValue(this.dailyProgress.calories, ' kcal')} consumed</span>
-                        <span>${caloriePercentage}%</span>
-                    </div>
-                </div>
-            `;
-            const goalItem = calorieSection.querySelector('.goal-item');
-            if (goalItem) {
-                goalItem.innerHTML = calorieContent;
-            }
-        }
-
-        // Update macro goals section
-        const macroSection = sidebar.querySelector('.sidebar-section:nth-child(2)');
-        if (macroSection) {
-            const macros = [
-                { label: 'Protein', current: this.dailyProgress.protein, target: this.goals.proteinGoal },
-                { label: 'Carbs', current: this.dailyProgress.carbs, target: this.goals.carbsGoal },
-                { label: 'Fat', current: this.dailyProgress.fat, target: this.goals.fatGoal }
-            ];
-
-            let macroContent = '';
-            macros.forEach(macro => {
-                if (macro.target) {
-                    const percentage = this.getPercentage(macro.current, macro.target);
-                    macroContent += `
-                        <div class="goal-item">
-                            <div class="goal-header">
-                                <span class="goal-label">${macro.label}</span>
-                                <span class="goal-value">${this.formatValue(macro.target, 'g')}</span>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: ${percentage}%"></div>
-                            </div>
-                            <div class="goal-stats">
-                                <span>${this.formatValue(macro.current, 'g')} consumed</span>
-                                <span>${percentage}%</span>
-                            </div>
-                        </div>
-                    `;
-                }
-            });
-
-            if (macroContent) {
-                const items = macroSection.querySelectorAll('.goal-item');
-                items.forEach(item => item.remove());
-                macroSection.insertAdjacentHTML('beforeend', macroContent);
-            }
-        }
-
-        // Update health goals section
-        const healthSection = sidebar.querySelector('.sidebar-section:nth-child(3)');
-        if (healthSection && (this.goals.weightGoal || this.goals.weeklyGoal)) {
-            let healthContent = '';
-            
-            if (this.goals.weightGoal) {
-                healthContent += `
-                    <div class="goal-item">
-                        <div class="goal-header">
-                            <span class="goal-label">Target Weight</span>
-                            <span class="goal-value">${this.formatValue(this.goals.weightGoal, ' kg')}</span>
-                        </div>
-                        <div class="goal-stats">
-                            <span>${this.goals.goalType === 'maintain' ? 'Maintain Weight' : 
-                                   this.goals.goalType === 'lose' ? 'Weight Loss' : 'Gain Muscle Mass'}</span>
-                        </div>
-                    </div>
-                `;
-            }
-
-            if (this.goals.weeklyGoal) {
-                const sign = this.goals.weeklyGoal > 0 ? '+' : '';
-                healthContent += `
-                    <div class="goal-item">
-                        <div class="goal-header">
-                            <span class="goal-label">Weekly Goal</span>
-                            <span class="goal-value">${sign}${this.formatValue(this.goals.weeklyGoal, ' kg')}</span>
-                        </div>
-                        <div class="goal-stats">
-                            <span>${Math.abs(this.goals.weeklyGoal) <= 0.5 ? 'Healthy pace' : 'Ambitious pace'}</span>
-                        </div>
-                    </div>
-                `;
-            }
-
-            if (healthContent) {
-                const items = healthSection.querySelectorAll('.goal-item');
-                items.forEach(item => item.remove());
-                healthSection.insertAdjacentHTML('beforeend', healthContent);
-            }
-        }
     }
 }
 
