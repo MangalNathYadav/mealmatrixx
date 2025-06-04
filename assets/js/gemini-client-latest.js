@@ -288,6 +288,55 @@ class GeminiClient {    constructor(apiKey) {
         
         return this.generateContent(prompt);
     }
+
+    // Generate random health tip
+    async generateHealthTip() {
+        const prompt = `You are a professional nutritionist and fitness expert. Generate a single, concise health tip or insight that would be useful for someone tracking their nutrition and fitness goals.
+
+        The tip should be specific, actionable, and evidence-based. Keep it under 100 words.
+
+        Return ONLY a JSON object without any markdown formatting or additional text. Use this exact structure:
+        {
+            "title": "Short catchy title",
+            "tip": "The actual health tip content",
+            "category": "One of: nutrition, fitness, wellness, mindfulness, hydration"
+        }
+
+        The JSON should be valid and directly parseable. Do not include any code blocks, quotes, or other formatting.`;
+
+        const result = await this.generateContent(prompt);
+        
+        // If we got a text response with markdown, try to extract the JSON
+        if (result.text && typeof result.text === 'string') {
+            try {
+                // Try to extract JSON from markdown code blocks if present
+                const jsonMatch = result.text.match(/```json\n([\s\S]*?)\n```/) || 
+                                result.text.match(/```\n([\s\S]*?)\n```/) ||
+                                result.text.match(/({[\s\S]*})/);
+                                
+                if (jsonMatch && jsonMatch[1]) {
+                    return JSON.parse(jsonMatch[1]);
+                }
+                
+                // If no JSON found in markdown, try parsing the entire text
+                return JSON.parse(result.text);
+            } catch (error) {
+                console.error('Failed to parse JSON from Gemini response:', error);
+                return {
+                    title: "Stay Hydrated",
+                    tip: "Drinking enough water is crucial for metabolism, digestion, and nutrient absorption. Aim for at least 8 glasses daily, and more when exercising.",
+                    category: "hydration"
+                };
+            }
+        }
+        
+        // Return default tip if JSON extraction failed
+        return {
+            title: "Stay Hydrated",
+            tip: "Drinking enough water is crucial for metabolism, digestion, and nutrient absorption. Aim for at least 8 glasses daily, and more when exercising.",
+            category: "hydration"
+        };
+    }
 }
 
 // Export the GeminiClient class

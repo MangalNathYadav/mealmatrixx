@@ -184,6 +184,23 @@ class MealAI {
             throw new Error('Failed to suggest alternatives: ' + error.message);
         }
     }
+
+    // Get a random health tip
+    async getHealthTip() {
+        try {
+            console.log('Getting random health tip');
+            const result = await this.client.generateHealthTip();
+            console.log('Health tip result:', result);
+            return result;
+        } catch (error) {
+            console.error('Health tip generation failed:', error);
+            return {
+                title: "Balanced Nutrition",
+                tip: "Aim for a colorful plate at each meal. Different colored fruits and vegetables provide various nutrients essential for overall health.",
+                category: "nutrition"
+            };
+        }
+    }
 }
 
 // Create and export a single instance

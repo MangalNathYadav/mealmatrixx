@@ -244,6 +244,9 @@ p {
   padding: 2rem;
   border: 1px solid var(--gray-200);
   box-shadow: var(--shadow-sm);
+  height: fit-content;
+  position: sticky;
+  top: 2rem;
 }
 
 .dashboard-main {
@@ -263,7 +266,7 @@ p {
   background: linear-gradient(to right, rgba(99, 102, 241, 0.05), rgba(139, 92, 246, 0.05));
   padding: 3.5rem 0 6rem;
   margin-top: 0;
-  min-height: 100vh;
+  min-height: auto; /* Changed from 100vh to prevent excessive height */
 }
 
 /* Section Header */
@@ -1263,4 +1266,206 @@ p {
   h1 { font-size: 2rem; }
   h2 { font-size: 1.75rem; }
   h3 { font-size: 1.5rem; }
+}
+
+/* Health Tips Section */
+.health-tip-container {
+  margin-top: 2.5rem;
+  background-color: white;
+  border-radius: var(--border-radius);
+  padding: 2rem;
+  border: 1px solid var(--gray-200);
+  box-shadow: var(--shadow-sm);
+}
+
+.health-tip {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.health-tip-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.health-tip-icon {
+  font-size: 2rem;
+}
+
+.health-tip-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--gray-800);
+  margin: 0;
+}
+
+.health-tip-content {
+  color: var(--gray-700);
+  line-height: 1.6;
+}
+
+.health-tip-category {
+  display: inline-block;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  font-weight: 600;
+  background: var(--primary-light);
+  color: var(--primary);
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  margin-top: 0.5rem;
+}
+
+.health-tip-refresh {
+  border: none;
+  background: transparent;
+  color: var(--primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  margin-top: 1rem;
+}
+
+.health-tip-refresh:hover {
+  color: var(--secondary);
+  text-decoration: underline;
+}
+
+/* Responsive Health Tips Section */
+@media (max-width: 992px) {
+  .health-tip-container {
+    margin-top: 1.5rem;
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    grid-template-columns: 1fr;
+  }
+  
+  .dashboard-sidebar {
+    position: static;
+    height: auto;
+  }
+    .health-tip-container {
+    margin-top: 1rem;
+    padding: 1.25rem;
+  }
+}
+
+/* ---------- AI TIPS SECTION ---------- */
+.ai-tips-section {
+  margin-top: 1rem;
+}
+
+.ai-tips-section .sidebar-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ai-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--accent), var(--secondary));
+  color: white;
+  font-size: 0.7rem;
+  font-weight: bold;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.ai-tips-content {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-top: 0.5rem;
+}
+
+.ai-tip {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem 0;
+}
+
+.ai-tip:not(:last-child) {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ai-tip-icon {
+  background: rgba(255, 255, 255, 0.1);
+  height: 2rem;
+  width: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  flex-shrink: 0;
+  font-size: 1.25rem;
+}
+
+.ai-tip p {
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: var(--text-light);
+}
+
+.ai-tip-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.75rem;
+}
+
+.btn-refresh-tips {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 4px;
+  color: var(--text-light);
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 0.5rem 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.btn-refresh-tips:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Responsive adjustments for AI Tips */
+@media (max-width: 991px) {
+  .ai-tips-content {
+    padding: 0.75rem;
+  }
+  
+  .ai-tip {
+    padding: 0.5rem 0;
+    gap: 0.5rem;
+  }
+  
+  .ai-tip-icon {
+    height: 1.5rem;
+    width: 1.5rem;
+    font-size: 1rem;
+  }
+}
+
+/* For smaller screens, we might want to show the AI tips section in the main content area */
+@media (max-width: 767px) {
+  .ai-tips-section.move-to-main {
+    margin-top: 1.5rem;
+  }
 }
