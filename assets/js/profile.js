@@ -3,6 +3,40 @@ const profileForm = document.getElementById('profileForm');
 const successMessage = document.getElementById('successMessage');
 let currentPhotoData = null;
 
+// Create loading overlay
+function createLoadingOverlay() {
+    const overlay = document.createElement('div');
+    overlay.id = 'loadingOverlay';
+    overlay.innerHTML = `
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <p id="loadingMessage">Loading...</p>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+    return overlay;
+}
+
+// Show/hide loading functions
+function showLoading(message = 'Loading...') {
+    let overlay = document.getElementById('loadingOverlay');
+    if (!overlay) {
+        overlay = createLoadingOverlay();
+    }
+    const messageEl = overlay.querySelector('#loadingMessage');
+    if (messageEl) {
+        messageEl.textContent = message;
+    }
+    overlay.classList.add('visible');
+}
+
+function hideLoading() {
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) {
+        overlay.classList.remove('visible');
+    }
+}
+
 // Check if user is logged in
 firebase.auth().onAuthStateChanged((user) => {
     if (!user) {
@@ -14,6 +48,8 @@ firebase.auth().onAuthStateChanged((user) => {
 
 // Load existing profile data
 async function loadUserProfile() {
+    showLoading('Loading your profile...');
+    
     const user = firebase.auth().currentUser;
     if (!user) return;
 
@@ -44,6 +80,8 @@ async function loadUserProfile() {
     } catch (error) {
         console.error('Error loading profile:', error);
         showToast('Failed to load profile', 'error');
+    } finally {
+        hideLoading();
     }
 }
 
@@ -56,6 +94,8 @@ profileForm.addEventListener('submit', async (e) => {
         showToast('Please log in to save your profile', 'error');
         return;
     }
+
+    showLoading('Saving your profile...');
 
     const profileData = {
         fullName: document.getElementById('fullName').value,
@@ -86,6 +126,8 @@ profileForm.addEventListener('submit', async (e) => {
     } catch (error) {
         console.error('Error saving profile:', error);
         showToast('Failed to save profile', 'error');
+    } finally {
+        hideLoading();
     }
 });
 
@@ -108,6 +150,8 @@ photoUpload?.addEventListener('change', async (e) => {
         showToast('Image size should be less than 5MB', 'error');
         return;
     }
+
+    showLoading('Processing photo...');
 
     try {
         // Convert to base64
@@ -137,6 +181,8 @@ photoUpload?.addEventListener('change', async (e) => {
     } catch (error) {
         console.error('Error processing photo:', error);
         showToast('Failed to process photo', 'error');
+    } finally {
+        hideLoading();
     }
 });
 
