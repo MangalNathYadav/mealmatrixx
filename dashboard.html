@@ -6,6 +6,84 @@
     <title>MealMatrix - Dashboard</title>
     <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="stylesheet" href="assets/css/goals.css">    <style>
+        /* Welcome section styles */
+        .welcome-section {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            animation: fadeSlideUp 0.6s ease-out;
+        }
+
+        .welcome-profile-photo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid var(--primary-color);
+            padding: 2px;
+            background: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .welcome-content {
+            flex: 1;
+        }
+
+        .welcome-content h2 {
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+            font-size: 1.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .welcome-content h2 span {
+            font-size: 1.5rem;
+        }
+
+        .welcome-content p {
+            color: var(--text-color);
+            opacity: 0.9;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+
+        .welcome-stats {
+            display: flex;
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+
+        .welcome-stat {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1.25rem;
+            background: var(--bg-subtle);
+            border-radius: var(--border-radius);
+            font-size: 0.9rem;
+        }
+
+        .welcome-stat span {
+            font-size: 1.25rem;
+        }
+
+        @keyframes fadeSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         /* Dashboard specific styles */
         .dashboard {
             padding: 2rem 0;
@@ -512,175 +590,235 @@
             border-bottom: 2px solid var(--primary-color);
         }
 
-        /* Goals Progress Styles */
-        .goals-progress {
+        /* Loading overlay styles */
+        .loading-overlay {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.95);
+            min-width: 280px;
+            padding: 2rem;
             background: white;
-            padding: 1.5rem;
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1),
+                        0 5px 15px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+            border: 1px solid rgba(var(--primary-color-rgb), 0.1);
+        }
+
+        .loading-overlay::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(8px);
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .loading-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .loading-overlay.visible::before {
+            opacity: 1;
+        }
+
+        .loading-spinner {
+            width: 56px;
+            height: 56px;
+            border: 3px solid rgba(var(--primary-color-rgb), 0.1);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s cubic-bezier(0.76, 0.35, 0.2, 0.75) infinite;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .loading-spinner::after {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            right: -3px;
+            bottom: -3px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            border-top-color: rgba(var(--primary-color-rgb), 0.2);
+            animation: spin 2s linear infinite;
+        }
+
+        .loading-text {
+            color: var(--primary-color);
+            font-size: 1.25rem;
+            font-weight: 600;
+            text-align: center;
+            white-space: nowrap;
+            margin-bottom: 0.75rem;
+            opacity: 0;
+            transform: translateY(10px);
+            animation: fadeInUp 0.5s ease forwards 0.2s;
+        }
+
+        .loading-subtext {
+            color: var(--text-color);
+            font-size: 0.95rem;
+            opacity: 0;
+            text-align: center;
+            line-height: 1.5;
+            transform: translateY(10px);
+            animation: fadeInUp 0.5s ease forwards 0.4s;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 0.8;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Goals Progress Styles */
+        .goals-section {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
             margin-bottom: 2rem;
         }
 
-        .goals-progress h3 {
-            color: var(--primary-color);
-            margin-bottom: 1rem;
+        .goals-card {
+            background: white;
+            padding: 1.75rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            transition: all 0.3s ease;
         }
 
-        .progress-item {
-            margin-bottom: 1rem;
+        .goals-card:hover {
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+            transform: translateY(-2px);
         }
 
-        .progress-label {
+        .goals-card-header {
             display: flex;
-            justify-content: space-between;
-            margin-bottom: 0.5rem;
-            font-size: 0.9rem;
-            color: var(--text-color);
-        }
-
-        .progress-bar {
-            height: 8px;
-            background: #e5e7eb;
-            border-radius: 4px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: var(--primary-color);
-            border-radius: 4px;
-            transition: width 0.3s ease;
-        }
-
-        /* Enhanced Goals Progress Styles */
-        .goals-header {
-            display: flex;
-            justify-content: space-between;
             align-items: center;
+            gap: 0.75rem;
             margin-bottom: 1.5rem;
         }
 
-        .goals-header h3 {
-            margin: 0;
-        }
-
-        .btn-link {
+        .goals-card-header h3 {
             color: var(--primary-color);
-            text-decoration: none;
+            font-size: 1.25rem;
+            margin: 0;
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            font-size: 0.9rem;
-            transition: opacity 0.2s ease;
         }
 
-        .btn-link:hover {
-            opacity: 0.8;
+        .goals-card-header .icon {
+            font-size: 1.5rem;
         }
 
-        .empty-goals-message {
-            text-align: center;
-            padding: 2rem;
-            background: var(--bg-subtle);
-            border-radius: 8px;
-            border: 2px dashed var(--border-color);
-        }
-
-        .empty-goals-message h4 {
-            color: var(--primary-color);
-            margin: 0.5rem 0;
-        }
-
-        .empty-goals-message p {
-            color: var(--text-color);
-            margin-bottom: 1.5rem;
-        }
-
-        .goals-loading {
-            text-align: center;
-            padding: 2rem;
-            color: var(--text-color);
-        }
-
-        .goals-data {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .goal-stat-card {
-            background: var(--bg-subtle);
-            padding: 1.5rem;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-        }
-
-        .goal-stat-header {
+        .goals-card-content {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
+            flex-direction: column;
+            gap: 1.25rem;
         }
 
-        .goal-stat-title {
-            font-size: 0.9rem;
+        .goal-item {
+            animation: fadeIn 0.5s ease forwards;
+            opacity: 0;
+        }
+
+        .goal-item-label {
+            font-weight: 500;
             color: var(--text-color);
-            margin: 0;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
         }
 
-        .goal-stat-value {
+        .goal-item-value {
             font-size: 1.5rem;
             font-weight: 600;
             color: var(--primary-color);
-            margin: 0.5rem 0;
         }
 
-        .progress-bar-container {
-            position: relative;
+        .goal-item-subtitle {
+            font-size: 0.9rem;
+            color: var(--text-color);
+            opacity: 0.8;
+            margin-top: 0.25rem;
+        }
+
+        .goal-progress {
+            margin-top: 1rem;
+        }
+
+        .goal-progress-bar {
             height: 8px;
-            background: #e5e7eb;
+            background: rgba(var(--primary-color-rgb), 0.1);
             border-radius: 4px;
             overflow: hidden;
-            margin-top: 0.5rem;
+            position: relative;
         }
 
-        .progress-bar-fill {
-            position: absolute;
+        .goal-progress-fill {
             height: 100%;
-            left: 0;
-            top: 0;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
             border-radius: 4px;
-            transition: width 0.3s ease;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
         }
 
-        .progress-bar-fill.good {
-            background: #22c55e;
-        }
-
-        .progress-bar-fill.warning {
-            background: #f59e0b;
-        }
-
-        .progress-bar-fill.over {
-            background: #ef4444;
-        }
-
-        .goal-stat-footer {
+        .goal-progress-labels {
             display: flex;
             justify-content: space-between;
-            align-items: center;
             margin-top: 0.5rem;
-            font-size: 0.8rem;
+            font-size: 0.9rem;
             color: var(--text-color);
         }
 
-        /* Hide scrollbar when popup is open */
-        body.popup-open {
-            overflow: hidden;
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
 </head>
-<body>    <nav class="navbar">
+<body>    <!-- Loading Overlay -->
+    <div id="app-loading-overlay">
+        <div id="app-loading-spinner"></div>
+        <div id="app-loading-text">Loading MealMatrix</div>
+        <div id="app-loading-subtext">Please wait while we prepare your dashboard</div>
+    </div>
+
+    <!-- Rest of the body content -->
+    <nav class="navbar">
         <h2>
             <img src="assets/mealmatrixx_logo.png" alt="MealMatrix Logo">
             MealMatrix
@@ -727,27 +865,119 @@
             <!-- Summary will be inserted here -->
         </div>
     </div>    <div class="container dashboard">
-        <!-- Goals Progress Section -->        <div id="goalsProgress" class="goals-progress">
-            <div class="goals-header">
-                <h3>Today's Goals Progress</h3>
-                <a href="nutrition-goals.html" class="btn-link">
-                    <span>⚙️ Configure Goals</span>
-                </a>
-            </div>
-            <div class="goals-content">
-                <div class="goals-loading">
-                    <div class="loading-spinner"></div>
-                    <p>Loading your nutrition goals...</p>
-                </div>
-                <div class="goals-empty" style="display: none;">
-                    <div class="empty-goals-message">
-                        <img src="assets/mealmatrixx_logo.png" alt="Set Goals">
-                        <h4>Set Your Nutrition Goals</h4>
-                        <p>Track your progress, get personalized insights, and achieve your health targets with customized nutrition goals.</p>
-                        <a href="nutrition-goals.html" class="btn btn-primary">Get Started with Goals</a>
+        <!-- Welcome Section -->
+        <div class="welcome-section">
+            <img src="assets/default-avatar.png" alt="Profile Photo" class="welcome-profile-photo" id="welcomeProfilePhoto">
+            <div class="welcome-content">
+                <h2>Welcome back, <span id="welcomeName">there</span> 👋</h2>
+                <p>Here's your meal tracking overview for today</p>
+                <div class="welcome-stats">
+                    <div class="welcome-stat">
+                        <span>📊</span>
+                        <div class="stat-text">
+                            <strong id="todayMealsCount">0</strong> meals logged today
+                        </div>
+                    </div>
+                    <div class="welcome-stat">
+                        <span>✨</span>
+                        <div class="stat-text">
+                            <strong id="streakCount">0</strong> day streak
+                        </div>
                     </div>
                 </div>
-                <div class="goals-data" style="display: none;"></div>
+            </div>
+        </div>        <!-- Goals Section -->
+        <div class="goals-section">
+            <!-- Daily Calorie Goals -->
+            <div class="goals-card">
+                <div class="goals-card-header">
+                    <span class="icon">🔥</span>
+                    <h3>Daily Calorie Goals</h3>
+                </div>
+                <div class="goals-card-content">
+                    <div class="goal-item">
+                        <div class="goal-item-label">Target Daily Calories</div>
+                        <div class="goal-item-value">5000 kcal</div>
+                        <div class="goal-progress">
+                            <div class="goal-progress-bar">
+                                <div class="goal-progress-fill" style="width: 45%"></div>
+                            </div>
+                            <div class="goal-progress-labels">
+                                <span>2250 kcal consumed</span>
+                                <span>45%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Macro Goals -->
+            <div class="goals-card">
+                <div class="goals-card-header">
+                    <span class="icon">🎯</span>
+                    <h3>Macro Goals</h3>
+                </div>
+                <div class="goals-card-content">
+                    <div class="goal-item">
+                        <div class="goal-item-label">Protein</div>
+                        <div class="goal-item-value">200g</div>
+                        <div class="goal-progress">
+                            <div class="goal-progress-bar">
+                                <div class="goal-progress-fill" style="width: 35%"></div>
+                            </div>
+                            <div class="goal-progress-labels">
+                                <span>70g consumed</span>
+                                <span>35%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="goal-item">
+                        <div class="goal-item-label">Carbs</div>
+                        <div class="goal-item-value">250g</div>
+                        <div class="goal-progress">
+                            <div class="goal-progress-bar">
+                                <div class="goal-progress-fill" style="width: 40%"></div>
+                            </div>
+                            <div class="goal-progress-labels">
+                                <span>100g consumed</span>
+                                <span>40%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="goal-item">
+                        <div class="goal-item-label">Fat</div>
+                        <div class="goal-item-value">55g</div>
+                        <div class="goal-progress">
+                            <div class="goal-progress-bar">
+                                <div class="goal-progress-fill" style="width: 50%"></div>
+                            </div>
+                            <div class="goal-progress-labels">
+                                <span>27.5g consumed</span>
+                                <span>50%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Health Goals -->
+            <div class="goals-card">
+                <div class="goals-card-header">
+                    <span class="icon">⚖️</span>
+                    <h3>Health Goals</h3>
+                </div>
+                <div class="goals-card-content">
+                    <div class="goal-item">
+                        <div class="goal-item-label">Target Weight</div>
+                        <div class="goal-item-value">56 kg</div>
+                        <div class="goal-item-subtitle">Gain Muscle Mass</div>
+                    </div>
+                    <div class="goal-item">
+                        <div class="goal-item-label">Weekly Goal</div>
+                        <div class="goal-item-value">+0.2 kg</div>
+                        <div class="goal-item-subtitle">Healthy weight gain pace</div>
+                    </div>
+                </div>
             </div>
         </div>
 

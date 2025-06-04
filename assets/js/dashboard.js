@@ -11,12 +11,47 @@ function showToast(message, type = 'info') {
     setTimeout(() => toast.remove(), 3000);
 }
 
+// Loading overlay control
+let loadingCount = 0;
+
+function showLoading(message = 'Loading...', section = null) {
+    loadingCount++;
+    const overlay = document.querySelector('.loading-overlay');
+    const textElement = overlay?.querySelector('.loading-text');
+    if (textElement) {
+        textElement.textContent = message;
+    }
+    if (overlay) {
+        if (section) {
+            const rect = section.getBoundingClientRect();
+            overlay.style.top = `${rect.top + rect.height/2}px`;
+            overlay.style.left = `${rect.left + rect.width/2}px`;
+        }
+        overlay.classList.add('visible');
+    }
+}
+
+function hideLoading() {
+    loadingCount--;
+    if (loadingCount <= 0) {
+        loadingCount = 0;
+        const overlay = document.querySelector('.loading-overlay');
+        if (overlay) {
+            overlay.classList.remove('visible');
+        }
+    }
+}
+
 // Dashboard elements
 const mealGrid = document.getElementById('mealGrid');
 const logoutBtn = document.getElementById('logoutBtn');
 const weeklySummaryBtn = document.getElementById('weeklySummaryBtn');
 const popup = document.getElementById('weeklySummaryPopup');
 const goalsProgressElement = document.getElementById('goalsProgress');
+const welcomeNameElement = document.getElementById('welcomeName');
+const welcomeProfilePhoto = document.getElementById('welcomeProfilePhoto');
+const todayMealsCountElement = document.getElementById('todayMealsCount');
+const streakCountElement = document.getElementById('streakCount');
 
 // Close weekly summary function
 function closeWeeklySummary() {
@@ -43,118 +78,178 @@ logoutBtn?.addEventListener('click', async () => {
     }
 });
 
-// Load user's meals
-async function loadMeals() {
+// Load user's meals and update stats
+async function loadMealsAndStats() {
     const user = firebase.auth().currentUser;
     if (!user) return;
 
     try {
+        showLoading('Loading your meals...');
         const mealsRef = firebase.database().ref(`users/${user.uid}/meals`);
-        mealsRef.on('value', (snapshot) => {
-            const meals = snapshot.val();
-            if (mealGrid) {
-                if (!meals) {
-                    mealGrid.innerHTML = `
-                        <div class="empty-state">
-                            <h3>No meals added yet</h3>
-                            <p>Click the + button to add your first meal</p>
-                        </div>
-                    `;
-                    return;
+        
+        return new Promise((resolve, reject) => {
+            mealsRef.on('value', (snapshot) => {
+                try {
+                    const meals = snapshot.val();
+                    updateMealGrid(meals);
+                    updateStats(meals);
+                    resolve();
+                } catch (error) {
+                    reject(error);
+                } finally {
+                    hideLoading();
                 }
-
-                // Convert meals object to array and sort by date (newest first)
-                const mealsArray = Object.values(meals).sort((a, b) => 
-                    new Date(b.dateTime) - new Date(a.dateTime)
-                );
-
-                mealGrid.innerHTML = mealsArray.map(meal => `
-                    <div class="meal-card">
-                        <div class="meal-header">
-                            <h3>${meal.name}</h3>
-                            <span class="meal-time">${new Date(meal.dateTime).toLocaleString()}</span>
-                        </div>
-                        <div class="meal-content">
-                            <div class="meal-stats">
-                                <div class="stat">
-                                    <span>Calories</span>
-                                    <strong>${meal.calories || 0}</strong>
-                                </div>
-                                <div class="stat">
-                                    <span>Protein</span>
-                                    <strong>${meal.protein || 0}g</strong>
-                                </div>
-                                <div class="stat">
-                                    <span>Carbs</span>
-                                    <strong>${meal.carbs || 0}g</strong>
-                                </div>
-                                <div class="stat">
-                                    <span>Fat</span>
-                                    <strong>${meal.fat || 0}g</strong>
-                                </div>
-                            </div>
-                            ${meal.notes ? `<p class="meal-notes">${meal.notes}</p>` : ''}
-                        </div>
-                    </div>
-                `).join('');
-            }
+            }, (error) => {
+                console.error('Error loading meals:', error);
+                showToast('Failed to load meals. Please try again.');
+                hideLoading();
+                reject(error);
+            });
         });
     } catch (error) {
-        console.error('Error loading meals:', error);
-        showToast('Failed to load meals', 'error');
+        console.error('Error setting up meals listener:', error);
+        showToast('Failed to initialize meals loading. Please refresh the page.');
+        hideLoading();
+        throw error;
     }
 }
 
-// Initialize dashboard for authenticated user
-async function initializeDashboard(user) {
+// Update meal grid UI
+function updateMealGrid(meals) {
+    if (!mealGrid) return;
+    
+    if (!meals) {
+        mealGrid.innerHTML = `
+            <div class="empty-state">
+                <h3>No meals added yet</h3>
+                <p>Click the + button to add your first meal</p>
+            </div>
+        `;
+        return;
+    }
+
+    const mealsArray = Object.values(meals).sort((a, b) => 
+        new Date(b.dateTime) - new Date(a.dateTime)
+    );
+
+    mealGrid.innerHTML = mealsArray.map(meal => `
+        <div class="meal-card">
+            <div class="meal-header">
+                <h3>${meal.name}</h3>
+                <span class="meal-time">${new Date(meal.dateTime).toLocaleString()}</span>
+            </div>
+            <div class="meal-content">
+                <div class="meal-stats">
+                    <div class="stat">
+                        <span>Calories</span>
+                        <strong>${meal.calories || 0}</strong>
+                    </div>
+                    <div class="stat">
+                        <span>Protein</span>
+                        <strong>${meal.protein || 0}g</strong>
+                    </div>
+                    <div class="stat">
+                        <span>Carbs</span>
+                        <strong>${meal.carbs || 0}g</strong>
+                    </div>
+                    <div class="stat">
+                        <span>Fat</span>
+                        <strong>${meal.fat || 0}g</strong>
+                    </div>
+                </div>
+                ${meal.notes ? `<p class="meal-notes">${meal.notes}</p>` : ''}
+            </div>
+        </div>
+    `).join('');
+}
+
+// Update stats UI
+function updateStats(meals) {
+    const today = new Date().toDateString();
+    const todayMeals = meals ? Object.values(meals).filter(meal => 
+        new Date(meal.dateTime).toDateString() === today
+    ) : [];
+
+    if (todayMealsCountElement) {
+        todayMealsCountElement.textContent = todayMeals.length;
+    }
+
+    // Calculate streak
+    let streak = 0;
+    if (meals) {
+        const dates = [...new Set(Object.values(meals).map(meal => 
+            new Date(meal.dateTime).toDateString()
+        ))];
+        dates.sort((a, b) => new Date(b) - new Date(a));
+        
+        let currentDate = new Date();
+        for (const date of dates) {
+            if (new Date(date).toDateString() === currentDate.toDateString()) {
+                streak++;
+                currentDate.setDate(currentDate.getDate() - 1);
+            } else {
+                break;
+            }
+        }
+    }
+
+    if (streakCountElement) {
+        streakCountElement.textContent = streak;
+    }
+}
+
+// Load user's profile data
+async function loadUserProfile() {
+    const user = firebase.auth().currentUser;
+    if (!user) return;
+
+    showLoading('Loading your profile...');
     try {
+        const profileRef = firebase.database().ref(`users/${user.uid}/profile`);
+        const snapshot = await profileRef.once('value');
+        const profile = snapshot.val();
+
+        if (profile) {
+            // Update welcome name
+            if (profile.fullName && welcomeNameElement) {
+                welcomeNameElement.textContent = profile.fullName.split(' ')[0];
+            }
+
+            // Update profile photo
+            if (profile.photo && welcomeProfilePhoto) {
+                welcomeProfilePhoto.src = profile.photo;
+            }
+        }
+    } catch (error) {
+        console.error('Error loading profile:', error);
+        showToast('Failed to load profile');
+    } finally {
+        hideLoading();
+    }
+}
+
+// Initialize dashboard
+async function initializeDashboard() {
+    showLoading('Loading your dashboard...');
+    try {
+        const user = firebase.auth().currentUser;
         if (!user) {
             window.location.href = 'login.html';
             return;
         }
 
-        // First check if user has goals
-        const hasGoals = await goalsManager.checkGoalsExist(user.uid);
-        
-        // Update goals progress section
-        if (goalsProgressElement) {
-            if (!hasGoals) {
-                goalsProgressElement.innerHTML = `
-                    <div class="goals-empty" style="display: block;">
-                        <div class="empty-goals-message">
-                            <img src="assets/mealmatrixx_logo.png" alt="Set Goals">
-                            <h4>Set Your Nutrition Goals</h4>
-                            <p>Track your progress, get personalized insights, and achieve your health targets with customized nutrition goals.</p>
-                            <a href="nutrition-goals.html" class="btn btn-primary">Get Started with Goals</a>
-                        </div>
-                    </div>`;
-            } else {
-                await goalsManager.updateGoalProgress(goalsProgressElement);
-            }
-        }
-
-        // Load meals
-        await loadMeals();
-
-        // Setup weekly summary button
-        if (weeklySummaryBtn && popup) {
-            setupWeeklySummary();
-        }
-
+        await Promise.all([
+            loadUserProfile(),
+            loadMealsAndStats(),
+            goalsManager.loadGoals()
+        ]);
     } catch (error) {
         console.error('Dashboard initialization error:', error);
-        showToast(error.message || 'Failed to initialize dashboard', 'error');
+        showToast('Some dashboard features failed to load');
+    } finally {
+        hideLoading();
     }
 }
-
-// Setup event listeners and initialize
-firebase.auth().onAuthStateChanged(async (user) => {
-    if (user) {
-        await initializeDashboard(user);
-    } else {
-        window.location.href = 'login.html';
-    }
-});
 
 // Weekly Summary Button Click Handler
 weeklySummaryBtn.addEventListener('click', async () => {
@@ -276,3 +371,14 @@ weeklySummaryBtn.addEventListener('click', async () => {
 
 // Expose closeWeeklySummary to window for HTML onclick handler
 window.closeWeeklySummary = closeWeeklySummary;
+
+// Event Listeners
+document.addEventListener('DOMContentLoaded', () => {
+    firebase.auth().onAuthStateChanged((user) => {
+        if (user) {
+            initializeDashboard();
+        } else {
+            window.location.href = 'login.html';
+        }
+    });
+});

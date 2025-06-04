@@ -85,6 +85,81 @@ async function loadUserProfile() {
     }
 }
 
+// Show success message function
+function showSuccessMessage(message) {
+    const successMessage = document.getElementById('successMessage');
+    if (successMessage) {
+        successMessage.innerHTML = `<span>✨</span> ${message}`;
+        successMessage.classList.add('visible');
+        
+        // Remove any existing timeout
+        if (successMessage.timeout) {
+            clearTimeout(successMessage.timeout);
+        }
+        
+        // Set up the fade out animation after 3 seconds
+        successMessage.timeout = setTimeout(() => {
+            successMessage.style.animation = 'slideOutRight 0.3s ease forwards';
+            
+            // Remove the visible class and reset animation after slide out
+            setTimeout(() => {
+                successMessage.classList.remove('visible');
+                successMessage.style.animation = '';
+            }, 300);
+        }, 3000);
+    }
+}
+
+// Handle profile photo upload
+const photoUpload = document.getElementById('photoUpload');
+const profilePhoto = document.getElementById('profilePhoto');
+
+photoUpload?.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+        showToast('Please select an image file', 'error');
+        return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+        showToast('Image size should be less than 5MB', 'error');
+        return;
+    }
+
+    showLoading('Processing photo...');
+
+    try {
+        const reader = new FileReader();
+        reader.onload = async function(event) {
+            const base64Data = event.target.result;
+
+            if (base64Data.length > 10 * 1024 * 1024) {
+                showToast('Image is too large after encoding. Please choose a smaller image.', 'error');
+                return;
+            }
+
+            profilePhoto.src = base64Data;
+            profilePhoto.style.display = 'block';
+            currentPhotoData = base64Data;
+            
+            showSuccessMessage('Photo updated! Click Save Profile to keep these changes');
+        };
+        reader.onerror = () => {
+            showToast('Failed to process image', 'error');
+        };
+        reader.readAsDataURL(file);
+    } catch (error) {
+        console.error('Error processing photo:', error);
+        showToast('Failed to process photo', 'error');
+    } finally {
+        hideLoading();
+    }
+});
+
 // Save profile data
 profileForm.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -111,76 +186,17 @@ profileForm.addEventListener('submit', async (e) => {
         updatedAt: firebase.database.ServerValue.TIMESTAMP
     };
 
-    // Add photo data if available
     if (currentPhotoData) {
         profileData.photo = currentPhotoData;
     }
 
     try {
         await firebase.database().ref(`users/${user.uid}/profile`).update(profileData);
-        successMessage.classList.add('visible');
-        setTimeout(() => {
-            successMessage.classList.remove('visible');
-        }, 3000);
-        showToast('Profile saved successfully!', 'success');
+        showSuccessMessage('Your profile has been updated successfully!');
+        showToast('Profile saved!', 'success');
     } catch (error) {
         console.error('Error saving profile:', error);
         showToast('Failed to save profile', 'error');
-    } finally {
-        hideLoading();
-    }
-});
-
-// Handle profile photo upload
-const photoUpload = document.getElementById('photoUpload');
-const profilePhoto = document.getElementById('profilePhoto');
-
-photoUpload?.addEventListener('change', async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-        showToast('Please select an image file', 'error');
-        return;
-    }
-
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-        showToast('Image size should be less than 5MB', 'error');
-        return;
-    }
-
-    showLoading('Processing photo...');
-
-    try {
-        // Convert to base64
-        const reader = new FileReader();
-        reader.onload = async function(event) {
-            const base64Data = event.target.result;
-
-            // Check if the base64 string is too large (max 10MB for RTDB)
-            if (base64Data.length > 10 * 1024 * 1024) {
-                showToast('Image is too large after encoding. Please choose a smaller image.', 'error');
-                return;
-            }
-
-            // Update preview
-            profilePhoto.src = base64Data;
-            profilePhoto.style.display = 'block';
-
-            // Store for saving later
-            currentPhotoData = base64Data;
-
-            showToast('Photo ready to be saved', 'success');
-        };
-        reader.onerror = () => {
-            showToast('Failed to process image', 'error');
-        };
-        reader.readAsDataURL(file);
-    } catch (error) {
-        console.error('Error processing photo:', error);
-        showToast('Failed to process photo', 'error');
     } finally {
         hideLoading();
     }

@@ -276,28 +276,49 @@
         }
 
         .success-message {
-            background: #ecfdf5;
-            border: 1px solid #6ee7b7;
-            color: #065f46;
-            padding: 1rem;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #22c55e;
+            color: white;
+            padding: 1rem 2rem;
             border-radius: var(--border-radius);
-            margin-bottom: 1rem;
             display: none;
+            align-items: center;
+            gap: 0.75rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            font-weight: 500;
+            z-index: 1000;
+        }
+
+        .success-message span {
+            font-size: 1.25rem;
         }
 
         .success-message.visible {
-            display: block;
-            animation: slideDown 0.3s ease;
+            display: flex;
+            animation: slideInRight 0.3s ease;
         }
 
-        @keyframes slideDown {
+        @keyframes slideInRight {
             from {
+                transform: translateX(100%);
                 opacity: 0;
-                transform: translateY(-10px);
             }
             to {
+                transform: translateX(0);
                 opacity: 1;
-                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
             }
         }
 
