@@ -1,0 +1,27 @@
+:root {
+    --primary-color: #3b82f6;
+    --primary-color-rgb: 59, 130, 246;
+    --border-color: #e5e7eb;
+    --text-color: #374151;
+    --bg-subtle: #f9fafb;
+    --transition: 0.2s ease-in-out;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.5;
+    color: var(--text-color);
+    background-color: #f3f4f6;
+}
+
+.container {
+    max-width: 100%;
+    padding: 0 1rem;
+    margin: 0 auto;
+}
