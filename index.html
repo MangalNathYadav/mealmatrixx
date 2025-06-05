@@ -18,12 +18,12 @@
             --bg-subtle: #F8FAFC;
             --white: #FFFFFF;
             --border-radius: 12px;
-            --box-shadow: 0 8px 30px rgba(147, 51, 234, 0.12);
-            --shadow-sm: 0 1px 2px rgba(147, 51, 234, 0.05);
-            --shadow-md: 0 4px 6px rgba(147, 51, 234, 0.1);
-            --transition: 250ms cubic-bezier(0.4, 0, 0.2, 1);
-            --gradient-start: rgba(192, 132, 252, 0.2);
-            --gradient-end: rgba(232, 121, 249, 0.15);
+            --box-shadow: 0 8px 38px rgba(147, 51, 234, 0.18);
+            --shadow-sm: 0 2px 6px rgba(147, 51, 234, 0.1);
+            --shadow-md: 0 4px 10px rgba(147, 51, 234, 0.15);
+            --transition: 180ms cubic-bezier(0.4, 0, 0.2, 1);
+            --gradient-start: rgba(192, 132, 252, 0.3);
+            --gradient-end: rgba(232, 121, 249, 0.25);
         }
 
         body {
@@ -31,6 +31,9 @@
             font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
             background: var(--bg-subtle);
             color: var(--text-color);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
         }
 
         .hero {
@@ -43,7 +46,8 @@
                         linear-gradient(135deg, var(--primary-color), var(--accent-color));
             position: relative;
             overflow: hidden;
-            padding: 2rem;
+            padding: 1rem;
+            backdrop-filter: blur(0);
         }
 
         .hero::before {
@@ -56,23 +60,62 @@
         }
 
         .hero-content {
+            min-width: 70vw;;
             max-width: 800px;
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(12px);
+            background: rgba(255, 255, 255, 0.22);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             padding: 3.5rem;
             border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
+            box-shadow: 
+                0 8px 38px rgba(147, 51, 234, 0.18),
+                0 2px 10px rgba(255, 255, 255, 0.1);
             position: relative;
             z-index: 1;
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.4);
             margin: 1rem;
             animation: fadeSlideUp 0.8s ease-out;
+            overflow: hidden;
         }
 
-        .logo-emoji {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-            animation: bounce 2s ease-in-out infinite;
+        .hero-content::before,
+        .hero-content::after {
+            content: '';
+            position: absolute;
+            width: 150%;
+            height: 150%;
+            top: -25%;
+            left: -25%;
+            z-index: -1;
+            background: linear-gradient(180deg, 
+                rgba(146, 51, 234, 0.697),
+                rgba(192, 132, 252, 15.15),
+                rgba(232, 121, 249, 0.15)
+            );
+            animation: fluidRotate 15s linear infinite;
+        }
+
+        .hero-content::after {
+            background: linear-gradient(180deg, 
+                rgba(232, 121, 249, 0.12),
+                rgba(147, 51, 234, 12.12),
+                rgba(192, 132, 252, 0.12)
+            );
+            animation: fluidRotate 12s linear infinite reverse;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+
+        .logo-img {
+            width: 64px;
+            height: 64px;
+            filter: brightness(1) invert(1);
+            animation: fadeSlideUp 0.8s ease-out;
         }
 
         .feature-icons {
@@ -87,46 +130,50 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.15);
             padding: 0.75rem 1.25rem;
             border-radius: 50px;
             font-size: 1rem;
             color: white;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
             transition: var(--transition);
+            text-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
         }
 
         .feature-icon:hover {
             transform: translateY(-2px);
-            background: rgba(255, 255, 255, 0.2);
-            border-color: rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
         }
 
         .hero h1 {
             font-size: 3.75rem;
             margin-bottom: 1.5rem;
-            color: white;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            letter-spacing: -0.5px;
-            font-weight: 700;
-            line-height: 1.2;
-            background: linear-gradient(to right, #fff, rgba(255,255,255,0.85));
-            color: transparent;
-            background-clip: text;
+            font-weight: 800;
+            line-height: 1.1;
+            background: linear-gradient(to right, #ffffff, rgba(255,255,255,0.95));
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            letter-spacing: -0.025em;
             margin-top: 0;
         }
 
         .hero p {
             font-size: 1.3rem;
             margin-bottom: 3rem;
-            color: rgba(255, 255, 255, 0.95);
+            color: rgba(255, 255, 255, 0.99);
             line-height: 1.7;
-            font-weight: 400;
+            font-weight: 450;
             max-width: 600px;
             margin-left: auto;
             margin-right: auto;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.08);
         }
 
         .cta-buttons {
@@ -144,21 +191,28 @@
             text-decoration: none;
             transition: all var(--transition);
             font-weight: 600;
-            box-shadow: var(--shadow-md);
+            box-shadow: 
+                var(--shadow-md),
+                0 2px 6px rgba(255, 255, 255, 0.1);
             display: inline-flex;
             align-items: center;
             justify-content: center;
             min-width: 160px;
+            letter-spacing: 0.01em;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.08);
         }
 
         .btn-cta:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            box-shadow: 
+                0 10px 28px rgba(0,0,0,0.18),
+                0 4px 10px rgba(255, 255, 255, 0.1);
         }
 
         .btn-cta.primary {
             background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
             color: var(--white);
+            border: 1px solid rgba(255, 255, 255, 0.15);
         }
 
         .btn-cta.primary:hover {
@@ -167,14 +221,15 @@
         }
 
         .btn-cta.secondary {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.15);
             color: white;
-            border: 2px solid rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(5px);
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
         }
 
         .btn-cta.secondary:hover {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.25);
             border-color: white;
         }
 
@@ -207,6 +262,38 @@
             }
         }
 
+        @keyframes fluidRotate {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes fluidMove {
+            0% {
+                background-position: 0% 50%;
+            }
+            100% {
+                background-position: 100% 50%;
+            }
+        }
+
+        @keyframes liquidFill {
+            0% {
+                transform: translateY(100%);
+                opacity: 0;
+            }
+            40% {
+                opacity: 0.3;
+            }
+            100% {
+                transform: translateY(0);
+                opacity: 0.15;
+            }
+        }
+
         @media (max-width: 768px) {
             .hero h1 {
                 font-size: 2.5rem;
@@ -220,12 +307,28 @@
                 padding: 0.875rem 2rem;
             }
         }
+
+        @media (min-width: 1920px) {
+            .hero-content {
+                transform: scale(1.1);
+            }
+            
+            .hero h1 {
+                font-size: 4rem;
+            }
+            
+            .hero p {
+                font-size: 1.4rem;
+            }
+        }
     </style> 
 </head>
 <body>
     <main class="hero">
         <div class="hero-content">
-            <div class="logo-emoji">🍽️</div>
+            <div class="logo-container">
+                <img src="./assets/mealmatrixx_logo.png" alt="MealMatrix Logo" class="logo-img">
+            </div>
             <h1>Welcome to MealMatrix</h1>
             <p>Track your meals effortlessly with our simple and intuitive food tracking application. Stay on top of your nutrition goals with ease. ✨</p>
             <div class="feature-icons">
