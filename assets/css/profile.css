@@ -59,8 +59,9 @@
 
 /* Profile Content */
 .profile-content {
-    max-width: 600px;
+    max-width: 1200px;
     margin: 0 auto;
+    padding: 0 1rem 4rem;
 }
 
 /* Profile Photo Section */
@@ -126,6 +127,9 @@
     border: 1px solid #e5e7eb;
     border-radius: 8px;
     padding: 1.5rem;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
     margin-bottom: 1.5rem;
 }
 
@@ -137,6 +141,21 @@
     font-size: 1rem;
     font-weight: 600;
     margin-bottom: 1.25rem;
+}
+
+/* Grid Layout */
+.profile-grid {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.preferences-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
 }
 
 /* Form Groups */
@@ -196,15 +215,19 @@ textarea.form-control {
 /* Save Button */
 .btn-save {
     width: 100%;
+    max-width: 400px;
     background: #4F46E5;
     color: white;
     border: none;
-    padding: 0.75rem;
     border-radius: 6px;
-    font-weight: 500;
+    padding: 0.75rem 1.5rem;
     font-size: 0.875rem;
+    font-weight: 500;
     cursor: pointer;
     transition: background-color 0.2s;
+    display: block;
+    margin: 2rem auto 3rem;
+    text-align: center;
 }
 
 .btn-save:hover {

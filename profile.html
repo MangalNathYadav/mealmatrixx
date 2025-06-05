@@ -37,11 +37,10 @@
             </div>
 
             <div class="profile-content">
-
-        <form id="profileForm">
+        <form id="profileForm" class="profile-form-container">
             <div class="profile-grid">
                 <!-- Profile Photo Section -->
-                <div class="profile-photo-section">
+                <div class="profile-photo-section section-card">
                     <div class="photo-wrapper">
                         <img src="assets/default-avatar.png" alt="Profile Photo" class="profile-photo" id="profilePhoto">
                     </div>
@@ -144,15 +143,17 @@
                             placeholder="List any other dietary restrictions..."></textarea>
                     </div>
                 </div>
-            </div>            <div class="profile-section section-card">
-                <h3>
-                    <span>🎯</span>
-                    Health Conditions
-                </h3>
-                <div class="form-group">
-                    <label for="healthConditions">Relevant Health Conditions</label>
-                    <textarea id="healthConditions" class="form-control" 
-                        placeholder="List any health conditions that affect your diet (e.g., diabetes, high blood pressure)..."></textarea>
+            </div>            <div class="health-conditions-section">
+                <div class="section-card">
+                    <h3>
+                        <span>🎯</span>
+                        Health Conditions
+                    </h3>
+                    <div class="form-group">
+                        <label for="healthConditions">Relevant Health Conditions</label>
+                        <textarea id="healthConditions" class="form-control" 
+                            placeholder="List any health conditions that affect your diet (e.g., diabetes, high blood pressure)..."></textarea>
+                    </div>
                 </div>
             </div>
 
