@@ -1,6 +1,9 @@
 import { MealFormHandler } from './meal-form-handler.js';
 import { MealAI } from './ai-features.js';
 
+// Track Firebase listener
+let mealDataListener = null;
+
 // Wait for DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', () => {
     // Initialize form handler
@@ -51,31 +54,39 @@ document.addEventListener('DOMContentLoaded', () => {
             analyzeButton.querySelector('.btn-text').style.opacity = '1';
         }
     });
-});
 
-// Get meal ID from URL if editing
-const urlParams = new URLSearchParams(window.location.search);
-const mealId = urlParams.get('id');
-let editMode = false;
+    // Get meal ID from URL if editing
+    const urlParams = new URLSearchParams(window.location.search);
+    const mealId = urlParams.get('id');
+    let editMode = false;
 
-// Set current datetime as default
-document.getElementById('dateTime').value = new Date().toISOString().slice(0, 16);
+    // Set current datetime as default
+    document.getElementById('dateTime').value = new Date().toISOString().slice(0, 16);
 
-// Helper function to parse number inputs safely
-function parseNumberInput(value, fallback = 0) {
-    const parsed = parseFloat(value);
-    return isNaN(parsed) ? fallback : parsed;
-}
+    // Clean up listener when leaving the page
+    window.addEventListener('unload', () => {
+        if (mealDataListener) {
+            const user = firebase.auth().currentUser;
+            if (user) {
+                firebase.database().ref(`users/${user.uid}/meals/${mealId}`).off('value', mealDataListener);
+            }
+            mealDataListener = null;
+        }
+    });
 
-// If editing, load meal data
-if (mealId) {
-    editMode = true;
-    formTitle.textContent = 'Edit Meal';
-    submitBtn.textContent = 'Update Meal';
-    
-    firebase.auth().onAuthStateChanged((user) => {
+    // If editing, load meal data
+    if (mealId) {
+        editMode = true;
+        const formTitle = document.querySelector('.section-header h2');
+        const submitBtn = document.querySelector('#mealForm button[type="submit"]');
+        if (formTitle) formTitle.textContent = 'Edit Meal';
+        if (submitBtn) submitBtn.textContent = 'Update Meal';
+        
+        const user = firebase.auth().currentUser;
         if (user) {
-            firebase.database().ref(`users/${user.uid}/meals/${mealId}`).once('value')
+            const mealRef = firebase.database().ref(`users/${user.uid}/meals/${mealId}`);
+            // Use once() instead of on() since we only need to load the data once
+            mealRef.once('value')
                 .then((snapshot) => {
                     const meal = snapshot.val();
                     if (meal) {
@@ -92,47 +103,73 @@ if (mealId) {
                     showToast(error.message);
                 });
         }
-    });
-}
-
-// Handle form submission
-mealForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const user = firebase.auth().currentUser;
-    if (!user) {
-        showToast('Please log in to add meals', 'error');
-        return;
     }
 
-    const mealData = {
-        name: document.getElementById('mealName').value,
-        calories: parseNumberInput(document.getElementById('calories').value),
-        protein: parseNumberInput(document.getElementById('protein').value),
-        carbs: parseNumberInput(document.getElementById('carbs').value),
-        fat: parseNumberInput(document.getElementById('fat').value),
-        dateTime: document.getElementById('dateTime').value,
-        notes: document.getElementById('notes').value
-    };
+    // Handle form submission
+    const mealForm = document.getElementById('mealForm');
+    if (mealForm) {
+        mealForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const user = firebase.auth().currentUser;
+            if (!user) {
+                showToast('Please log in to add meals', 'error');
+                return;
+            }
 
-    try {
-        if (editMode) {
-            // Update existing meal
-            await firebase.database().ref(`users/${user.uid}/meals/${mealId}`).update(mealData);
-            showToast('Meal updated successfully!', 'success');
-        } else {
-            // Add new meal
-            await firebase.database().ref(`users/${user.uid}/meals`).push(mealData);
-            showToast('Meal added successfully!', 'success');
-        }
-        
-        // Redirect to dashboard
-        window.location.href = 'dashboard.html';
-    } catch (error) {
-        console.error('Error saving meal:', error);
-        showToast(error.message || 'Failed to save meal', 'error');
+            const mealData = {
+                name: document.getElementById('mealName').value,
+                calories: parseNumberInput(document.getElementById('calories').value),
+                protein: parseNumberInput(document.getElementById('protein').value),
+                carbs: parseNumberInput(document.getElementById('carbs').value),
+                fat: parseNumberInput(document.getElementById('fat').value),
+                dateTime: document.getElementById('dateTime').value,
+                notes: document.getElementById('notes').value
+            };
+
+            try {
+                const mealsRef = firebase.database().ref(`users/${user.uid}/meals`);
+                if (editMode) {
+                    // Update existing meal
+                    await mealsRef.child(mealId).update(mealData);
+                    showToast('Meal updated successfully!', 'success');
+                } else {
+                    // Add new meal
+                    await mealsRef.push(mealData);
+                    showToast('Meal added successfully!', 'success');
+                }
+                
+                // Clean up listener before redirecting
+                if (mealDataListener) {
+                    mealsRef.child(mealId).off('value', mealDataListener);
+                    mealDataListener = null;
+                }
+                
+                // Redirect to dashboard after a short delay to show the toast
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 1000);
+            } catch (error) {
+                console.error('Error saving meal:', error);
+                showToast(error.message || 'Failed to save meal', 'error');
+            }
+        });
     }
 });
+
+// Get meal ID from URL if editing
+const urlParams = new URLSearchParams(window.location.search);
+const mealId = urlParams.get('id');
+let editMode = false;
+
+// Set current datetime as default
+document.getElementById('dateTime').value = new Date().toISOString().slice(0, 16);
+
+// Helper function to parse number inputs safely
+function parseNumberInput(value, fallback = 0) {
+    const parsed = parseFloat(value);
+    return isNaN(parsed) ? fallback : parsed;
+}
 
 // Function to update AI result display
 function updateAIResult(analysis) {

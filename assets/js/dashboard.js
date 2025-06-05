@@ -6,6 +6,9 @@ import nutritionTipGenerator from './nutrition-tip-generator.js';
 // Initialize AI features
 const ai = new MealAI();
 
+// Track initialization state
+let isDashboardInitialized = false;
+
 // Toast notification helper
 function showToast(message, type = 'info') {
     const toast = document.createElement('div');
@@ -40,9 +43,10 @@ async function initializeFirebase() {
 
         // Initialize auth listener
         firebase.auth().onAuthStateChanged((user) => {
-            if (user) {
+            if (user && !isDashboardInitialized) {
+                isDashboardInitialized = true;
                 initializeDashboard();
-            } else {
+            } else if (!user) {
                 window.location.href = 'login.html';
             }
         });
@@ -130,6 +134,13 @@ function setupEventListeners() {
     // Logout button click handler
     logoutBtn?.addEventListener('click', async () => {
         try {
+            // Clean up meals listener
+            const user = firebase.auth().currentUser;
+            if (user && mealsListener) {
+                firebase.database().ref(`users/${user.uid}/meals`).off('value', mealsListener);
+                mealsListener = null;
+            }
+            
             await firebase.auth().signOut();
             showToast('Logged out successfully', 'success');
             window.location.href = 'login.html';
@@ -481,6 +492,9 @@ async function showMealDetails(mealId) {
 // Make showMealDetails available globally
 window.showMealDetails = showMealDetails;
 
+// Store reference to Firebase listener
+let mealsListener = null;
+
 // Load user's meals and update stats
 async function loadMealsAndStats() {
     const user = firebase.auth().currentUser;
@@ -490,8 +504,13 @@ async function loadMealsAndStats() {
         showLoading('Loading your meals...');
         const mealsRef = firebase.database().ref(`users/${user.uid}/meals`);
         
+        // Remove existing listener if any
+        if (mealsListener) {
+            mealsRef.off('value', mealsListener);
+        }
+        
         return new Promise((resolve, reject) => {
-            mealsRef.on('value', (snapshot) => {
+            mealsListener = mealsRef.on('value', (snapshot) => {
                 try {
                     const meals = snapshot.val();
                     updateMealGrid(meals);
@@ -534,9 +553,11 @@ function updateMealGrid(meals) {
         return;
     }
 
-    const mealsArray = Object.values(meals).sort((a, b) => 
-        new Date(b.dateTime) - new Date(a.dateTime)
-    );
+    // Convert meals object to array and assign IDs
+    const mealsArray = Object.entries(meals).map(([id, meal]) => ({
+        ...meal,
+        id
+    })).sort((a, b) => new Date(b.dateTime) - new Date(a.dateTime));
 
     mealGrid.innerHTML = mealsArray.map(meal => `
         <div class="meal-card">
@@ -1001,10 +1022,11 @@ let isDomReady = false;
 let isFirebaseReady = false;
 
 function tryInitialize() {
-    if (isDomReady && isFirebaseReady) {
+    if (isDomReady && isFirebaseReady && !isDashboardInitialized) {
         // Check if user is authenticated
         const user = firebase.auth().currentUser;
         if (user) {
+            isDashboardInitialized = true;
             initializeDashboard().catch(error => {
                 console.error('Dashboard initialization error:', error);
                 showToast('Failed to load dashboard. Please refresh the page.', 'error');
