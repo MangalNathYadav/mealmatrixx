@@ -36,10 +36,6 @@
                 </div>
             </div>
 
-            <div id="successMessage" class="success-message">
-                <span>✨</span> Your profile has been updated successfully!
-            </div>
-
             <div class="profile-content">
 
         <form id="profileForm">
@@ -65,17 +61,23 @@
                 <div class="personal-info-section">
                     <h3><span>👤</span> Personal Information</h3>
                     <div class="form-group">
-                        <label for="fullName">Full Name</label>
-                        <input type="text" id="fullName" class="form-control" required>
+                        <label for="fullName">Full Name<span aria-label="required">*</span></label>
+                        <input type="text" id="fullName" class="form-control" required 
+                               aria-describedby="fullNameError"
+                               autocomplete="name">
                     </div>
                     <div class="form-row">
                         <div class="form-group">
                             <label for="dob">Date of Birth</label>
-                            <input type="date" id="dob" class="form-control">
+                            <input type="date" id="dob" class="form-control" 
+                                   aria-describedby="dobError"
+                                   autocomplete="bday">
                         </div>
                         <div class="form-group">
                             <label for="gender">Gender</label>
-                            <select id="gender" class="form-control">
+                            <select id="gender" class="form-control" 
+                                    aria-describedby="genderError"
+                                    autocomplete="sex">
                                 <option value="">Select gender</option>
                                 <option value="male">Male</option>
                                 <option value="female">Female</option>
@@ -87,11 +89,15 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label for="height">Height (cm)</label>
-                            <input type="number" id="height" class="form-control" min="0" step="0.1">
+                            <input type="number" id="height" class="form-control" 
+                                   min="50" max="300" step="0.1"
+                                   aria-describedby="heightError">
                         </div>
                         <div class="form-group">
                             <label for="weight">Weight (kg)</label>
-                            <input type="number" id="weight" class="form-control" min="0" step="0.1">
+                            <input type="number" id="weight" class="form-control" 
+                                   min="20" max="500" step="0.1"
+                                   aria-describedby="weightError">
                         </div>
                     </div>
                 </div>
@@ -158,8 +164,13 @@
 
     <!-- Loading Overlay -->
     <div class="loading-overlay">
-        <div class="loading-spinner"></div>
-        <p id="loadingMessage">Updating profile...</p>
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <p id="loadingMessage">Updating profile...</p>
+            <div class="loading-progress">
+                <div class="loading-progress-bar"></div>
+            </div>
+        </div>
     </div>
 
     <!-- Firebase SDK -->
