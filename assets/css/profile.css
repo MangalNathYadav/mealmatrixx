@@ -66,19 +66,17 @@
 /* Profile Photo Section */
 .profile-photo-section {
     text-align: center;
+    padding: 2rem 0;
     margin-bottom: 2rem;
-    padding: 1rem;
 }
 
 .photo-wrapper {
     width: 120px;
     height: 120px;
-    margin: 0 auto 1rem;
+    margin: 0 auto;
     position: relative;
     border-radius: 50%;
     overflow: hidden;
-    border: 3px solid #f3f4f6;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .profile-photo {
@@ -87,38 +85,39 @@
     object-fit: cover;
 }
 
+.photo-overlay {
+    margin-top: 1rem;
+}
+
 .photo-upload-btn {
-    background: #4F46E5;
-    color: white;
-    border: none;
-    padding: 0.75rem 1.5rem;
-    border-radius: 8px;
-    font-size: 0.875rem;
-    font-weight: 500;
-    cursor: pointer;
     display: inline-flex;
     align-items: center;
-    gap: 0.75rem;
-    margin-top: 1rem;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 4px rgba(79, 70, 229, 0.1);
+    justify-content: center;
+    gap: 0.5rem;
+    background: #4F46E5;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: none;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
 }
 
 .photo-upload-btn:hover {
     background: #4338ca;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 6px rgba(79, 70, 229, 0.2);
 }
 
 .photo-upload-btn svg {
-    width: 20px;
-    height: 20px;
+    width: 16px;
+    height: 16px;
 }
 
 .photo-helper {
-    color: #6b7280;
-    font-size: 0.875rem;
-    margin-top: 0.75rem;
+    color: #666;
+    font-size: 14px;
+    margin-top: 0.5rem;
 }
 
 /* Form Sections */
