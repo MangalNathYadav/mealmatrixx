@@ -1,7 +1,57 @@
-// Add/Edit Meal functionality
-const mealForm = document.getElementById('mealForm');
-const formTitle = document.getElementById('formTitle');
-const submitBtn = document.getElementById('submitBtn');
+import { MealFormHandler } from './meal-form-handler.js';
+import { MealAI } from './ai-features.js';
+
+// Wait for DOM to be fully loaded
+document.addEventListener('DOMContentLoaded', () => {
+    // Initialize form handler
+    const formHandler = new MealFormHandler();
+    
+    // Initialize AI features
+    const mealAI = new MealAI();
+    
+    // Handle AI analysis button
+    const analyzeButton = document.getElementById('analyzeButton');
+    const mealDescription = document.getElementById('mealDescription');
+    const aiResult = document.getElementById('aiResult');
+
+    if (!analyzeButton || !mealDescription || !aiResult) {
+        console.error('Required elements not found');
+        return;
+    }
+    
+    analyzeButton.addEventListener('click', async () => {
+        const description = mealDescription.value.trim();
+        if (!description) {
+            formHandler.showToast('Please enter a meal description', 'error');
+            return;
+        }
+        
+        try {
+            // Show loading state
+            analyzeButton.disabled = true;
+            analyzeButton.querySelector('.btn-loading').style.display = 'block';
+            analyzeButton.querySelector('.btn-text').style.opacity = '0';
+            
+            // Analyze meal
+            const analysis = await mealAI.analyzeMeal(description);
+            
+            // Update AI result section
+            updateAIResult(analysis);
+            
+            // Populate form with AI results
+            formHandler.populateFromAIResult(analysis);
+            
+        } catch (error) {
+            console.error('AI Analysis error:', error);
+            formHandler.showToast('Failed to analyze meal. Please try again or use manual entry.', 'error');
+        } finally {
+            // Reset button state
+            analyzeButton.disabled = false;
+            analyzeButton.querySelector('.btn-loading').style.display = 'none';
+            analyzeButton.querySelector('.btn-text').style.opacity = '1';
+        }
+    });
+});
 
 // Get meal ID from URL if editing
 const urlParams = new URLSearchParams(window.location.search);
@@ -83,3 +133,74 @@ mealForm.addEventListener('submit', async (e) => {
         showToast(error.message || 'Failed to save meal', 'error');
     }
 });
+
+// Function to update AI result display
+function updateAIResult(analysis) {
+    const aiResult = document.getElementById('aiResult');
+    if (!aiResult) return;
+
+    if (!analysis) {
+        aiResult.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-state-icon">❌</div>
+                <p class="empty-state-text">Could not analyze meal. Please try again or use manual entry.</p>
+            </div>
+        `;
+        return;
+    }
+    
+    // Remove empty state
+    aiResult.classList.remove('empty');
+    aiResult.classList.add('with-data');
+    
+    // Create result HTML
+    const html = `
+        <div class="analysis-result">
+            <div class="detected-items">
+                <h4>Detected Items:</h4>
+                <p>${analysis.foodItems ? analysis.foodItems.join(', ') : 'No items detected'}</p>
+            </div>
+            
+            <div class="nutrient-display">
+                <div class="nutrient-item">
+                    <div class="label">Calories</div>
+                    <div class="value">${Math.round(analysis.nutrients?.calories || 0)}</div>
+                </div>
+                <div class="nutrient-item">
+                    <div class="label">Protein</div>
+                    <div class="value">${Math.round(analysis.nutrients?.protein || 0)}g</div>
+                </div>
+                <div class="nutrient-item">
+                    <div class="label">Carbs</div>
+                    <div class="value">${Math.round(analysis.nutrients?.carbs || 0)}g</div>
+                </div>
+                <div class="nutrient-item">
+                    <div class="label">Fat</div>
+                    <div class="value">${Math.round(analysis.nutrients?.fat || 0)}g</div>
+                </div>
+            </div>
+            
+            ${renderWarnings(analysis.warnings)}
+        </div>
+    `;
+    
+    aiResult.innerHTML = html;
+}
+
+// Function to render warning messages
+function renderWarnings(warnings) {
+    if (!warnings || warnings.length === 0) return '';
+    
+    return `
+        <div class="warnings">
+            ${warnings.map(warning => `
+                <div class="warning">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                    ${warning.message}
+                </div>
+            `).join('')}
+        </div>
+    `;
+}

@@ -1,0 +1,284 @@
+import GeminiClient from './gemini-client-latest.js';
+
+// AI Features for MealMatrix
+export class MealA    // Format the response for UI
+    formatAnalysisResponse(parsedResult) {
+        // Extract food names from complex food objects if needed
+        const foodItems = (parsedResult.foods || []).map(food => 
+            typeof food === 'string' ? food : food.name || ''
+        ).filter(name => name);
+
+        return {
+            foodItems,
+            nutrients: {
+                calories: parsedResult.calories || parsedResult.macros?.calories || 0,
+                protein: parsedResult.macros?.protein || 0,
+                carbs: parsedResult.macros?.carbs || 0,
+                fat: parsedResult.macros?.fat || 0
+            },
+            suggestions: parsedResult.suggestions || '',
+            assessment: parsedResult.assessment || '',
+            warnings: parsedResult.warnings || []
+        };uctor() {
+        // Initialize Gemini client using config
+        this.client = new GeminiClient();
+        this.userProfile = null;
+    }
+
+    // Load user profile data
+    async loadUserProfile() {
+        const user = firebase.auth().currentUser;
+        if (!user) return null;
+
+        try {
+            const profileRef = firebase.database().ref(`users/${user.uid}/profile`);
+            const snapshot = await profileRef.once('value');
+            this.userProfile = snapshot.val() || {};
+            return this.userProfile;
+        } catch (error) {
+            console.error('Error loading user profile:', error);
+            return null;
+        }
+    }
+
+    // Check for allergies and dietary conflicts
+    checkDietaryConflicts(foods) {
+        if (!this.userProfile || !foods) return [];
+
+        const warnings = [];
+        const allergies = this.userProfile.allergies ? 
+            this.userProfile.allergies.toLowerCase().split(/[,\n]/).map(a => a.trim()) : [];
+        const restrictions = this.userProfile.restrictions ?
+            this.userProfile.restrictions.toLowerCase().split(/[,\n]/).map(r => r.trim()) : [];
+        const dietType = this.userProfile.dietType;
+
+        // Check each food against allergies and restrictions
+        foods.forEach(food => {
+            // Handle both string and object formats
+            const foodName = typeof food === 'string' ? food : food.name || '';
+            const foodLower = foodName.toLowerCase();
+            
+            // Check allergies
+            allergies.forEach(allergy => {
+                if (foodLower.includes(allergy)) {
+                    warnings.push({
+                        type: 'allergy',
+                        severity: 'high',
+                        message: `⚠️ Warning: ${food} conflicts with your allergy to ${allergy}`
+                    });
+                }
+            });
+
+            // Check dietary restrictions
+            restrictions.forEach(restriction => {
+                if (foodLower.includes(restriction)) {
+                    warnings.push({
+                        type: 'restriction',
+                        severity: 'medium',
+                        message: `⚠️ Note: ${food} conflicts with your dietary restriction: ${restriction}`
+                    });
+                }
+            });
+
+            // Check diet type conflicts
+            if (dietType) {
+                const veganFoods = ['meat', 'fish', 'chicken', 'beef', 'pork', 'lamb', 'egg', 'milk', 'dairy', 'cheese', 'butter'];
+                const vegetarianFoods = ['meat', 'fish', 'chicken', 'beef', 'pork', 'lamb'];
+                const pescatarianFoods = ['meat', 'chicken', 'beef', 'pork', 'lamb'];
+
+                if (dietType === 'vegan' && veganFoods.some(f => foodLower.includes(f))) {
+                    warnings.push({
+                        type: 'diet',
+                        severity: 'medium',
+                        message: `Note: ${food} is not suitable for a vegan diet`
+                    });
+                } else if (dietType === 'vegetarian' && vegetarianFoods.some(f => foodLower.includes(f))) {
+                    warnings.push({
+                        type: 'diet',
+                        severity: 'medium',
+                        message: `Note: ${food} is not suitable for a vegetarian diet`
+                    });
+                } else if (dietType === 'pescatarian' && pescatarianFoods.some(f => foodLower.includes(f))) {
+                    warnings.push({
+                        type: 'diet',
+                        severity: 'medium',
+                        message: `Note: ${food} is not suitable for a pescatarian diet`
+                    });
+                }
+            }
+        });
+
+        return warnings;
+    }
+
+    // Normalize text to handle multiple languages and common food terms
+    async normalizeText(text) {
+        const prompt = `Translate and normalize this meal description to English, preserving portion sizes and cooking methods: "${text}"`;
+        const result = await this.client.generateContent(prompt);
+        return result.text || text;
+    }
+
+    // Format the response for the UI
+    formatAnalysisResponse(parsedResult) {
+        return {
+            foodItems: parsedResult.foods || [],
+            nutrients: {
+                calories: parsedResult.calories || parsedResult.macros?.calories || 0,
+                protein: parsedResult.macros?.protein || 0,
+                carbs: parsedResult.macros?.carbs || 0,
+                fat: parsedResult.macros?.fat || 0
+            },
+            suggestions: parsedResult.suggestions || '',
+            assessment: parsedResult.assessment || '',
+            warnings: parsedResult.warnings || []
+        };
+    }
+
+    // Parse AI response safely
+    parseAIResponse(result) {
+        try {
+            let text = result.text || '';
+            
+            // Try to extract JSON from markdown code blocks first
+            const jsonMatch = text.match(/```(?:json)?\n([\s\S]*?)\n```/);
+            if (jsonMatch && jsonMatch[1]) {
+                text = jsonMatch[1];
+            }
+
+            // Clean the text and parse JSON
+            text = text.trim();
+            if (!text.startsWith('{')) {
+                const jsonStart = text.indexOf('{');
+                const jsonEnd = text.lastIndexOf('}');
+                if (jsonStart !== -1 && jsonEnd !== -1) {
+                    text = text.slice(jsonStart, jsonEnd + 1);
+                }
+            }
+
+            return JSON.parse(text);
+        } catch (error) {
+            console.error('Error parsing AI response:', error);
+            throw new Error('Could not parse AI response');
+        }
+    }
+
+    // Analyze a meal from free text input
+    async analyzeMeal(mealText) {
+        try {
+            await this.loadUserProfile(); // Load user profile before analysis
+            console.log('Analyzing meal:', mealText);
+            
+            // Convert meal text to English if needed
+            const normalizedText = await this.normalizeText(mealText);
+
+            let dietaryContext = '';
+            if (this.userProfile) {
+                dietaryContext = `
+                Consider the following dietary context:
+                Diet Type: ${this.userProfile.dietType || 'No specific diet'}
+                Allergies: ${this.userProfile.allergies || 'None'}
+                Restrictions: ${this.userProfile.restrictions || 'None'}
+                Health Conditions: ${this.userProfile.healthConditions || 'None'}
+                `;
+            }
+
+            const prompt = `Analyze this meal description: "${normalizedText}"
+            
+            ${dietaryContext}
+            
+            Identify the foods, their approximate portions, and calculate nutritional values.
+            Common Indian foods reference:
+            - Rice (1 cup cooked): 200 calories, 45g carbs, 4g protein, 0g fat
+            - Roti/Chapati (1 piece): 120 calories, 20g carbs, 3g protein, 3g fat
+            - Dal (1 cup): 150 calories, 28g carbs, 9g protein, 1g fat
+            - Aloo Sabji (1 cup): 180 calories, 35g carbs, 4g protein, 3g fat
+            
+            Return a detailed JSON object with this structure:
+            {
+                "foods": ["detailed list with portions"],
+                "calories": number,
+                "macros": {
+                    "protein": number (in grams),
+                    "carbs": number (in grams),
+                    "fat": number (in grams)
+                },
+                "suggestions": "specific nutrition advice",
+                "assessment": "detailed health assessment",
+                "warnings": ["relevant warnings"]
+            }`;
+
+            const result = await this.client.generateContent(prompt);
+            console.log('Raw analysis result:', result);
+            
+            const parsedResult = this.parseAIResponse(result);
+            if (!parsedResult || !parsedResult.macros) {
+                throw new Error('Invalid response format from AI service');
+            }
+            
+            // Format the response for UI
+            const formattedResult = this.formatAnalysisResponse(parsedResult);
+
+            // Add dietary conflict warnings
+            const conflictWarnings = this.checkDietaryConflicts(formattedResult.foodItems);
+            if (conflictWarnings.length > 0) {
+                formattedResult.warnings = [
+                    ...formattedResult.warnings,
+                    ...conflictWarnings.map(w => w.message)
+                ];
+            }
+            
+            console.log('Final analyzed result:', formattedResult);
+            return formattedResult;
+        } catch (error) {
+            console.error('Meal analysis failed:', error);
+            throw new Error('Failed to analyze meal: ' + error.message);
+        }
+    }
+
+    // Generate weekly summary from meal data
+    async generateWeeklySummary(meals) {
+        try {
+            console.log('Generating summary for meals:', meals);
+            const result = await this.client.generateWeeklySummary(meals);
+            console.log('Summary result:', result);
+            return result;
+        } catch (error) {
+            console.error('Weekly summary generation failed:', error);
+            throw new Error('Failed to generate summary: ' + error.message);
+        }
+    }
+
+    // Get healthier meal suggestions
+    async suggestBetterMeal(meal) {
+        try {
+            console.log('Getting suggestions for meal:', meal);
+            const result = await this.client.suggestBetterMeal(meal);
+            console.log('Suggestion result:', result);
+            return result;
+        } catch (error) {
+            console.error('Meal suggestion failed:', error);
+            throw new Error('Failed to suggest alternatives: ' + error.message);
+        }
+    }
+
+    // Get a random health tip
+    async getHealthTip() {
+        try {
+            console.log('Getting random health tip');
+            const result = await this.client.generateHealthTip();
+            console.log('Health tip result:', result);
+            return result;
+        } catch (error) {
+            console.error('Health tip generation failed:', error);
+            return {
+                title: "Balanced Nutrition",
+                tip: "Aim for a colorful plate at each meal. Different colored fruits and vegetables provide various nutrients essential for overall health.",
+                category: "nutrition"
+            };
+        }
+    }
+}
+
+// Create and export a single instance
+const ai = new MealAI();
+export default ai;

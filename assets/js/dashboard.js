@@ -1,7 +1,10 @@
 // Import required modules
 import goalsManager from './goals.js';
-import ai from './ai-features.js';
+import { MealAI } from './ai-features.js';
 import nutritionTipGenerator from './nutrition-tip-generator.js';
+
+// Initialize AI features
+const ai = new MealAI();
 
 // Toast notification helper
 function showToast(message, type = 'info') {
@@ -164,7 +167,6 @@ function setupEventListeners() {
             }
 
             // Get AI analysis
-            const ai = new MealAI();
             const summary = await ai.generateWeeklySummary(recentMeals);
             
             if (!summary || typeof summary !== 'object') {
@@ -316,6 +318,169 @@ function closeWeeklySummary() {
     }, 300);
 }
 
+// Render a meal card
+function renderMealCard(meal) {
+    const mealTime = new Date(meal.dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const mealDate = new Date(meal.dateTime).toLocaleDateString();
+    
+    return `
+        <div class="meal-card">
+            <div class="meal-card-header">
+                <div>
+                    <h3 class="meal-title">${meal.name}</h3>
+                    <span class="meal-time">${mealTime}</span>
+                </div>
+            </div>
+            
+            <div class="meal-nutrients">
+                <div class="nutrient-item">
+                    <div class="nutrient-label">Calories</div>
+                    <div class="nutrient-value">${Math.round(meal.calories)}</div>
+                </div>
+                <div class="nutrient-item">
+                    <div class="nutrient-label">Protein</div>
+                    <div class="nutrient-value">${Math.round(meal.protein)}g</div>
+                </div>
+                <div class="nutrient-item">
+                    <div class="nutrient-label">Carbs</div>
+                    <div class="nutrient-value">${Math.round(meal.carbs)}g</div>
+                </div>
+                <div class="nutrient-item">
+                    <div class="nutrient-label">Fat</div>
+                    <div class="nutrient-value">${Math.round(meal.fat)}g</div>
+                </div>
+            </div>
+            
+            <div class="meal-actions">
+                <button class="view-details-btn" onclick="showMealDetails('${meal.id}')">
+                    AI Assessment
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+// Show meal details in a modal
+async function showMealDetails(mealId) {
+    const user = firebase.auth().currentUser;
+    if (!user) {
+        showToast('Please log in to view meal details');
+        return;
+    }
+
+    try {
+        // Create and show modal first with loading state
+        const modal = document.createElement('div');
+        modal.className = 'modal-backdrop visible';
+        modal.innerHTML = `
+            <div class="modal">
+                <div class="modal-header">
+                    <h3 class="modal-title">Loading...</h3>
+                    <button class="modal-close" onclick="this.closest('.modal-backdrop').remove()">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="loading-spinner"></div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+
+        // Fetch meal data
+        const snapshot = await firebase.database().ref(`users/${user.uid}/meals/${mealId}`).once('value');
+        const meal = snapshot.val();
+        if (!meal) {
+            throw new Error('Meal not found');
+        }
+
+        // Get AI assessment of the meal
+        const assessment = await ai.analyzeMeal(meal.name);
+
+        // Update modal with meal details and assessment
+        const modalContent = modal.querySelector('.modal');
+        modalContent.innerHTML = `
+            <div class="modal-header">
+                <div class="modal-title-section">
+                    <h3 class="modal-title">${meal.name}</h3>
+                    <p class="modal-subtitle">${new Date(meal.dateTime).toLocaleString()}</p>
+                </div>
+                <button class="modal-close" onclick="this.closest('.modal-backdrop').remove()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="meal-details">
+                    <div class="nutrient-details">
+                        <h4>Nutritional Information</h4>
+                        <div class="nutrient-grid">
+                            <div class="nutrient-detail">
+                                <span class="label">Calories</span>
+                                <span class="value">${Math.round(meal.calories)} kcal</span>
+                            </div>
+                            <div class="nutrient-detail">
+                                <span class="label">Protein</span>
+                                <span class="value">${Math.round(meal.protein)}g</span>
+                            </div>
+                            <div class="nutrient-detail">
+                                <span class="label">Carbs</span>
+                                <span class="value">${Math.round(meal.carbs)}g</span>
+                            </div>
+                            <div class="nutrient-detail">
+                                <span class="label">Fat</span>
+                                <span class="value">${Math.round(meal.fat)}g</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ai-assessment">
+                        <h4>AI Assessment <span class="ai-badge">AI</span></h4>
+                        <div class="assessment-content">
+                            ${assessment.assessment ? `
+                                <div class="assessment-section">
+                                    <p>${assessment.assessment}</p>
+                                </div>
+                            ` : ''}
+                            
+                            ${assessment.suggestions ? `
+                                <div class="suggestions-section">
+                                    <h5>Suggestions</h5>
+                                    <p>${assessment.suggestions}</p>
+                                </div>
+                            ` : ''}
+                            
+                            ${assessment.warnings && assessment.warnings.length > 0 ? `
+                                <div class="warnings-section">
+                                    <h5>Important Notes</h5>
+                                    <ul>
+                                        ${assessment.warnings.map(warning => `
+                                            <li>${warning}</li>
+                                        `).join('')}
+                                    </ul>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+
+                    ${meal.notes ? `
+                        <div class="notes-section">
+                            <h4>Additional Notes</h4>
+                            <p>${meal.notes}</p>
+                        </div>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+
+    } catch (error) {
+        console.error('Error showing meal details:', error);
+        showToast('Failed to load meal details');
+        const modalBackdrop = document.querySelector('.modal-backdrop');
+        if (modalBackdrop) {
+            modalBackdrop.remove();
+        }
+    }
+}
+
+// Make showMealDetails available globally
+window.showMealDetails = showMealDetails;
+
 // Load user's meals and update stats
 async function loadMealsAndStats() {
     const user = firebase.auth().currentUser;
@@ -375,29 +540,36 @@ function updateMealGrid(meals) {
 
     mealGrid.innerHTML = mealsArray.map(meal => `
         <div class="meal-card">
-            <div class="meal-header">
-                <h3>${meal.name}</h3>
-                <span class="meal-time">${new Date(meal.dateTime).toLocaleString()}</span>
-            </div>            <div class="meal-content">
-                <div class="meal-stats">
-                    <div class="meal-stat calories">
-                        <span class="meal-stat-label">Calories</span>
-                        <span class="meal-stat-value">${meal.calories || 0}</span>
-                    </div>
-                    <div class="meal-stat protein">
-                        <span class="meal-stat-label">Protein</span>
-                        <span class="meal-stat-value">${meal.protein || 0}g</span>
-                    </div>
-                    <div class="meal-stat carbs">
-                        <span class="meal-stat-label">Carbs</span>
-                        <span class="meal-stat-value">${meal.carbs || 0}g</span>
-                    </div>
-                    <div class="meal-stat fat">
-                        <span class="meal-stat-label">Fat</span>
-                        <span class="meal-stat-value">${meal.fat || 0}g</span>
-                    </div>
+            <div class="meal-card-header">
+                <div>
+                    <h3 class="meal-title">${meal.name}</h3>
+                    <span class="meal-time">${new Date(meal.dateTime).toLocaleString()}</span>
                 </div>
-                ${meal.notes ? `<p class="meal-notes">${meal.notes}</p>` : ''}
+            </div>
+            
+            <div class="meal-nutrients">
+                <div class="nutrient-item">
+                    <div class="nutrient-label">Calories</div>
+                    <div class="nutrient-value">${Math.round(meal.calories)}</div>
+                </div>
+                <div class="nutrient-item">
+                    <div class="nutrient-label">Protein</div>
+                    <div class="nutrient-value">${Math.round(meal.protein)}g</div>
+                </div>
+                <div class="nutrient-item">
+                    <div class="nutrient-label">Carbs</div>
+                    <div class="nutrient-value">${Math.round(meal.carbs)}g</div>
+                </div>
+                <div class="nutrient-item">
+                    <div class="nutrient-label">Fat</div>
+                    <div class="nutrient-value">${Math.round(meal.fat)}g</div>
+                </div>
+            </div>
+            
+            <div class="meal-actions">
+                <button class="view-details-btn" onclick="showMealDetails('${meal.id}')">
+                    AI Assessment
+                </button>
             </div>
         </div>
     `).join('');
@@ -537,7 +709,6 @@ weeklySummaryBtn.addEventListener('click', async () => {
         }
 
         // Get AI analysis
-        const ai = new MealAI();
         const summary = await ai.generateWeeklySummary(recentMeals);
         
         if (!summary || typeof summary !== 'object') {

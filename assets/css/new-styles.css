@@ -551,103 +551,101 @@ p {
 }
 
 .meal-card {
-  background-color: white;
+  background: var(--white);
   border-radius: var(--border-radius);
-  padding: 1.5rem;
   border: 1px solid var(--gray-200);
-  transition: all var(--transition);
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
 }
 
 .meal-card:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
   border-color: var(--primary-light);
 }
 
-.meal-header {
+.meal-card-header {
   display: flex;
   justify-content: space-between;
+  align-items: flex-start;
   margin-bottom: 1rem;
 }
 
 .meal-title {
-  font-weight: 600;
   font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--gray-900);
+  margin-right: 1rem;
 }
 
 .meal-time {
-  color: var(--gray-500);
   font-size: 0.875rem;
+  color: var(--gray-500);
 }
 
-.meal-content {
+.meal-nutrients {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
   margin-bottom: 1rem;
 }
 
-.food-item {
-  display: flex;
-  justify-content: space-between;
-  padding: 0.5rem 0;
-  border-bottom: 1px dashed var(--gray-200);
-}
-
-.food-item:last-child {
-  border-bottom: none;
-}
-
-.food-name {
-  color: var(--gray-700);
-}
-
-.food-amount {
-  color: var(--gray-600);
-  font-size: 0.875rem;
-}
-
-.meal-stats {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1rem;
-  background: var(--gray-100);
-  padding: 1.25rem;
-  border-radius: var(--border-radius);
-  margin-top: 1rem;
-  transition: all var(--transition);
-}
-
-.meal-card:hover .meal-stats {
-  background: var(--bg-subtle);
-}
-
-.meal-stat {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.nutrient-item {
   text-align: center;
-  position: relative;
-}
-
-.meal-stat-value {
-  font-size: 1rem;
-  font-weight: 600;
   padding: 0.5rem;
-  min-width: 60px;
-  background: white;
-  border-radius: 6px;
-  box-shadow: var(--shadow-sm);
-  transition: all var(--transition-fast);
+  background: var(--bg-subtle);
+  border-radius: var(--border-radius-sm);
 }
 
-.meal-stat:hover .meal-stat-value {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-}
-
-.meal-stat-label {
+.nutrient-label {
   font-size: 0.75rem;
   color: var(--gray-600);
-  text-transform: uppercase;
   margin-bottom: 0.25rem;
+}
+
+.nutrient-value {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--gray-800);
+}
+
+.meal-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--gray-200);
+}
+
+.view-details-btn {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  color: var(--primary);
+  background: transparent;
+  border: 1px solid var(--primary);
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.view-details-btn:hover {
+  background: var(--primary);
+  color: var(--white);
+}
+
+.meal-badge {
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--white);
+  background: var(--primary);
+  border-radius: var(--border-radius-full);
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
 }
 
 /* Color coding for different nutrients */
@@ -806,6 +804,164 @@ p {
 
 .modal-body {
   padding: 1.5rem;
+}
+
+/* Modal Styles */
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.modal-backdrop.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    transform: scale(0.95);
+    opacity: 0;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-lg);
+}
+
+.modal-backdrop.visible .modal {
+    transform: scale(1);
+    opacity: 1;
+}
+
+.modal-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--gray-200);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.modal-title-section {
+    flex: 1;
+}
+
+.modal-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--gray-900);
+    margin: 0;
+}
+
+.modal-subtitle {
+    font-size: 0.875rem;
+    color: var(--gray-500);
+    margin: 0.25rem 0 0 0;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--gray-500);
+    cursor: pointer;
+    padding: 0.5rem;
+    margin: -0.5rem;
+    line-height: 1;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.meal-details {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.nutrient-details h4, .notes-section h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--gray-800);
+    margin: 0 0 1rem 0;
+}
+
+.nutrient-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1rem;
+}
+
+.nutrient-detail {
+    background: var(--bg-subtle);
+    padding: 1rem;
+    border-radius: var(--border-radius-sm);
+    text-align: center;
+}
+
+.nutrient-detail .label {
+    font-size: 0.875rem;
+    color: var(--gray-600);
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.nutrient-detail .value {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--gray-900);
+}
+
+.notes-section {
+    background: var(--bg-subtle);
+    padding: 1.25rem;
+    border-radius: var(--border-radius-sm);
+}
+
+/* Compact Meal Card Styles */
+.meal-card {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--gray-200);
+    padding: 1.25rem;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.meal-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    border-color: var(--primary-light);
+}
+
+.meal-card-header {
+    margin-bottom: 1rem;
+}
+
+.meal-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--gray-900);
+    margin: 0 0 0.25rem 0;
+}
+
+.meal-time {
+    font-size: 0.875rem;
+    color: var(--gray-500);
 }
 
 /* ---------- LOADING OVERLAY ---------- */

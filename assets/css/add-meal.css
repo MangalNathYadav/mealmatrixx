@@ -152,6 +152,18 @@ textarea.form-control {
     line-height: 1.6;
 }
 
+/* Form Validation */
+.form-control.invalid {
+    border-color: #ef4444;
+    background-color: #fef2f2;
+}
+
+.field-error {
+    color: #ef4444;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
 /* Nutrient Grid */
 .nutrient-grid {
     display: grid;
@@ -163,6 +175,11 @@ textarea.form-control {
 .ai-result {
     margin-top: 1.5rem;
     transition: var(--transition);
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-top: 1rem;
 }
 
 .ai-result.empty {
@@ -174,6 +191,23 @@ textarea.form-control {
     border: 2px dashed var(--gray-300);
 }
 
+.ai-result.with-data {
+    background: white;
+}
+
+.ai-result .warning {
+    color: #f59e0b;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.ai-result .warning svg {
+    width: 16px;
+    height: 16px;
+}
+
 .empty-state-icon {
     font-size: 2.5rem;
     margin-bottom: 1rem;
@@ -182,6 +216,56 @@ textarea.form-control {
 .empty-state-text {
     color: var(--gray-600);
     font-size: 0.95rem;
+}
+
+/* Nutrient Display */
+.nutrient-display {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.nutrient-item {
+    background: #f3f4f6;
+    padding: 0.75rem;
+    border-radius: 6px;
+    text-align: center;
+}
+
+.ai-assessment, .ai-suggestions, .ai-notes {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.ai-assessment h4, .ai-suggestions h4, .ai-notes h4 {
+    color: var(--gray-800);
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem 0;
+}
+
+.ai-assessment p, .ai-suggestions p {
+    color: var(--gray-700);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.nutrient-item .label {
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.nutrient-item .value {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #111827;
+    margin-top: 0.25rem;
 }
 
 /* Buttons */
@@ -265,13 +349,18 @@ textarea.form-control {
     transform: translateY(0);
 }
 
+.loading-content {
+    text-align: center;
+}
+
 .loading-spinner {
-    width: 24px;
-    height: 24px;
-    border: 2px solid var(--gray-200);
-    border-top-color: var(--primary);
+    width: 40px;
+    height: 40px;
+    border: 3px solid #e5e7eb;
+    border-top-color: #4F46E5;
     border-radius: 50%;
-    animation: spin 0.8s linear infinite;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
 }
 
 #loadingMessage {
@@ -279,6 +368,41 @@ textarea.form-control {
     font-weight: 500;
     font-size: 0.95rem;
     margin: 0;
+}
+
+/* Toast Notifications */
+.toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100%);
+    padding: 12px 24px;
+    border-radius: 8px;
+    background: white;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    z-index: 1000;
+}
+
+.toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
+
+.toast-success {
+    background: #10b981;
+    color: white;
+}
+
+.toast-error {
+    background: #ef4444;
+    color: white;
+}
+
+.toast-info {
+    background: #3b82f6;
+    color: white;
 }
 
 /* Animations */

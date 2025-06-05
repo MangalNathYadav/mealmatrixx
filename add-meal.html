@@ -51,11 +51,14 @@
                                     class="form-control" 
                                     rows="4" 
                                     placeholder="Example: I had a grilled chicken breast with a side of quinoa and steamed broccoli, topped with olive oil..."
+                                    aria-label="Meal description for AI analysis"
+                                    aria-describedby="mealDescriptionHelp"
                                 ></textarea>
-                                <button class="btn btn-primary" id="analyzeButton">
+                                <div id="mealDescriptionHelp" class="helper-text">Describe your meal naturally, including portions and ingredients</div>
+                                <button class="btn btn-primary" id="analyzeButton" aria-label="Analyze meal with AI">
                                     <span class="btn-text">Analyze Meal</span>
                                     <div class="btn-loading">
-                                        <div class="loading-dots"></div>
+                                        <div class="loading-dots" role="progressbar" aria-label="Analyzing meal"></div>
                                     </div>
                                 </button>
                             </div>
@@ -140,8 +143,6 @@
     <!-- App Scripts -->
     <script src="firebase-config.js"></script>
     <script src="assets/js/auth.js"></script>
-    <script src="assets/js/ai-features.js" type="module"></script>
-    <script src="assets/js/ai-ui.js" type="module"></script>
-    <script src="assets/js/addMeal.js"></script>
+    <script src="assets/js/addMeal.js" type="module"></script>
 </body>
 </html>
