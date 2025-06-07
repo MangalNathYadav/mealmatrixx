@@ -77,48 +77,45 @@ formFields.forEach(fieldId => {
 
 // Loading state management
 function showLoading(message = 'Updating profile...') {
-    const overlay = document.querySelector('.loading-overlay');
-    const messageEl = document.getElementById('loadingMessage');
-    
-    if (messageEl) {
-        messageEl.textContent = message;
-    }
-    
+    const overlay = document.getElementById('app-loading-overlay');
     if (overlay) {
-        document.body.style.overflow = 'hidden'; // Prevent scrolling
-        overlay.classList.add('visible');
+        const title = overlay.querySelector('.dashboard-loading-title');
+        const subtext = overlay.querySelector('.dashboard-loading-subtext');
+        
+        if (title) title.textContent = message;
+        if (subtext) subtext.textContent = 'Please wait while we process your request...';
+        
+        document.body.style.overflow = 'hidden';
+        overlay.classList.remove('hidden');
+        overlay.style.display = 'flex';
     }
 }
 
 function hideLoading() {
-    const overlay = document.querySelector('.loading-overlay');
-    
+    const overlay = document.getElementById('app-loading-overlay');
     if (overlay) {
-        overlay.classList.remove('visible');
+        overlay.classList.add('hidden');
         setTimeout(() => {
-            document.body.style.overflow = ''; // Restore scrolling
+            document.body.style.overflow = '';
+            overlay.style.display = 'none';
         }, 300); // Match transition duration
     }
 }
 
-// Toast notification functions
-function createToast(message) {
-    const toast = document.createElement('div');
-    toast.className = 'toast';
-    toast.innerHTML = `<span>✨</span>${message}`;
-    document.body.appendChild(toast);
-    
-    // Show the toast
-    setTimeout(() => {
-        toast.classList.add('show');
-    }, 100);
+// Toast notification function
+function showToast(message, type = 'success') {
+    const toast = document.getElementById('toast');
+    if (!toast) return;
 
-    // Hide and remove the toast after 3 seconds
+    toast.className = `toast toast-${type}`;
+    toast.innerHTML = `
+        <span class="toast-icon">${type === 'success' ? '✓' : '⚠'}</span>
+        <span>${message}</span>
+    `;
+    
+    toast.classList.add('show');
     setTimeout(() => {
         toast.classList.remove('show');
-        setTimeout(() => {
-            document.body.removeChild(toast);
-        }, 300);
     }, 3000);
 }
 
@@ -224,13 +221,13 @@ photoUpload.addEventListener('change', async (e) => {
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
-        createToast('Please select an image file');
+        showToast('Please select an image file', 'error');
         return;
     }
 
     // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-        createToast('Image size should be less than 5MB');
+        showToast('Image size should be less than 5MB', 'error');
         return;
     }
 
@@ -255,7 +252,7 @@ photoUpload.addEventListener('change', async (e) => {
         await new Promise(resolve => setTimeout(resolve, 1500));
 
         hideLoading();
-        createToast('Profile photo updated successfully!');
+        showToast('Profile photo updated successfully!', 'success');
     } catch (error) {
         console.error('Error uploading photo:', error);
         hideLoading();
@@ -388,14 +385,21 @@ if (profileForm) {
     });
 }
 
-// Initialize
+// Initialize app when document is ready
 document.addEventListener('DOMContentLoaded', () => {
-    // Check authentication state
+    // Initialize Firebase Auth state
     firebase.auth().onAuthStateChanged((user) => {
         if (!user) {
             window.location.href = 'login.html';
         } else {
-            loadUserProfile();
+            loadUserProfile().then(() => {
+                // Hide loading overlay after profile is loaded
+                hideLoading();
+            }).catch(error => {
+                console.error('Error loading profile:', error);
+                hideLoading();
+                showToast('Failed to load profile data', 'error');
+            });
         }
     });
 
