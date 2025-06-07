@@ -5,8 +5,506 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MealMatrix - User Profile</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/new-styles.css">
-    <link rel="stylesheet" href="assets/css/profile.css">
+    <style>
+        /* Updated Styles to reduce scrolling */
+        :root {
+            --primary-color: #9333EA;
+            --secondary-color: #C084FC;
+            --accent-color: #E879F9;
+            --text-color: #1E293B;
+            --bg-subtle: #F8FAFC;
+            --white: #FFFFFF;
+            --shadow-sm: 0 1px 2px rgba(147, 51, 234, 0.05);
+            --shadow-md: 0 4px 6px rgba(147, 51, 234, 0.1);
+            --transition: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+            --border-radius: 16px;
+            --box-shadow: 0 8px 32px rgba(147, 51, 234, 0.15);
+            --gradient-start: rgba(192, 132, 252, 0.15);
+            --gradient-end: rgba(232, 121, 249, 0.1);
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end)),
+                        linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            background-attachment: fixed;
+            color: white;
+            min-height: 100vh;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        /* Navbar Enhancement */
+        .navbar {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            padding: 0;
+            height: 60px;
+        }
+
+        .navbar-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 100%;
+        }
+
+        .navbar-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            color: white;
+            font-weight: 600;
+            font-size: 1.25rem;
+        }
+
+        .navbar-logo img {
+            height: 32px;
+            width: auto;
+        }
+
+        .btn {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+            color: white;
+            text-decoration: none;
+            padding: 0.625rem 1.25rem;
+            border-radius: var(--border-radius);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Profile Container */
+        .profile-container {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(12px);
+            border-radius: var(--border-radius);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(147, 51, 234, 0.15);
+            overflow: hidden;
+            position: relative;
+            /* height: calc(100vh - 80px); */
+            margin: 2.5rem auto;
+            padding: 0.75rem;
+            overflow-y: auto;
+        }
+
+        .welcome-section {
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .section-header h2 {
+            font-size: 1.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .section-header p {
+            font-size: 0.875rem;
+        }
+
+        /* Content Layout */
+        .profile-content {
+            flex: 1;
+            overflow: hidden;
+            padding: 0 0.5rem;
+        }
+
+        .profile-form-container {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        /* Grid Layout */
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: 1rem;
+            align-items: start;
+        }
+
+        .preferences-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .health-conditions-section {
+            margin-bottom: 2rem;
+        }
+
+        /* Section Cards */
+        .section-card {
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(12px);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            height: auto;
+            margin:0.5rem;
+                        margin-left:1rem;
+
+
+max-width: 96%;
+    max-height: 96%;
+            box-sizing: border-box;
+        }
+
+        .section-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow), 0 12px 48px rgba(147, 51, 234, 0.2);
+        }
+
+        .section-card h3 {
+            font-size: 1.125rem;
+            margin-bottom: 1rem;
+        }
+
+        .section-card h3 span {
+            font-size: 1.25rem;
+        }
+
+        /* Form Controls */
+        .form-group {
+            margin-bottom: 0.75rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.25rem;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .form-group label span[aria-label="required"] {
+            color: #FCA5A5;
+            margin-left: 0.25rem;
+        }
+
+        .form-control {
+            width: 90%;
+            padding: 0.5rem;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white;
+            font-size: 0.875rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        textarea.form-control {
+            min-height: 60px;
+            resize: vertical;
+        }
+
+        select.form-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4 6L8 10L12 6' stroke='white' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            padding-right: 2.5rem;
+        }
+
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .form-control:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        /* Photo Upload */
+        .photo-wrapper {
+            position: relative;
+            width: 90px;
+            height: 90px;
+            margin: 0 auto;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .photo-wrapper:hover {
+            transform: scale(1.05);
+            border-color: var(--accent-color);
+        }
+
+        .profile-photo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .photo-upload-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 0.4rem 0.75rem;
+            margin: 0.5rem auto;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            font-size: 0.875rem;
+        }
+
+        .photo-upload-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .photo-helper {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        /* Save Button */
+        .btn-save {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.25rem;
+            margin: 1.75rem 3rem;
+            position: sticky;
+            bottom: 0;
+            align-self: flex-end;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9375rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(147, 51, 234, 0.25);
+        }
+
+        .btn-save:hover {
+            background: #8B31E3;
+            transform: translateY(-2px);
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 12px 36px rgba(147, 51, 234, 0.35);
+        }
+
+        /* Loading Overlay - Using Dashboard Style */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(147, 51, 234, 0.15);
+            backdrop-filter: blur(8px);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading-content {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(12px);
+            border-radius: var(--border-radius);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 2rem;
+            text-align: center;
+            color: white;
+            box-shadow: 0 8px 32px rgba(147, 51, 234, 0.2);
+            animation: fadeSlideUp 0.3s ease-out;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        .loading-progress {
+            width: 200px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            margin-top: 1rem;
+            overflow: hidden;
+        }
+
+        .loading-progress-bar {
+            width: 30%;
+            height: 100%;
+            background: white;
+            border-radius: 2px;
+            animation: progress 2s ease-in-out infinite;
+        }
+
+        @keyframes progress {
+            0% { width: 0%; }
+            50% { width: 100%; }
+            100% { width: 0%; }
+        }
+
+        #loadingMessage {
+            font-size: 0.9375rem;
+            margin: 0.5rem 0;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        /* Animations */
+        @keyframes fadeSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Tab Navigation */
+        .tab-navigation {
+            display: flex;
+            gap: 0.25rem;
+            margin-bottom: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .tab-button {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.4rem 0.625rem;
+            font-size: 0.875rem;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            font-weight: 500;
+        }
+
+        .tab-button.active {
+            background: var(--primary-color);
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 2px 8px rgba(147, 51, 234, 0.2);
+        }
+
+        .tab-button:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease-out;
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 0.75rem;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Custom Scrollbar */
+        .tab-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .tab-content::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        .tab-content::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+
+        .tab-content::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .profile-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .preferences-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 
 <body>    <!-- Navbar -->
@@ -25,40 +523,59 @@
                 </a>
             </div>
         </div>
-    </nav>    <div class="container">
-        <div class="profile-container">
-            <div class="welcome-section">
-                <div class="welcome-header">
-                    <div class="section-header">
-                        <h2>User Profile</h2>
-                        <p>Manage your personal information and preferences</p>
+    </nav>
+    <main class="main-content">
+        <div class="container">
+            <div class="profile-container">
+                <div class="welcome-section">
+                    <div class="welcome-header">
+                        <div class="section-header">
+                            <div style="display: flex; align-items: center; gap: 1rem;">
+                                <h2 style="margin: 0;">User Profile</h2>
+                                <p style="margin: 0;">Manage your personal information and preferences</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="profile-content">
-        <form id="profileForm" class="profile-form-container">
-            <div class="profile-grid">
-                <!-- Profile Photo Section -->
-                <div class="profile-photo-section section-card">
-                    <div class="photo-wrapper">
-                        <img src="assets/default-avatar.png" alt="Profile Photo" class="profile-photo" id="profilePhoto">
-                    </div>
-                    <div class="photo-overlay">
-                        <input type="file" id="photoUpload" accept="image/*" style="display: none;">
-                        <button type="button" class="photo-upload-btn" onclick="document.getElementById('photoUpload').click()">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
-                            </svg>
-                            Change Photo
+                <div class="profile-content">
+                <form id="profileForm" class="profile-form-container">
+                    <!-- Tab Navigation -->
+                    <div class="tab-navigation">
+                        <button type="button" class="tab-button active" data-tab="basic-info">
+                            👤 Basic Info
+                        </button>
+                        <button type="button" class="tab-button" data-tab="diet">
+                            🥗 Diet & Preferences
+                        </button>
+                        <button type="button" class="tab-button" data-tab="health">
+                            ⚠️ Health & Restrictions
                         </button>
                     </div>
-                    <p class="photo-helper">Upload a square image for best results</p>
-                </div>
 
-                <!-- Personal Information -->
-                <div class="personal-info-section">
-                    <h3><span>👤</span> Personal Information</h3>
+                    <!-- Basic Info Tab -->
+                    <div class="tab-content active" id="basic-info">
+                        <div class="profile-grid">
+                            <!-- Profile Photo Section -->
+                            <div class="profile-photo-section section-card">
+                                <div class="photo-wrapper">
+                                    <img src="assets/default-avatar.png" alt="Profile Photo" class="profile-photo" id="profilePhoto">
+                                </div>
+                                <div class="photo-overlay">
+                                    <input type="file" id="photoUpload" accept="image/*" style="display: none;">
+                                    <button type="button" class="photo-upload-btn" onclick="document.getElementById('photoUpload').click()">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+                                        </svg>
+                                        Change Photo
+                                    </button>
+                                </div>
+                                <p class="photo-helper">Upload a square image for best results</p>
+                            </div>
+
+                        <!-- Personal Information -->
+                        <div class="personal-info-section section-card">
+                            <h3><span>👤</span> Personal Information</h3>
                     <div class="form-group">
                         <label for="fullName">Full Name<span aria-label="required">*</span></label>
                         <input type="text" id="fullName" class="form-control" required 
@@ -100,64 +617,77 @@
                         </div>
                     </div>
                 </div>
-            </div>            <div class="preferences-grid">
-                <div class="profile-section section-card">
-                    <h3>
-                        <span>🥗</span>
-                        Dietary Preferences
-                    </h3>
-                    <div class="form-group">
-                        <label for="dietType">Diet Type</label>
-                        <select id="dietType" class="form-control">
-                            <option value="none">No specific diet</option>
-                            <option value="vegetarian">Vegetarian</option>
-                            <option value="vegan">Vegan</option>
-                            <option value="pescatarian">Pescatarian</option>
-                            <option value="keto">Ketogenic</option>
-                            <option value="paleo">Paleo</option>
-                            <option value="mediterranean">Mediterranean</option>
-                            <option value="lowCarb">Low Carb</option>
-                            <option value="lowFat">Low Fat</option>
-                        </select>
+            </div>            </div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="foodPreferences">Food Preferences</label>
-                        <textarea id="foodPreferences" class="form-control" 
-                            placeholder="List foods you particularly enjoy..."></textarea>
-                    </div>
-                </div>                <div class="profile-section section-card">
-                    <h3>
-                        <span>⚠️</span>
-                        Allergies & Restrictions
-                    </h3>
-                    <div class="form-group">
-                        <label for="allergies">Food Allergies</label>
-                        <textarea id="allergies" class="form-control" 
-                            placeholder="List any food allergies..."></textarea>
+                    <!-- Diet & Preferences Tab -->
+                    <div class="tab-content" id="diet">
+                        <div class="preferences-grid">
+                            <div class="profile-section section-card">
+                                <h3>
+                                    <span>🥗</span>
+                                    Dietary Preferences
+                                </h3>
+                                <div class="form-group">
+                                    <label for="dietType">Diet Type</label>
+                                    <select id="dietType" class="form-control">
+                                        <option value="none">No specific diet</option>
+                                        <option value="vegetarian">Vegetarian</option>
+                                        <option value="vegan">Vegan</option>
+                                        <option value="pescatarian">Pescatarian</option>
+                                        <option value="keto">Ketogenic</option>
+                                        <option value="paleo">Paleo</option>
+                                        <option value="mediterranean">Mediterranean</option>
+                                        <option value="lowCarb">Low Carb</option>
+                                        <option value="lowFat">Low Fat</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="foodPreferences">Food Preferences</label>
+                                    <textarea id="foodPreferences" class="form-control" 
+                                        placeholder="List foods you particularly enjoy..."></textarea>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="restrictions">Dietary Restrictions</label>
-                        <textarea id="restrictions" class="form-control" 
-                            placeholder="List any other dietary restrictions..."></textarea>
-                    </div>
-                </div>
-            </div>            <div class="health-conditions-section">
-                <div class="section-card">
-                    <h3>
-                        <span>🎯</span>
-                        Health Conditions
-                    </h3>
-                    <div class="form-group">
-                        <label for="healthConditions">Relevant Health Conditions</label>
-                        <textarea id="healthConditions" class="form-control" 
-                            placeholder="List any health conditions that affect your diet (e.g., diabetes, high blood pressure)..."></textarea>
-                    </div>
-                </div>
-            </div>
+                    <!-- Health & Restrictions Tab -->
+                    <div class="tab-content" id="health">
+                        <div class="preferences-grid" style="margin-bottom: 1rem;">
+                            <div class="section-card">
+                                <h3>
+                                    <span>⚠️</span>
+                                    Allergies & Restrictions
+                                </h3>
+                                <div class="form-group">
+                                    <label for="allergies">Food Allergies</label>
+                                    <textarea id="allergies" class="form-control" 
+                                        placeholder="List any food allergies..."></textarea>
+                                </div>
 
-            <button type="submit" class="btn-save">Save Profile</button>
+                                <div class="form-group">
+                                    <label for="restrictions">Dietary Restrictions</label>
+                                    <textarea id="restrictions" class="form-control" 
+                                        placeholder="List any other dietary restrictions..."></textarea>
+                                </div>
+                            </div>
+
+                            <div class="section-card">
+                                <h3>
+                                    <span>🎯</span>
+                                    Health Conditions
+                                </h3>
+                                <div class="form-group">
+                                    <label for="healthConditions">Relevant Health Conditions</label>
+                                    <textarea id="healthConditions" class="form-control" 
+                                        placeholder="List any health conditions that affect your diet (e.g., diabetes, high blood pressure)..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-save">Save Profile</button>
         </form>
         </div>
     </div>
@@ -183,5 +713,91 @@
     <script src="firebase-config.js"></script>
     <script src="assets/js/auth.js"></script>
     <script src="assets/js/profile.js"></script>
+
+    <script>
+        // Tab Switching
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', () => {
+                // Remove active class from all tabs
+                document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                // Add active class to clicked tab
+                button.classList.add('active');
+                document.getElementById(button.dataset.tab).classList.add('active');
+            });
+        });
+    </script>
+
+    <style>
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(147, 51, 234, 0.15);
+            backdrop-filter: blur(8px);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading-content {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(12px);
+            border-radius: var(--border-radius);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 2rem;
+            text-align: center;
+            color: white;
+            box-shadow: 0 8px 32px rgba(147, 51, 234, 0.2);
+            animation: fadeSlideUp 0.3s ease-out;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        .loading-progress {
+            width: 200px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            margin-top: 1rem;
+            overflow: hidden;
+        }
+
+        .loading-progress-bar {
+            width: 30%;
+            height: 100%;
+            background: white;
+            border-radius: 2px;
+            animation: progress 2s ease-in-out infinite;
+        }
+
+        @keyframes progress {
+            0% { width: 0%; }
+            50% { width: 100%; }
+            100% { width: 0%; }
+        }
+
+        #loadingMessage {
+            font-size: 0.9375rem;
+            margin: 0.5rem 0;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+    </style>
 </body>
 </html>
