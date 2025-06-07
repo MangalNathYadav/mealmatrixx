@@ -759,7 +759,7 @@ p {
 
 .modal {
   width: 100%;
-  max-width: 800px;
+  max-width: 90vw;
   max-height: 90vh;
   background-color: white;
   border-radius: var(--border-radius-lg);
@@ -832,8 +832,8 @@ p {
 .modal {
     background: var(--white);
     border-radius: var(--border-radius);
-    width: 90%;
-    max-width: 600px;
+    width:auto;
+    max-width: 90vw;
     max-height: 90vh;
     overflow-y: auto;
     transform: scale(0.95);
@@ -841,7 +841,23 @@ p {
     transition: all 0.3s ease;
     box-shadow: var(--shadow-lg);
 }
-
+.modal::before, .modal::after {
+    content: '';
+    position: absolute;
+    width: 225%;
+    height: 200%;
+    top: 0%;
+    left: 0%;
+    overflow:hidden;
+    z-index: -1;
+    background: linear-gradient(180deg, rgba(146, 51, 234, 0.697), rgba(192, 132, 252, 15.15), rgba(232, 121, 249, 0.15));
+    animation: fluidRotate 15s linear infinite;
+}
+.modal::after {
+  overflow:hidden;
+    background: linear-gradient(180deg, rgba(232, 121, 249, 0.12), rgba(147, 51, 234, 12.12), rgba(192, 132, 252, 0.12));
+    animation: fluidRotate 12s linear infinite reverse;
+}
 .modal-backdrop.visible .modal {
     transform: scale(1);
     opacity: 1;

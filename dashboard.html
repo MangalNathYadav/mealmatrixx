@@ -812,16 +812,21 @@
         }
 
         .modal {
-            background: white;
-            border-radius: 16px;
-            width: 90%;
-            max-width: 900px;
-            max-height: 90vh;
-            overflow-y: auto;
-            transform: scale(0.95) translateY(20px);
-            opacity: 0;
+           background: white;
+            border-radius: var(--border-radius);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            padding: 1.5rem 2rem;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            height:auto ;
+            width:90vw;
+            box-sizing: border-box;
+            position: relative;
+            /* overflow: hidden; */
+            box-shadow: 
+                0 4px 6px rgba(0, 0, 0, 0.05),
+                0 10px 15px rgba(147, 51, 234, 0.1);
+            animation: fadeSlideUp 0.6s ease-out;
+            animation-fill-mode: both;
         }
 
         .modal-backdrop.visible .modal {

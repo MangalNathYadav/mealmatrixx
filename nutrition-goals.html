@@ -7,8 +7,610 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/new-styles.css">
-    <link rel="stylesheet" href="assets/css/nutrition-goals.css">
+    <style>
+        :root {
+            --primary-color: #9333EA;
+            --secondary-color: #C084FC;
+            --accent-color: #E879F9;
+            --text-color: #1E293B;
+            --bg-subtle: #F8FAFC;
+            --white: #FFFFFF;
+            --shadow-sm: 0 1px 2px rgba(147, 51, 234, 0.05);
+            --shadow-md: 0 4px 6px rgba(147, 51, 234, 0.1);
+            --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --transition: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+            --border-radius: 16px;
+            --box-shadow: 0 8px 32px rgba(147, 51, 234, 0.15);
+            --gradient-start: rgba(192, 132, 252, 0.15);
+            --gradient-end: rgba(232, 121, 249, 0.1);
+            --gradient-primary: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            --gradient-secondary: linear-gradient(45deg, var(--secondary-color), var(--accent-color));
+            --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+            --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end)),
+                        linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            background-attachment: fixed;
+            color: var(--text-color);
+            height: 100vh;
+            line-height: 1.5;
+        }
+
+        /* Loading Overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(146, 51, 234, 0.12);
+            backdrop-filter: blur(12px);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .loading-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar h2 {
+            color: var(--text-color);
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: var(--text-color);
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--border-radius);
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(4px);
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Goals Container */
+        .goals-container {
+            width: 100%;
+            max-width: 1000px;
+            margin: 1rem auto;
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(8px);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            position: relative;
+            overflow: hidden;
+            transform: translateY(0);
+            transition: all 0.3s ease;
+            animation: fadeSlideUp 0.8s ease-out;
+            z-index: 1;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 0;
+        }
+
+        .goals-container .main-content {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: 0;
+            position: relative;
+            margin-top: 0;
+        }
+
+        .goals-container::before,
+        .goals-container::after {
+            content: '';
+            position: absolute;
+            width: 225%;
+            height: 200%;
+            top: 0%;
+            left: 0%;
+            z-index: -1;
+            background: linear-gradient(180deg, 
+                rgba(146, 51, 234, 0.697),
+                rgba(192, 132, 252, 15.15),
+                rgba(232, 121, 249, 0.15)
+            );
+            animation: fluidRotate 15s linear infinite;
+        }
+
+        .goals-container::after {
+            background: linear-gradient(180deg, 
+                rgba(232, 121, 249, 0.12),
+                rgba(147, 51, 234, 12.12),
+                rgba(192, 132, 252, 0.12)
+            );
+            animation: fluidRotate 12s linear infinite reverse;
+        }
+
+        .goals-container:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(255, 255, 255, 0.15);
+        }
+
+        @keyframes fluidRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .goals-header {
+            text-align: center;
+            padding: 2rem 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .goals-header h2 {
+            font-size: 2rem;
+            color: white;
+            margin: 0 0 1rem 0;
+            font-weight: 600;
+        }
+
+        .goals-header p {
+            color: rgba(255, 255, 255, 0.8);
+            max-width: 600px;
+            margin: 0 auto;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        /* Success Message */
+        .success-message {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(147, 51, 234, 0.2);
+            color: var(--primary-color);
+            padding: 1rem 2rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 2rem;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            box-shadow: var(--shadow-md);
+        }
+        
+        .success-message.visible {
+            display: flex;
+            animation: slideInDown 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes slideInDown {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Goals Grid */
+        .tab-navigation {
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            border-right: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .goals-content {
+            padding: 1rem 2rem;
+        }
+
+        .goals-grid {
+            display: none;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            padding-right: 0.5rem;
+        }
+
+        .goals-grid.active {
+            display: grid;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .goal-card {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-md);
+            border: 1px solid rgba(147, 51, 234, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .goal-card::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: -100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(147, 51, 234, 0.1),
+                rgba(232, 121, 249, 0.15),
+                transparent
+            );
+            transition: 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 0;
+        }
+
+        .goal-card:hover {
+            transform: translateY(-4px) scale(1.01);
+            box-shadow: 
+                0 8px 12px rgba(0, 0, 0, 0.1),
+                0 15px 25px rgba(147, 51, 234, 0.15);
+        }
+
+        .goal-card:hover::before {
+            left: 100%;
+        }
+
+        .goal-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .goal-input-group {
+            margin-bottom: 1.5rem;
+            animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .goal-input-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .goal-input-group label {
+            display: block;
+            margin-bottom: 0.75rem;
+            color: var(--gray-700);
+            font-weight: 500;
+            font-size: 1.1rem;
+        }
+
+        .goal-input-group input,
+        .goal-input-group select {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 1.5px solid rgba(147, 51, 234, 0.2);
+            background: white;
+            border-radius: calc(var(--border-radius) / 2);
+            color: var(--gray-800);
+            font-family: inherit;
+            font-size: 1rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .goal-input-group input:focus,
+        .goal-input-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .goal-input-group input:hover,
+        .goal-input-group select:hover {
+            border-color: rgba(147, 51, 234, 0.4);
+        }
+
+        .input-hint {
+            margin-top: 0.75rem;
+            font-size: 0.9rem;
+            color: var(--gray-500);
+        }
+
+        /* Save Button */
+        .save-goals-container {
+            margin-top: 1.5rem;
+            text-align: center;
+            animation: fadeIn 1s cubic-bezier(0.4, 0, 0.2, 1);
+            flex-shrink: 0;
+            padding: 0.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .save-goals {
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            padding: 1rem 3rem;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow-md);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .save-goals::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 70%);
+            transform: translate(-50%, -50%) scale(0);
+            opacity: 0;
+            transition: transform 0.6s ease-out, opacity 0.4s ease-out;
+        }
+
+        .save-goals:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(147, 51, 234, 0.35);
+            background: linear-gradient(45deg, var(--secondary-color), var(--accent-color));
+        }
+
+        .save-goals:active::before {
+            transform: translate(-50%, -50%) scale(3);
+            opacity: 1;
+            transition: 0s;
+        }
+
+        /* Tab Navigation */
+        .tab-button {
+            padding: 0.75rem 1.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            width: 100%;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .tab-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(4px);
+        }
+
+        .tab-button.active {
+            background: var(--primary-color);
+            box-shadow: 0 4px 12px rgba(147, 51, 234, 0.25);
+        }
+
+        /* Form Sections */
+        .form-section {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            opacity: 0;
+            animation: fadeInUp 0.4s ease-out forwards;
+        }
+
+        .form-section h3 {
+            color: white;
+            font-size: 1.25rem;
+            margin: 0 0 1.5rem 0;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-group label {
+            display: block;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .form-group input:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.25);
+        }
+
+        @media (max-width: 768px) {
+            .goals-container {
+                grid-template-columns: 1fr;
+                margin: 1rem;
+            }
+
+            .tab-navigation {
+                padding: 1rem;
+                flex-direction: row;
+                overflow-x: auto;
+                border-right: none;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+                height: auto;
+            }
+
+            .tab-button {
+                width: auto;
+                white-space: nowrap;
+            }
+
+            .goals-content {
+                padding: 1.5rem;
+            }
+
+            .navbar {
+                padding: 1rem;
+            }
+
+            .goals-header h2 {
+                font-size: 2rem;
+            }
+
+            .goals-grid {
+                padding-right: 0;
+            }
+        }
+        
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            background: white;
+            color: var(--gray-800);
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: var(--shadow-md);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            animation: slideInUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            max-width: calc(100% - 3rem);
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .toast.success {
+            border-color: #10B981;
+        }
+        
+        .toast.error {
+            border-color: #EF4444;
+        }
+        
+        .toast.removing {
+            animation: slideOutDown 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        
+        @keyframes slideInUp {
+            from {
+                transform: translateY(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOutDown {
+            from {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateY(100%);
+                opacity: 0;
+            }
+        }
+        
+        .toast-icon {
+            font-size: 1.25rem;
+        }
+        
+        .toast-message {
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+    </style>
 </head>
 <body>
     <!-- Loading Overlay -->
@@ -27,83 +629,105 @@
                 Back to Dashboard
             </a>
         </div>
-    </nav><div class="goals-container">
+    </nav>
+    <div class="goals-container">
         <div class="goals-header">
-            <h2>Set Your Nutrition Goals</h2>
-            <p>Customize your daily nutrition targets to achieve your health goals. We'll use these to track your progress and provide personalized insights to help you succeed.</p>
+            <h2>Nutrition Goals</h2>
+            <p>Set and track your nutrition goals to maintain a healthy lifestyle</p>
         </div>
         
-        <div id="successMessage" class="success-message">
-            <span>✨</span> Your nutrition goals have been saved successfully!
-        </div>
-
-        <div class="goals-grid">
-            <!-- Daily Calorie Goals -->
-            <div class="goal-card">
-                <h3 class="goal-header" data-icon="🔥">Daily Calorie Goals</h3>
-                <div class="goal-input-group">
-                    <label for="targetCalories">Target Daily Calories</label>
-                    <input type="number" id="targetCalories" min="500" max="10000" placeholder="e.g., 2000">
-                    <div class="input-hint">Recommended: 1800-2500 calories for most adults</div>
-                </div>
-                <div class="goal-input-group">
-                    <label for="activityLevel">Activity Level</label>
-                    <select id="activityLevel">
-                        <option value="sedentary">Sedentary (Office job, little exercise)</option>
-                        <option value="light">Lightly Active (Light exercise 1-3 days/week)</option>
-                        <option value="moderate">Moderately Active (Exercise 3-5 days/week)</option>
-                        <option value="very">Very Active (Hard exercise 6-7 days/week)</option>
-                        <option value="extra">Extra Active (Very hard exercise & physical job)</option>
-                    </select>
-                </div>
+        <div class="main-content">
+            <!-- Tab Navigation -->
+            <div class="tab-navigation">
+                <button class="tab-button active" data-tab="weight">
+                    Weight Goals
+                </button>
+                <button class="tab-button" data-tab="calories">
+                    Calorie Goals
+                </button>
+                <button class="tab-button" data-tab="macros">
+                    Macronutrients
+                </button>
             </div>
 
-            <!-- Macro Goals -->
-            <div class="goal-card">
-                <h3 class="goal-header" data-icon="🥗">Macro Goals</h3>
-                <div class="goal-input-group">
-                    <label for="proteinGoal">Daily Protein (g)</label>
-                    <input type="number" id="proteinGoal" min="0" max="500" placeholder="e.g., 150">
-                    <div class="input-hint">Recommended: 0.8-2.2g per kg of body weight</div>
+            <!-- Goals Content -->
+            <div class="goals-content">
+                <!-- Success Message -->
+                <div id="successMessage" class="success-message">
+                    <span>✅</span> Your nutrition goals have been saved successfully!
                 </div>
-                <div class="goal-input-group">
-                    <label for="carbsGoal">Daily Carbs (g)</label>
-                    <input type="number" id="carbsGoal" min="0" max="500" placeholder="e.g., 250">
-                    <div class="input-hint">Typically 45-65% of total calories</div>
-                </div>
-                <div class="goal-input-group">
-                    <label for="fatGoal">Daily Fat (g)</label>
-                    <input type="number" id="fatGoal" min="0" max="500" placeholder="e.g., 65">
-                    <div class="input-hint">Recommended: 20-35% of total calories</div>
-                </div>
-            </div>
+                <!-- Goals Form -->
+                <form class="goals-form" id="goals-form">
+                    <!-- Weight Goals Section -->
+                    <div class="form-section active" id="weight-tab">
+                        <h3>Weight Goals</h3>
+                        <div class="form-group">
+                            <label for="currentWeight">Current Weight (kg)</label>
+                            <input type="number" id="currentWeight" name="currentWeight" required placeholder="Enter your current weight">
+                        </div>
+                        <div class="form-group">
+                            <label for="weightGoal">Target Weight (kg)</label>
+                            <input type="number" id="weightGoal" name="weightGoal" required placeholder="Enter your target weight">
+                        </div>
+                        <div class="form-group">
+                            <label for="goalType">Goal Type</label>
+                            <select id="goalType" name="goalType" required>
+                                <option value="lose">Lose Weight</option>
+                                <option value="maintain">Maintain Weight</option>
+                                <option value="gain">Gain Weight</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="weeklyGoal">Weekly Goal (kg)</label>
+                            <input type="number" id="weeklyGoal" name="weeklyGoal" step="0.1" placeholder="Weekly weight change goal">
+                            <div class="input-hint">Amount to lose/gain per week</div>
+                        </div>
+                    </div>
 
-            <!-- Health Goals -->
-            <div class="goal-card">
-                <h3 class="goal-header" data-icon="⚖️">Health Goals</h3>
-                <div class="goal-input-group">
-                    <label for="weightGoal">Target Weight (kg)</label>
-                    <input type="number" id="weightGoal" min="30" max="200" step="0.1" placeholder="e.g., 70">
-                    <div class="input-hint">Set a realistic target within a healthy BMI range</div>
-                </div>
-                <div class="goal-input-group">
-                    <label for="goalType">Goal Type</label>
-                    <select id="goalType">
-                        <option value="maintain">Maintain Weight</option>
-                        <option value="lose">Lose Weight</option>
-                        <option value="gain">Gain Muscle Mass</option>
-                    </select>
-                </div>
-                <div class="goal-input-group">
-                    <label for="weeklyGoal">Weekly Goal (kg)</label>
-                    <input type="number" id="weeklyGoal" min="0" max="1" step="0.1" placeholder="e.g., 0.5">
-                    <div class="input-hint">Recommended: 0.5-1kg per week for safe progress</div>
-                </div>
-            </div>
-        </div>
+                    <!-- Calorie Goals Section -->
+                    <div class="form-section" id="calories-tab" style="display: none;">
+                        <h3>Calorie Goals</h3>
+                        <div class="form-group">
+                            <label for="targetCalories">Daily Calorie Target</label>
+                            <input type="number" id="targetCalories" name="targetCalories" required placeholder="Enter your daily calorie target">
+                        </div>
+                        <div class="form-group">
+                            <label for="activityLevel">Activity Level</label>
+                            <select id="activityLevel" name="activityLevel" required>
+                                <option value="sedentary">Sedentary (Office job, little exercise)</option>
+                                <option value="light">Lightly Active (Light exercise 1-3 days/week)</option>
+                                <option value="moderate">Moderately Active (Exercise 3-5 days/week)</option>
+                                <option value="very">Very Active (Hard exercise 6-7 days/week)</option>
+                                <option value="extra">Extra Active (Very hard exercise & physical job)</option>
+                            </select>
+                        </div>
+                    </div>
 
-        <div class="save-goals-container">
-            <button class="save-goals" onclick="saveNutritionGoals()">Save Your Goals</button>
+                    <!-- Macronutrient Goals Section -->
+                    <div class="form-section" id="macros-tab" style="display: none;">
+                        <h3>Macronutrient Goals</h3>
+                        <div class="form-group">
+                            <label for="proteinGoal">Protein (g)</label>
+                            <input type="number" id="proteinGoal" name="proteinGoal" required placeholder="Enter protein target">
+                        </div>
+                        <div class="form-group">
+                            <label for="carbsGoal">Carbohydrates (g)</label>
+                            <input type="number" id="carbsGoal" name="carbsGoal" required placeholder="Enter carbs target">
+                        </div>
+                        <div class="form-group">
+                            <label for="fatGoal">Fat (g)</label>
+                            <input type="number" id="fatGoal" name="fatGoal" required placeholder="Enter fat target">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="save-goals">
+                        Save Goals
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                            <path d="M3.5 8h9M8.5 3L13 8l-4.5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -116,6 +740,12 @@
     <script src="firebase-config.js"></script>
     <script src="assets/js/auth.js"></script>
     <script>
+        // Wait for Firebase to be initialized
+        window.addEventListener('firebaseLoaded', () => {
+            initializeTabs();
+            initializeFormSubmission();
+        });
+        
         // Show loading spinner
         function showLoading() {
             document.querySelector('.loading-overlay').classList.add('visible');
@@ -128,6 +758,12 @@
 
         // Show toast notifications
         function showToast(message, type = 'info') {
+            // Remove existing toasts of same type
+            document.querySelectorAll(`.toast.${type}`).forEach(existing => {
+                existing.classList.add('removing');
+                setTimeout(() => existing.remove(), 300);
+            });
+            
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
             
@@ -135,18 +771,26 @@
             const icon = type === 'error' ? '❌' : type === 'success' ? '✅' : 'ℹ️';
             toast.innerHTML = `<span class="toast-icon">${icon}</span><span class="toast-message">${message}</span>`;
             
-            // Add to DOM and animate
-            document.body.appendChild(toast);
-                
-            // Remove after delay
+            // Add to DOM with slight delay to ensure animation works
             setTimeout(() => {
-                toast.classList.add('removing');
+                document.body.appendChild(toast);
+                
+                // Remove after delay
+                setTimeout(() => {
+                    toast.classList.add('removing');
                     setTimeout(() => toast.remove(), 300);
                 }, 3000);
+            }, 10);
         }
 
         // Load user's goals
         async function loadUserGoals() {
+            // Check if Firebase is initialized
+            if (typeof firebase === 'undefined' || !firebase.apps.length) {
+                showToast('Firebase is not initialized yet. Please wait...', 'error');
+                return;
+            }
+            
             const user = firebase.auth().currentUser;
             if (!user) return;
 
@@ -223,7 +867,15 @@
         }
 
         // Save nutrition goals
-        async function saveNutritionGoals() {
+        async function saveNutritionGoals(e) {
+            if (e) e.preventDefault();
+            
+            // Check if Firebase and auth are available
+            if (typeof firebase === 'undefined' || !firebase.apps.length) {
+                showToast('Firebase is not initialized. Please reload the page.', 'error');
+                return;
+            }
+            
             const user = firebase.auth().currentUser;
             if (!user) {
                 showToast('Please log in to save goals', 'error');
@@ -231,13 +883,14 @@
             }
 
             // Validate inputs
-            const inputs = ['targetCalories', 'proteinGoal', 'carbsGoal', 'fatGoal', 'weightGoal'];
+            const inputs = ['targetCalories', 'proteinGoal', 'carbsGoal', 'fatGoal', 'currentWeight', 'weightGoal'];
             let isValid = true;
 
             inputs.forEach(id => {
                 const input = document.getElementById(id);
-                const value = parseFloat(input.value);
+                if (!input) return;
                 
+                const value = parseFloat(input.value);
                 if (input.value && (isNaN(value) || value < 0)) {
                     input.classList.add('error');
                     isValid = false;
@@ -251,15 +904,17 @@
                 return;
             }
 
+            // Create goals object from form fields
             const goals = {
+                currentWeight: parseFloat(document.getElementById('currentWeight').value) || null,
+                weightGoal: parseFloat(document.getElementById('weightGoal').value) || null,
                 targetCalories: parseInt(document.getElementById('targetCalories').value) || null,
-                activityLevel: document.getElementById('activityLevel').value,
                 proteinGoal: parseInt(document.getElementById('proteinGoal').value) || null,
                 carbsGoal: parseInt(document.getElementById('carbsGoal').value) || null,
                 fatGoal: parseInt(document.getElementById('fatGoal').value) || null,
-                weightGoal: parseFloat(document.getElementById('weightGoal').value) || null,
-                goalType: document.getElementById('goalType').value,
-                weeklyGoal: parseFloat(document.getElementById('weeklyGoal').value) || null,
+                goalType: document.getElementById('goalType').value || 'maintain',
+                weeklyGoal: parseFloat(document.getElementById('weeklyGoal').value) || 0,
+                activityLevel: document.getElementById('activityLevel').value || 'moderate',
                 updatedAt: firebase.database.ServerValue.TIMESTAMP
             };
 
@@ -270,15 +925,23 @@
             saveButton.disabled = true;
 
             try {
-                await firebase.database().ref(`users/${user.uid}/nutritionGoals`).set(goals);
+                // Double check Firebase is initialized
+                if (typeof firebase === 'undefined' || !firebase.apps.length) {
+                    throw new Error('Firebase is not initialized');
+                }
+                
+                // Save to database
+                await firebase.database().ref(`users/${user.uid}/nutritionGoals`).update(goals);
                 
                 // Show success message with animation
                 const successMessage = document.getElementById('successMessage');
-                successMessage.classList.add('visible');
-                
-                setTimeout(() => {
-                    successMessage.classList.remove('visible');
-                }, 3000);
+                if (successMessage) {
+                    successMessage.classList.add('visible');
+                    
+                    setTimeout(() => {
+                        successMessage.classList.remove('visible');
+                    }, 3000);
+                }
 
                 showToast('Goals saved successfully!', 'success');
 
@@ -303,8 +966,8 @@
                 }
             });
         });
-
-        // Handle goal type changes
+        
+        // Add goal type change handler
         document.getElementById('goalType').addEventListener('change', (e) => {
             const weeklyGoalInput = document.getElementById('weeklyGoal');
             if (e.target.value === 'maintain') {
@@ -312,17 +975,168 @@
                 weeklyGoalInput.disabled = true;
             } else {
                 weeklyGoalInput.disabled = false;
+                if (weeklyGoalInput.value === '0') {
+                    weeklyGoalInput.value = e.target.value === 'lose' ? '-0.5' : '0.5';
+                }
             }
         });
 
-        // Initialize page
-        firebase.auth().onAuthStateChanged((user) => {
-            if (!user) {
-                window.location.href = 'login.html';
-            } else {
-                loadUserGoals();
+        // Tab switching functionality
+        function initializeTabs() {
+            // Show first tab content and hide others on load
+            document.querySelectorAll('.form-section').forEach(section => {
+                if (section.id === 'weight-tab') {
+                    section.style.display = 'block';
+                    section.style.animation = 'fadeInUp 0.4s ease-out forwards';
+                } else {
+                    section.style.display = 'none';
+                }
+            });
+
+            // Add click handlers for tab buttons
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.addEventListener('click', () => {
+                    // Remove active class from all buttons
+                    document.querySelectorAll('.tab-button').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    
+                    // Hide all sections
+                    document.querySelectorAll('.form-section').forEach(section => {
+                        section.style.display = 'none';
+                        section.style.opacity = '0';
+                    });
+                    
+                    // Add active class to clicked button
+                    button.classList.add('active');
+                    
+                    // Show the corresponding section with animation
+                    const tabId = button.getAttribute('data-tab');
+                    const section = document.getElementById(`${tabId}-tab`);
+                    if (section) {
+                        section.style.display = 'block';
+                        section.style.opacity = '0';
+                        section.style.animation = 'fadeInUp 0.4s ease-out forwards';
+                    }
+                });
+            });
+        }
+
+        // This section is now handled by the firebaseLoaded event listener
+
+        // Initialize form submission
+        function initializeFormSubmission() {
+            const form = document.getElementById('goals-form');
+            if (!form) {
+                console.error('Form element not found');
+                return;
             }
-        });
+            
+            // Main form submit handler
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                console.log('Form submitted');
+                try {
+                    await saveNutritionGoals(e);
+                } catch (error) {
+                    console.error('Error in form submission:', error);
+                    showToast(`Error saving goals: ${error.message}`, 'error');
+                }
+            });
+
+            // Add "Save" button click handler as a backup
+            const saveButton = document.querySelector('.save-goals');
+            if (saveButton) {
+                saveButton.addEventListener('click', async (e) => {
+                    // This is a fallback in case the form submit event doesn't trigger
+                    if (e.target.form) {
+                        console.log('Save button clicked');
+                        try {
+                            await form.requestSubmit();
+                        } catch (error) {
+                            console.error('Error in button click submission:', error);
+                            showToast(`Error saving goals: ${error.message}`, 'error');
+                        }
+                    }
+                });
+            }
+        }
+
+        // Initialize Firebase first, then check auth state
+        function initApp() {
+            // Make sure Firebase is initialized before checking auth
+            if (typeof firebase === 'undefined' || !firebase.apps.length) {
+                console.error('Firebase not initialized');
+                showToast('Error initializing app. Please reload the page.', 'error');
+                return;
+            }
+            
+            // Now check auth state
+            firebase.auth().onAuthStateChanged((user) => {
+                if (!user) {
+                    window.location.href = 'login.html';
+                } else {
+                    loadUserGoals();
+                }
+            });
+        }
+        
+        // Initialize Firebase and app when the page loads
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                try {
+                    // Initialize Firebase if needed
+                    if (typeof initFirebase === 'function') {
+                        initFirebase();
+                    } else {
+                        // Create fallback initialization if initFirebase function is missing
+                        if (typeof firebase !== 'undefined' && !firebase.apps.length) {
+                            // Default Firebase config if needed
+                            const firebaseConfig = {
+                                apiKey: "AIzaSyDJRYvkh4ejfXHiYvTYcrcTMjA8awrnZzQ",
+                                authDomain: "mealmatrix-ac32a.firebaseapp.com",
+                                projectId: "mealmatrix-ac32a",
+                                databaseURL: "https://mealmatrix-ac32a-default-rtdb.firebaseio.com",
+                                messagingSenderId: "347054902442",
+                                appId: "1:347054902442:web:c83ed92e399e3f19c414d3"
+                            };
+                            firebase.initializeApp(firebaseConfig);
+                            window.dispatchEvent(new Event('firebaseLoaded'));
+                        }
+                    }
+                    initApp();
+                } catch (error) {
+                    console.error('Error during initialization:', error);
+                    showToast('Failed to initialize application. Please try reloading the page.', 'error');
+                }
+            });
+        } else {
+            try {
+                // Initialize Firebase if needed
+                if (typeof initFirebase === 'function') {
+                    initFirebase();
+                } else {
+                    // Create fallback initialization if initFirebase function is missing
+                    if (typeof firebase !== 'undefined' && !firebase.apps.length) {
+                        // Default Firebase config if needed
+                        const firebaseConfig = {
+                            apiKey: "AIzaSyDJRYvkh4ejfXHiYvTYcrcTMjA8awrnZzQ",
+                            authDomain: "mealmatrix-ac32a.firebaseapp.com",
+                            projectId: "mealmatrix-ac32a",
+                            databaseURL: "https://mealmatrix-ac32a-default-rtdb.firebaseio.com",
+                            messagingSenderId: "347054902442",
+                            appId: "1:347054902442:web:c83ed92e399e3f19c414d3"
+                        };
+                        firebase.initializeApp(firebaseConfig);
+                        window.dispatchEvent(new Event('firebaseLoaded'));
+                    }
+                }
+                initApp();
+            } catch (error) {
+                console.error('Error during initialization:', error);
+                showToast('Failed to initialize application. Please try reloading the page.', 'error');
+            }
+        }
     </script>
 </body>
 </html>

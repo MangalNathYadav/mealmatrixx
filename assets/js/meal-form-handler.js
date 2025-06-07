@@ -72,19 +72,23 @@ export class MealFormHandler {
         }
     }
 
+    // These methods will be overridden by addMeal.js
     showLoading(message = 'Saving meal...') {
-        this.loadingOverlay.querySelector('#loadingMessage').textContent = message;
-        this.loadingOverlay.classList.add('active');
-        this.submitBtn.disabled = true;
+        if (this.loadingOverlay && this.loadingOverlay.querySelector('#loadingMessage')) {
+            this.loadingOverlay.querySelector('#loadingMessage').textContent = message;
+            this.loadingOverlay.classList.add('active');
+        }
+        if (this.submitBtn) this.submitBtn.disabled = true;
     }
 
     hideLoading() {
-        this.loadingOverlay.classList.remove('active');
-        this.submitBtn.disabled = false;
+        if (this.loadingOverlay) this.loadingOverlay.classList.remove('active');
+        if (this.submitBtn) this.submitBtn.disabled = false;
     }
 
     async handleSubmit(e) {
         e.preventDefault();
+        console.log('MealFormHandler handleSubmit called');
         
         // Validate all required fields
         let isValid = true;
@@ -127,9 +131,17 @@ export class MealFormHandler {
                 timestamp: firebase.database.ServerValue.TIMESTAMP
             };
 
-            await firebase.database().ref(`users/${user.uid}/meals`).push(mealData);
-            this.showToast('Meal added successfully!', 'success');
-            setTimeout(() => window.location.href = 'dashboard.html', 1500);
+            // Check if we're in edit mode based on URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const mealId = urlParams.get('id');
+            
+            // Only proceed with create if we're not in edit mode
+            // (Edit mode is handled by addMeal.js with a custom handleSubmit)
+            if (!mealId) {
+                await firebase.database().ref(`users/${user.uid}/meals`).push(mealData);
+                this.showToast('Meal added successfully!', 'success');
+                setTimeout(() => window.location.href = 'dashboard.html', 1200);
+            }
         } catch (error) {
             console.error('Error saving meal:', error);
             this.showToast(error.message || 'Failed to save meal', 'error');
