@@ -1,8 +1,6 @@
-// Configuration
-const config = {
-    // Get your API key from https://aistudio.google.com/app/apikey
-    geminiApiKey: 'AIzaSyCjLU7RoLVj-ahKYP7ULWdTY6PRFIxKdiM'
-};
-
-// Export the configuration
-export default config;
+fetch("/.netlify/functions/getGeminiKey")
+  .then((res) => res.json())
+  .then((data) => {
+    geminiApiKey= data.key;
+    // Now use GEMINI_API_KEY in your AI code
+  });
