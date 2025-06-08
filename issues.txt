@@ -5,3 +5,4 @@ weekly summary cross button issue and overflow y direction
 sidebar -fat weight not updating , nutrition tips not updating protein , hydration reminder
 footer few pages not working.
 new user is seeing nutrtion tips and protein suggestion at bottom at first load app
+

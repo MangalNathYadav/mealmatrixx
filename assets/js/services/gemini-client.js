@@ -1,16 +1,29 @@
-// Import configuration
-import config from './config.js';
+// Import API key client
+import ApiKeyClient from './api-key-client.js';
 
 // Gemini API Client
-class GeminiClient {constructor(apiKey) {
-        this.apiKey = apiKey || config.geminiApiKey; // Use config from config.js
+class GeminiClient {
+    constructor(apiKey = null) {
+        this.apiKey = apiKey; // Will be fetched if not provided
         this.apiEndpoint = 'https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent';
-        
-        // Validate API key
+        this.isInitialized = false;
+    }
+    
+    async initialize() {
         if (!this.apiKey) {
-            throw new Error('Gemini API key is required');
+            try {
+                this.apiKey = await ApiKeyClient.getGeminiApiKey();
+            } catch (error) {
+                console.error('Failed to get Gemini API key:', error);
+                throw new Error('Failed to initialize Gemini client. API key not available.');
+            }
         }
+        this.isInitialized = true;
     }async generateContent(prompt) {
+        if (!this.isInitialized) {
+            await this.initialize();
+        }
+        
         try {
             console.log('Making API request to:', this.apiEndpoint);
             const response = await fetch(this.apiEndpoint, {

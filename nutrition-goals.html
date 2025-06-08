@@ -1091,15 +1091,15 @@
                     } else {
                         // Create fallback initialization if initFirebase function is missing
                         if (typeof firebase !== 'undefined' && !firebase.apps.length) {
-                            // Default Firebase config if needed
-                            const firebaseConfig = {
-                                apiKey: "AIzaSyDJRYvkh4ejfXHiYvTYcrcTMjA8awrnZzQ",
-                                authDomain: "mealmatrix-ac32a.firebaseapp.com",
-                                projectId: "mealmatrix-ac32a",
-                                databaseURL: "https://mealmatrix-ac32a-default-rtdb.firebaseio.com",
-                                messagingSenderId: "347054902442",
-                                appId: "1:347054902442:web:c83ed92e399e3f19c414d3"
-                            };
+                            // Fetch Firebase config from Netlify function
+                            try {
+                                const response = await fetch('/.netlify/functions/getFirebaseConfig');
+                                const firebaseConfig = await response.json();
+                                firebase.initializeApp(firebaseConfig);
+                            } catch (error) {
+                                console.error('Failed to fetch Firebase config:', error);
+                                showToast('Failed to initialize Firebase. Please reload the page.', 'error');
+                            }
                             firebase.initializeApp(firebaseConfig);
                             window.dispatchEvent(new Event('firebaseLoaded'));
                         }
@@ -1118,15 +1118,15 @@
                 } else {
                     // Create fallback initialization if initFirebase function is missing
                     if (typeof firebase !== 'undefined' && !firebase.apps.length) {
-                        // Default Firebase config if needed
-                        const firebaseConfig = {
-                            apiKey: "AIzaSyDJRYvkh4ejfXHiYvTYcrcTMjA8awrnZzQ",
-                            authDomain: "mealmatrix-ac32a.firebaseapp.com",
-                            projectId: "mealmatrix-ac32a",
-                            databaseURL: "https://mealmatrix-ac32a-default-rtdb.firebaseio.com",
-                            messagingSenderId: "347054902442",
-                            appId: "1:347054902442:web:c83ed92e399e3f19c414d3"
-                        };
+                        // Fetch Firebase config from Netlify function
+                        try {
+                            const response = await fetch('/.netlify/functions/getFirebaseConfig');
+                            const firebaseConfig = await response.json();
+                            firebase.initializeApp(firebaseConfig);
+                        } catch (error) {
+                            console.error('Failed to fetch Firebase config:', error);
+                            showToast('Failed to initialize Firebase. Please reload the page.', 'error');
+                        }
                         firebase.initializeApp(firebaseConfig);
                         window.dispatchEvent(new Event('firebaseLoaded'));
                     }

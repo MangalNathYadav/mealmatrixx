@@ -1,18 +1,18 @@
 // Application Configuration
 const config = {
-    // Firebase Config
+    // Firebase Config - Using environment variables from Netlify
     firebase: {
-        apiKey: "AIzaSyDJRYvkh4ejfXHiYvTYcrcTMjA8awrnZzQ",
-        authDomain: "mealmatrix-ac32a.firebaseapp.com",
-        projectId: "mealmatrix-ac32a",
-        databaseURL: "https://mealmatrix-ac32a-default-rtdb.firebaseio.com",
-        messagingSenderId: "347054902442",
-        appId: "1:347054902442:web:c83ed92e399e3f19c414d3"
+        apiKey: process.env.FIREBASE_API_KEY || "",
+        authDomain: process.env.FIREBASE_AUTH_DOMAIN || "",
+        projectId: process.env.FIREBASE_PROJECT_ID || "",
+        databaseURL: process.env.FIREBASE_DATABASE_URL || "",
+        messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID || "",
+        appId: process.env.FIREBASE_APP_ID || ""
     },
     
-    // AI Services
+    // AI Services - Using environment variables from Netlify
     ai: {
-        geminiApiKey: 'AIzaSyCjLU7RoLVj-ahKYP7ULWdTY6PRFIxKdiM'
+        geminiApiKey: process.env.GEMINI_API_KEY || ""
     },
     
     // App Settings
