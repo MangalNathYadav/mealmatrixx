@@ -1100,7 +1100,6 @@
                                 console.error('Failed to fetch Firebase config:', error);
                                 showToast('Failed to initialize Firebase. Please reload the page.', 'error');
                             }
-                            firebase.initializeApp(firebaseConfig);
                             window.dispatchEvent(new Event('firebaseLoaded'));
                         }
                     }
@@ -1127,7 +1126,6 @@
                             console.error('Failed to fetch Firebase config:', error);
                             showToast('Failed to initialize Firebase. Please reload the page.', 'error');
                         }
-                        firebase.initializeApp(firebaseConfig);
                         window.dispatchEvent(new Event('firebaseLoaded'));
                     }
                 }

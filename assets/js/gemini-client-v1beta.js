@@ -1,21 +1,37 @@
-// Import configuration
-import config from './config.js';
+// Import API key client
+import ApiKeyClient from './services/api-key-client.js';
 
 // Gemini API Client (v1beta)
-class GeminiClient {    constructor(apiKey) {
-        this.apiKey = apiKey || config.geminiApiKey;
+class GeminiClient {
+    constructor(apiKey = null) {
+        this.apiKey = apiKey; // Will be fetched if not provided
         this.baseUrl = 'https://generativelanguage.googleapis.com/v1beta';
         this.modelName = 'models/gemini-1.5-pro-latest';
+        this.isInitialized = false;
         
+        console.log('Gemini client created with model:', this.modelName);
+    }
+    
+    async initialize() {
         if (!this.apiKey) {
-            throw new Error('Gemini API key is required - get one from https://aistudio.google.com/app/apikey');
+            try {
+                this.apiKey = await ApiKeyClient.getGeminiApiKey();
+            } catch (error) {
+                console.error('Failed to get Gemini API key:', error);
+                throw new Error('Failed to initialize Gemini client. API key not available.');
+            }
         }
-        console.log('Gemini client initialized with model:', this.modelName);
+        this.isInitialized = true;
+        console.log('Gemini client initialized');
         this.listModels(); // Check available models on initialization
     }
 
     async listModels() {
         try {
+            if (!this.isInitialized) {
+                await this.initialize();
+            }
+            
             const url = `${this.baseUrl}/models?key=${this.apiKey}`;
             console.log('Fetching available Gemini models...');
             
@@ -31,8 +47,14 @@ class GeminiClient {    constructor(apiKey) {
             console.error('Error listing Gemini models:', error);
             throw error;
         }
-    }    async generateContent(prompt) {
+    }    
+    
+    async generateContent(prompt) {
         try {
+            if (!this.isInitialized) {
+                await this.initialize();
+            }
+            
             const url = `${this.baseUrl}/models/${this.modelName}:generateContent?key=${this.apiKey}`;
             console.log('Making Gemini API request to:', url);
             

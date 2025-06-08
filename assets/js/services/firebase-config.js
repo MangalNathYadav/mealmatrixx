@@ -1,22 +1,31 @@
 // Wait for Firebase SDK to load
-function initFirebase() {
-    // Firebase configuration
-    const firebaseConfig = {
-        apiKey: "AIzaSyDJRYvkh4ejfXHiYvTYcrcTMjA8awrnZzQ",
-        authDomain: "mealmatrix-ac32a.firebaseapp.com",
-        projectId: "mealmatrix-ac32a",
-        databaseURL: "https://mealmatrix-ac32a-default-rtdb.firebaseio.com",
-        messagingSenderId: "347054902442",
-        appId: "1:347054902442:web:c83ed92e399e3f19c414d3"
-    };
-
-    // Initialize Firebase if not already initialized
-    if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
+async function initFirebase() {
+    try {
+        // Fetch Firebase configuration from Netlify function
+        const response = await fetch('/.netlify/functions/getFirebaseConfig');
+        
+        if (!response.ok) {
+            throw new Error(`Failed to fetch Firebase config: ${response.status} ${response.statusText}`);
+        }
+        
+        const firebaseConfig = await response.json();
+        
+        // Initialize Firebase if not already initialized
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        
+        // Signal that Firebase is ready
+        window.dispatchEvent(new Event('firebaseLoaded'));
+    } catch (error) {
+        console.error('Error initializing Firebase:', error);
+        // Attempt to show user-friendly error message
+        if (typeof showToast === 'function') {
+            showToast('Failed to initialize Firebase. Please reload the page.', 'error');
+        } else {
+            alert('Failed to initialize Firebase. Please reload the page.');
+        }
     }
-
-    // Signal that Firebase is ready
-    window.dispatchEvent(new Event('firebaseLoaded'));
 }
 
 // Initialize when the SDK is ready
