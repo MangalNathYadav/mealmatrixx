@@ -1,4 +1,4 @@
-# MealMatrix - Food Tracking Made Simple https://hackatime-badge.hackclub.com/U059S5F9GG5/mealmatrixx
+# MealMatrix - Food Tracking Made Simple  <img src="https://hackatime-badge.hackclub.com/U059S5F9GG5/mealmatrixx">
 
 <div align="center">
   <a href="https://shipwrecked.hackclub.com/?t=ghrm" target="_blank">
