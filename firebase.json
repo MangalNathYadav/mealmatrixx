@@ -8,5 +8,8 @@
       "firebase-functions/**",
       "outofscope/**"
     ]
+  },
+  "database": {
+    "rules": "database.rules.json"
   }
 }

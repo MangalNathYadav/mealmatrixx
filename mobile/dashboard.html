@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MealMatrix Mobile - Dashboard</title>
+    <meta name="theme-color" content="#7C3AED">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/mobile-styles.css">
+    <link rel="stylesheet" href="assets/css/dashboard.css">
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js" defer></script>
+    <script src="assets/js/firebase-config.mobile.js" defer></script>
+    <script src="assets/js/auth.js" type="module" defer></script>
+    <script type="module">
+        import initializeDashboard from './assets/js/dashboard.js';
+        import { getCurrentUser } from './assets/js/auth.js';
+
+        // Wait for authentication before initializing dashboard
+        window.addEventListener('authStateChanged', function(e) {
+            if (e.detail && e.detail.isAuthenticated && e.detail.user) {
+                initializeDashboard();
+            }
+        });
+
+        // If already authenticated (e.g. page reload), initialize immediately
+        document.addEventListener('DOMContentLoaded', function() {
+            const user = getCurrentUser && getCurrentUser();
+            if (user) {
+                initializeDashboard();
+            }
+        });
+    </script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- App header -->
+        <header class="app-header">
+            <div class="logo-container">
+                <img src="../assets/mealmatrixx_logo.png" alt="MealMatrix Logo" class="app-logo">
+                <h1 class="app-title">MealMatrix</h1>
+            </div>
+            <div class="user-menu">
+                <div class="avatar-circle">
+                    <span id="userInitials">U</span>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Main content -->
+        <main class="container page-transition">
+            <!-- Welcome Card -->
+            <section class="welcome-card">
+                <div class="welcome-header">
+                    <div class="welcome-content">
+                        <h2>Hey, <span id="welcomeUser">Friend</span>! <span class="wave-emoji">👋</span></h2>
+                        <p class="today-date"><span id="currentDate">August 14, 2025</span></p>
+                    </div>
+                    <div class="user-avatar">
+                        <div class="avatar-circle pulse">
+                            <span id="userInitialsWelcome">U</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="quick-actions">
+                    <a href="add-meal.html" class="quick-action-btn">
+                        <div class="quick-action-icon">
+                            <i class="fas fa-utensils"></i>
+                        </div>
+                        <span>Log Meal</span>
+                    </a>
+                    <a href="nutrition-goals.html" class="quick-action-btn">
+                        <div class="quick-action-icon">
+                            <i class="fas fa-bullseye"></i>
+                        </div>
+                        <span>Goals</span>
+                    </a>
+                    <a href="advanced-features.html" class="quick-action-btn">
+                        <div class="quick-action-icon">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <span>AI Tools</span>
+                    </a>
+                </div>
+            </section>
+            
+            <!-- Dashboard Content -->
+            <section class="dashboard-content">
+                <!-- Today's Progress Ring -->
+                <div class="card progress-card">
+                    <div class="card-header">
+                        <h3>Today's Progress</h3>
+                        <span class="card-badge">Today</span>
+                    </div>
+                    
+                    <div class="nutrition-summary" id="nutritionSummary">
+                        <div class="loading-spinner"></div>
+                    </div>
+                </div>
+                
+                <!-- Recent Meals Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Recent Meals</h3>
+                        <a href="meal-history.html" class="card-link">View All</a>
+                    </div>
+                    
+                    <div class="recent-meals" id="recentMeals">
+                        <div class="loading-spinner"></div>
+                    </div>
+                </div>
+                
+                <!-- Daily Nutrition Tip Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Nutrition Tip</h3>
+                        <span class="card-badge accent">AI</span>
+                    </div>
+                    
+                    <div id="nutritionTip" class="nutrition-tip">
+                        <div class="loading-spinner"></div>
+                    </div>
+                </div>
+                
+                <!-- Water Intake Tracker -->
+                <div class="card water-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-tint"></i> Water Intake</h3>
+                        <span id="water-count" class="water-count">0/8</span>
+                    </div>
+                    
+                    <div class="water-tracker-container">
+                        <div class="water-progress-bar">
+                            <div class="water-progress-fill"></div>
+                        </div>
+                        
+                        <div class="water-controls">
+                            <button id="water-minus-btn" class="water-btn minus">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <div class="water-glasses">
+                                <i class="fas fa-glass-water"></i>
+                                <i class="fas fa-glass-water"></i>
+                                <i class="fas fa-glass-water"></i>
+                            </div>
+                            <button id="water-plus-btn" class="water-btn plus">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <a href="dashboard.html" class="bottom-nav-item">
+                <i class="bottom-nav-icon fas fa-home"></i>
+                <span class="bottom-nav-label">Dashboard</span>
+            </a>
+            <a href="add-meal.html" class="bottom-nav-item">
+                <i class="bottom-nav-icon fas fa-plus"></i>
+                <span class="bottom-nav-label">Add Meal</span>
+            </a>
+            <a href="nutrition-goals.html" class="bottom-nav-item">
+                <i class="bottom-nav-icon fas fa-chart-pie"></i>
+                <span class="bottom-nav-label">Goals</span>
+            </a>
+            <a href="meal-history.html" class="bottom-nav-item">
+                <i class="bottom-nav-icon fas fa-list"></i>
+                <span class="bottom-nav-label">History</span>
+            </a>
+            <a href="advanced-features.html" class="bottom-nav-item">
+                <i class="bottom-nav-icon fas fa-robot"></i>
+                <span class="bottom-nav-label">AI Tools</span>
+            </a>
+            <a href="profile.html" class="bottom-nav-item">
+                <i class="bottom-nav-icon fas fa-user"></i>
+                <span class="bottom-nav-label">Profile</span>
+            </a>
+        </nav>
+    </div>
+    
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner"></div>
+    </div>
+    <script src="assets/js/nav-active.js" defer></script>
+</body>
+</html>

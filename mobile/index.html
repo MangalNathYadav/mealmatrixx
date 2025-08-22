@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MealMatrix Mobile</title>
+    <meta name="theme-color" content="#7C3AED">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/mobile-styles.css">
+</head>
+<body>
+    <div class="landing-page">
+        <div class="app-splash"></div>
+        
+        <div class="hero-container">
+            <div class="hero-content">
+                <div class="logo-container">
+                    <img src="../assets/mealmatrixx_logo.png" alt="MealMatrix Logo" class="logo">
+                    <div class="logo-pulse"></div>
+                </div>
+                
+                <h1>MealMatrix</h1>
+                <p class="hero-subtitle">Intelligent nutrition tracking for your mobile lifestyle</p>
+                
+                <div class="hero-actions">
+                    <a href="login.html" class="btn btn-primary">
+                        <i class="fas fa-sign-in-alt btn-icon"></i>Sign In
+                    </a>
+                    <a href="register.html" class="btn btn-secondary">
+                        <i class="fas fa-user-plus btn-icon"></i>Create Account
+                    </a>
+                </div>
+            </div>
+            
+            <div class="hero-features">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-utensils"></i>
+                    </div>
+                    <div class="feature-content">
+                        <h3>Smart Tracking</h3>
+                        <p>Log meals and track nutrients with ease</p>
+                    </div>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="feature-content">
+                        <h3>AI Analysis</h3>
+                        <p>Get personalized nutrition insights</p>
+                    </div>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="feature-content">
+                        <h3>Goal Setting</h3>
+                        <p>Set targets and track your progress</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer class="landing-footer">
+            <p>© 2025 MealMatrix • <a href="#">Privacy</a> • <a href="#">Terms</a></p>
+        </footer>
+    </div>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+            background: linear-gradient(145deg, var(--primary-dark), var(--primary-color));
+            background-attachment: fixed;
+            color: var(--text-color);
+            height: 100vh;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        .landing-page {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+        }
+        
+        .app-splash {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 80% 20%, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0) 30%),
+                radial-gradient(circle at 20% 80%, rgba(124,58,237,0.2) 0%, rgba(124,58,237,0) 30%);
+            z-index: 0;
+            pointer-events: none;
+        }
+        
+        .hero-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .hero-content {
+            text-align: center;
+            max-width: 90%;
+            width: 400px;
+            margin-bottom: 2rem;
+            animation: fadeInUp 0.8s ease-out;
+        }
+        
+        .logo-container {
+            position: relative;
+            width: 90px;
+            height: 90px;
+            margin: 0 auto 1.5rem;
+        }
+        
+        .logo {
+            width: 90px;
+            height: auto;
+            position: relative;
+            z-index: 1;
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
+        }
+        
+        .logo-pulse {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            z-index: 0;
+            animation: pulse 2s infinite ease-in-out;
+        }
+        
+        h1 {
+            margin: 0 0 0.75rem 0;
+            color: white;
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .hero-subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+            max-width: 300px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .hero-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            width: 100%;
+        }
+        
+        .hero-features {
+            width: 100%;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            animation: fadeInUp 1s ease-out 0.3s backwards;
+        }
+        
+        .feature-card {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: var(--border-radius);
+            padding: 1.25rem;
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+        
+        .feature-card:active {
+            transform: translateY(2px);
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+        
+        .feature-content {
+            flex: 1;
+        }
+        
+        .feature-content h3 {
+            margin: 0 0 0.25rem 0;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        .feature-content p {
+            margin: 0;
+            opacity: 0.85;
+            font-size: 0.9rem;
+        }
+        
+        .landing-footer {
+            text-align: center;
+            padding: 1.5rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.85rem;
+        }
+        
+        .landing-footer a {
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+        }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes pulse {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.2; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
+        }
+        
+        @media (min-width: 480px) {
+            .hero-actions {
+                flex-direction: row;
+            }
+        }
+    </style>
+</body>
+</html>

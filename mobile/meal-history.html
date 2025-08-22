@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MealMatrix Mobile - Meal History</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/mobile-styles.css">
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js" defer></script>
+    <script src="assets/js/firebase-config.mobile.js" defer></script>
+    <script src="assets/js/auth.js" type="module" defer></script>
+    <script src="assets/js/meal-history.js" type="module"></script>
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <div class="header-back-button">
+                <a href="dashboard.html">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+            </div>
+            <h1 class="app-title">Meal History</h1>
+            <div class="header-actions"></div>
+        </header>
+        <main class="container">
+            <section class="meal-history-content">
+                <div class="card mb-3">
+                    <h3>All Meals</h3>
+                    <div id="mealHistoryList">
+                        <div class="loading-spinner"></div>
+                    </div>
+                </div>
+            </section>
+        </main>
+        <nav class="bottom-nav">
+            <a href="dashboard.html" class="bottom-nav-item">
+                <i class="bottom-nav-icon fas fa-home"></i>
+                <span class="bottom-nav-label">Dashboard</span>
+            </a>
+            <a href="add-meal.html" class="bottom-nav-item">
+                <i class="bottom-nav-icon fas fa-plus"></i>
+                <span class="bottom-nav-label">Add Meal</span>
+            </a>
+            <a href="nutrition-goals.html" class="bottom-nav-item">
+                <i class="bottom-nav-icon fas fa-chart-pie"></i>
+                <span class="bottom-nav-label">Goals</span>
+            </a>
+            <a href="meal-history.html" class="bottom-nav-item active">
+                <i class="bottom-nav-icon fas fa-list"></i>
+                <span class="bottom-nav-label">History</span>
+            </a>
+            <a href="advanced-features.html" class="bottom-nav-item">
+                <i class="bottom-nav-icon fas fa-robot"></i>
+                <span class="bottom-nav-label">AI Tools</span>
+            </a>
+            <a href="profile.html" class="bottom-nav-item">
+                <i class="bottom-nav-icon fas fa-user"></i>
+                <span class="bottom-nav-label">Profile</span>
+            </a>
+        </nav>
+    </div>
+    <script src="assets/js/nav-active.js" defer></script>
+    <style>
+        .meal-history-content {
+            padding-bottom: 2rem;
+        }
+        .meal-list-history {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .meal-card-history {
+            display: flex;
+            flex-direction: row;
+            align-items: stretch;
+            background: rgba(255,255,255,0.85);
+            border-radius: 14px;
+            box-shadow: 0 2px 8px rgba(147,51,234,0.07);
+            border: 1px solid var(--gray-200);
+            padding: 1rem 1.25rem;
+            min-height: 80px;
+            transition: box-shadow 0.2s;
+        }
+        .meal-card-history:hover {
+            box-shadow: 0 4px 16px rgba(147,51,234,0.13);
+        }
+        .meal-card-left {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .meal-card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 0.3rem;
+        }
+        .meal-card-macros {
+            display: flex;
+            gap: 1.2rem;
+            font-size: 0.95rem;
+            margin-bottom: 0.2rem;
+        }
+        .macro {
+            background: rgba(124,58,237,0.07);
+            border-radius: 6px;
+            padding: 0.15em 0.6em;
+            font-weight: 500;
+        }
+        .macro.calories { color: #7C3AED; }
+        .macro.protein { color: #4ADE80; }
+        .macro.carbs { color: #3B82F6; }
+        .macro.fat { color: #F59E0B; }
+        .meal-card-desc {
+            font-size: 0.92rem;
+            color: var(--gray-600);
+            margin-top: 0.2rem;
+        }
+        .meal-card-right {
+            display: flex;
+            align-items: flex-end;
+            justify-content: flex-end;
+            min-width: 90px;
+            padding-left: 1.2rem;
+        }
+        .meal-card-date {
+            font-size: 0.85rem;
+            color: var(--gray-500);
+            font-weight: 500;
+        }
+        @media (max-width: 600px) {
+            .meal-card-history {
+                flex-direction: column;
+                padding: 1rem;
+            }
+            .meal-card-right {
+                padding-left: 0;
+                margin-top: 0.5rem;
+                min-width: unset;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</body>
+</html>

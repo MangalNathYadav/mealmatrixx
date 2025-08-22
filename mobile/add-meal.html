@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MealMatrix Mobile - Add Meal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/mobile-styles.css">
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js" defer></script>
+    <script src="assets/js/firebase-config.mobile.js" defer></script>
+    <script src="assets/js/auth.js" type="module" defer></script>
+    <script type="module">
+        import initializeAddMeal from './assets/js/addMeal.js';
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeAddMeal();
+        });
+    </script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- App header -->
+        <header class="app-header">
+            <div class="header-back-button">
+                <a href="dashboard.html">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+            </div>
+            <h1 class="app-title">Add Meal</h1>
+            <div class="header-actions"></div>
+        </header>
+        
+        <!-- Main content -->
+        <main class="container">
+            <form id="mealForm" class="meal-form">
+                <div class="form-group">
+                    <label for="mealName" class="form-label">Meal Name</label>
+                    <input type="text" id="mealName" class="form-control" required placeholder="e.g., Breakfast, Lunch, Dinner">
+                </div>
+                
+                <div class="form-group">
+                    <label for="mealDescription" class="form-label">Description (Optional)</label>
+                    <textarea id="mealDescription" class="form-control" rows="3" placeholder="What did you eat?"></textarea>
+                </div>
+                
+                <div class="form-section">
+                    <h3>Nutrition Information</h3>
+                    
+                    <div class="form-group">
+                        <label for="calories" class="form-label">Calories</label>
+                        <input type="number" id="calories" class="form-control" required min="0" placeholder="e.g., 500">
+                    </div>
+                    
+                    <div class="macro-grid">
+                        <div class="form-group">
+                            <label for="protein" class="form-label">Protein (g)</label>
+                            <input type="number" id="protein" class="form-control" min="0" placeholder="e.g., 20">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="carbs" class="form-label">Carbs (g)</label>
+                            <input type="number" id="carbs" class="form-control" min="0" placeholder="e.g., 60">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="fat" class="form-label">Fat (g)</label>
+                            <input type="number" id="fat" class="form-control" min="0" placeholder="e.g., 15">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3>Date & Time</h3>
+                    
+                    <div class="date-time-grid">
+                        <div class="form-group">
+                            <label for="mealDate" class="form-label">Date</label>
+                            <input type="date" id="mealDate" class="form-control" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="mealTime" class="form-label">Time</label>
+                            <input type="time" id="mealTime" class="form-control" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Add Meal</button>
+                    <button type="button" id="aiAssistBtn" class="btn btn-secondary">
+                        <i class="fas fa-robot"></i>
+                        Use AI Assistant
+                    </button>
+                </div>
+            </form>
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <a href="dashboard.html" class="bottom-nav-item">
+                <i class="bottom-nav-icon fas fa-home"></i>
+                <span class="bottom-nav-label">Dashboard</span>
+            </a>
+            <a href="add-meal.html" class="bottom-nav-item">
+                <i class="bottom-nav-icon fas fa-plus"></i>
+                <span class="bottom-nav-label">Add Meal</span>
+            </a>
+            <a href="nutrition-goals.html" class="bottom-nav-item">
+                <i class="bottom-nav-icon fas fa-chart-pie"></i>
+                <span class="bottom-nav-label">Goals</span>
+            </a>
+            <a href="meal-history.html" class="bottom-nav-item">
+                <i class="bottom-nav-icon fas fa-list"></i>
+                <span class="bottom-nav-label">History</span>
+            </a>
+            <a href="advanced-features.html" class="bottom-nav-item">
+                <i class="bottom-nav-icon fas fa-robot"></i>
+                <span class="bottom-nav-label">AI Tools</span>
+            </a>
+            <a href="profile.html" class="bottom-nav-item">
+                <i class="bottom-nav-icon fas fa-user"></i>
+                <span class="bottom-nav-label">Profile</span>
+            </a>
+        </nav>
+    </div>
+    <script src="assets/js/nav-active.js" defer></script>
+    
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner"></div>
+    </div>
+    
+    <style>
+        .meal-form {
+            padding-bottom: 2rem;
+        }
+        
+        .form-section {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: var(--border-radius);
+            padding: 1.25rem;
+            margin-bottom: 1.25rem;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .form-section h3 {
+            margin-top: 0;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        .macro-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+        }
+        
+        .date-time-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+        
+        .form-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+        
+        .header-back-button a {
+            color: white;
+            font-size: 1.2rem;
+        }
+    </style>
+</body>
+</html>

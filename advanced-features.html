@@ -3,27 +3,548 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MealMatrix - Advanced Features</title>
+    <title>MealMatrix - Advanced AI Features</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="assets/css/universal.css">
+    <style>
+        :root {
+            /* Brand Colors */
+            --primary-color: #7C3AED; /* Vibrant purple */
+            --primary-dark: #6D28D9; /* Darker purple */
+            --primary-light: #A78BFA; /* Lighter purple */
+            --secondary-color: #F59E0B; /* Amber */
+            --accent-color: #10B981; /* Teal */
+            
+            /* UI Colors */
+            --bg-color: #F9FAFB;
+            --card-bg: #FFFFFF;
+            --text-color: #111827;
+            --text-muted: #6B7280;
+            --border-color: #E5E7EB;
+            
+            /* Gradient */
+            --gradient-primary: linear-gradient(135deg, #7C3AED, #9061F9);
+        }
+        
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: linear-gradient(145deg, rgba(167, 139, 250, 0.1), rgba(196, 181, 253, 0.05));
+            color: var(--text-color);
+            margin: 0;
+            min-height: 100vh;
+            line-height: 1.5;
+        }
+        
+        /* Layout */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+        
+        .page-header {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 2rem;
+        }
+        
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            margin-bottom: 1rem;
+        }
+        
+        .back-btn:hover {
+            text-decoration: underline;
+        }
+        
+        .page-header h1 {
+            font-size: 2.25rem;
+            margin: 0;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        
+        .subheader {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+        }
+        
+        /* Card Layout */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+        
+        .feature-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(124, 58, 237, 0.15);
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 30px -10px rgba(124, 58, 237, 0.25);
+        }
+        
+        .card-header {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .card-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+        
+        .card-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .card-content {
+            padding: 1.5rem;
+        }
+        
+        .card-description {
+            margin-bottom: 1.5rem;
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
+        
+        /* Form Controls */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            font-size: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: #F9FAFB;
+            transition: all 0.2s ease;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
+        }
+        
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        /* Button Styles */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+        }
+        
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);
+        }
+        
+        .btn-primary:hover {
+            box-shadow: 0 6px 16px rgba(124, 58, 237, 0.35);
+            transform: translateY(-2px);
+        }
+        
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+        
+        /* Results Container */
+        .results-container {
+            margin-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1.5rem;
+        }
+        
+        /* Full Screen Modal */
+        .ai-popup-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(17, 24, 39, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            padding: 2rem;
+        }
+        
+        .ai-popup-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            width: 100%;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            animation: modalFadeIn 0.4s ease;
+        }
+        
+        .ai-popup-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .ai-popup-title {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .ai-popup-close {
+            background: none;
+            border: none;
+            font-size: 1.75rem;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s;
+            color: var(--text-muted);
+        }
+        
+        .ai-popup-close:hover {
+            background: #F3F4F6;
+            color: var(--text-color);
+        }
+        
+        .ai-popup-content {
+            padding: 2rem;
+            overflow-y: auto;
+            flex: 1;
+        }
+        
+        /* Animation */
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        /* Loading Spinner */
+        .loading-indicator {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(124, 58, 237, 0.2);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Result Styling */
+        .nutrition-data {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .nutrition-item {
+            background: #F9FAFB;
+            border-radius: 12px;
+            padding: 1rem;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .nutrition-label {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+        
+        .nutrition-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+        
+        .analysis-notes {
+            background: #F9FAFB;
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+        
+        .analysis-notes h5 {
+            margin-top: 0;
+            margin-bottom: 1rem;
+            color: var(--primary-dark);
+        }
+        
+        .analysis-notes ul {
+            margin: 0;
+            padding-left: 1.25rem;
+        }
+        
+        .analysis-notes li {
+            margin-bottom: 0.75rem;
+        }
+        
+        /* Tips Styling */
+        .tips-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .tip-card {
+            display: flex;
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            gap: 1rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border-left: 4px solid var(--secondary-color);
+        }
+        
+        .tip-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--secondary-color);
+            color: white;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+        
+        .tip-content h5 {
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+            font-size: 1.125rem;
+            color: var(--text-color);
+        }
+        
+        .tip-content p {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 0.9375rem;
+            line-height: 1.6;
+        }
+        
+        /* Meal Plan Styling */
+        .meal-plans-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+        
+        .meal-plan-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .meal-plan-day {
+            margin-bottom: 2rem;
+        }
+        
+        .day-title {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 0.75rem 1.25rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            text-align: center;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.2);
+        }
+        
+        .meal-plan-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border-left: 4px solid var(--accent-color);
+        }
+        
+        .meal-plan-card h5 {
+            margin-top: 0;
+            margin-bottom: 0.75rem;
+            color: var(--accent-color);
+        }
+        
+        .meal-plan-card ul {
+            margin: 0 0 0.75rem 0;
+            padding-left: 1.25rem;
+        }
+        
+        .meal-plan-card li {
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+        }
+        
+        .meal-nutrition {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border-color);
+            padding-top: 0.75rem;
+            margin-top: 0.75rem;
+            font-style: italic;
+        }
+        
+        /* Utils */
+        .mb-4 { margin-bottom: 1.5rem; }
+        .mb-2 { margin-bottom: 0.75rem; }
+        .mt-4 { margin-top: 1.5rem; }
+    </style>
 </head>
 <body>
     <div class="container">
         <div class="page-header">
-            <a href="dashboard.html" class="back-btn">← Back to Dashboard</a>
-            <h1>Advanced Features</h1>
+            <a href="dashboard.html" class="back-btn">
+                <i class="fas fa-arrow-left" style="margin-right: 0.5rem;"></i>
+                Back to Dashboard
+            </a>
+            <h1>Advanced AI Nutrition Tools</h1>
+            <p class="subheader">Get personalized nutrition insights and meal recommendations powered by AI</p>
         </div>
 
-        <div class="features-container">
-            <!-- Feature sections will be dynamically added here -->
-            <div id="mealPlanSection"></div>
-            <div id="recipeModSection"></div>
-            <div id="grocerySection"></div>
-        </div>
+        <div class="features-grid">
+            <!-- Meal Analyzer -->
+            <div class="feature-card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-utensils"></i>
+                    </div>
+                    <h2>Meal Analyzer</h2>
+                </div>
+                <div class="card-content">
+                    <p class="card-description">
+                        Describe your meal and our AI will analyze its nutritional content, providing calories, macros, and key nutrition facts.
+                    </p>
+                    <div class="form-group">
+                        <label class="form-label" for="mealInput">What did you eat?</label>
+                        <textarea 
+                            id="mealInput" 
+                            class="form-control" 
+                            placeholder="Example: I had a chicken sandwich with lettuce, tomato, mayo on whole grain bread, and a side of roasted vegetables"
+                        ></textarea>
+                    </div>
+                    <button id="analyzeMealBtn" class="btn btn-primary">
+                        <i class="fas fa-robot"></i>
+                        Analyze Meal
+                    </button>
+                    <div id="mealAnalysisResult" class="results-container"></div>
+                </div>
+            </div>
 
-        <!-- Loading Overlay (reused from ai-ui.js) -->
-        <div id="ai-loading-overlay"></div>
-        <div class="modal-backdrop"></div>
+            <!-- Nutrition Tips -->
+            <div class="feature-card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-lightbulb"></i>
+                    </div>
+                    <h2>Personalized Tips</h2>
+                </div>
+                <div class="card-content">
+                    <p class="card-description">
+                        Get AI-generated nutrition tips personalized to your meal history, preferences, and health goals.
+                    </p>
+                    <div class="form-group mb-2">
+                        <p>Our AI will analyze your profile data and meal history to generate personalized nutrition tips.</p>
+                    </div>
+                    <button id="getTipsBtn" class="btn btn-primary">
+                        <i class="fas fa-robot"></i>
+                        Get Personalized Tips
+                    </button>
+                    <div id="nutritionTipsResult" class="results-container"></div>
+                </div>
+            </div>
+
+            <!-- Meal Planning -->
+            <div class="feature-card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <h2>Meal Planning Assistant</h2>
+                </div>
+                <div class="card-content">
+                    <p class="card-description">
+                        Let AI create a personalized meal plan based on your preferences, nutritional goals, and dietary restrictions.
+                    </p>
+                    <div class="form-group mb-2">
+                        <p>Our AI will generate a balanced 3-day meal plan with breakfast, lunch, dinner, and snacks tailored to your needs.</p>
+                    </div>
+                    <button id="planMealsBtn" class="btn btn-primary">
+                        <i class="fas fa-robot"></i>
+                        Plan My Meals
+                    </button>
+                    <div id="mealPlanningResult" class="results-container"></div>
+                </div>
+            </div>
+        </div>
     </div>
+
+    <!-- Modal Popup (will be created dynamically) -->
 
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -33,86 +554,571 @@
     <!-- App Scripts -->
     <script src="firebase-config.js"></script>
     <script src="assets/js/auth.js"></script>
-    <script src="assets/js/ai-ui.js" type="module"></script>
-    <script type="module">
-        import advancedAI from './assets/js/ai-advanced.js';
-        import advancedUI from './assets/js/advanced-features-ui.js';
-        import aiUI from './assets/js/ai-ui.js';
-
-        // Initialize UI sections
+    <script>
+        // DOM Elements
+        const analyzeMealBtn = document.getElementById('analyzeMealBtn');
+        const getTipsBtn = document.getElementById('getTipsBtn');
+        const planMealsBtn = document.getElementById('planMealsBtn');
+        
+        // Event Listeners
         document.addEventListener('DOMContentLoaded', () => {
-            // Render all feature sections
-            advancedUI.renderMealPlanSection(document.getElementById('mealPlanSection'));
-            advancedUI.renderRecipeModSection(document.getElementById('recipeModSection'));
-            advancedUI.renderGrocerySection(document.getElementById('grocerySection'));
-
-            // Setup event listeners
-            setupEventListeners();
+            // Ensure user is logged in
+            if (typeof firebase !== 'undefined' && firebase.auth) {
+                firebase.auth().onAuthStateChanged(user => {
+                    if (!user) {
+                        window.location.href = 'login.html?redirect=advanced-features.html';
+                    }
+                });
+            }
+            
+            // Setup feature buttons
+            analyzeMealBtn.addEventListener('click', handleMealAnalysis);
+            getTipsBtn.addEventListener('click', handleGetTips);
+            planMealsBtn.addEventListener('click', handleMealPlanning);
         });
-
-        function setupEventListeners() {
-            // Meal Plan Generation
-            document.getElementById('generatePlanBtn')?.addEventListener('click', async () => {
-                try {
-                    aiUI.showLoading('Generating your meal plan...');
-                    const preferences = {
-                        goals: 'weight maintenance',
-                        restrictions: 'none',
-                        calorieTarget: 2000,
-                        days: 7
-                    };
-                    const result = await advancedAI.generateMealPlan(preferences);
-                    advancedUI.showResults('mealPlanResults', result, 'mealPlan');
-                } catch (error) {
-                    console.error('Failed to generate meal plan:', error);
-                    showToast(error.message, 'error');
-                } finally {
-                    aiUI.hideLoading();
-                }
-            });
-
-            // Recipe Modification
-            document.getElementById('modifyRecipeBtn')?.addEventListener('click', async () => {
-                try {
-                    aiUI.showLoading('Modifying recipe...');
-                    const result = await advancedAI.modifyRecipe(
-                        'Classic Spaghetti Bolognese',
-                        'Make it vegetarian and gluten-free'
-                    );
-                    advancedUI.showResults('recipeModResults', result, 'recipe');
-                } catch (error) {
-                    console.error('Failed to modify recipe:', error);
-                    showToast(error.message, 'error');
-                } finally {
-                    aiUI.hideLoading();
-                }
-            });
-
-            // Grocery List Generation
-            document.getElementById('generateListBtn')?.addEventListener('click', async () => {
-                try {
-                    aiUI.showLoading('Generating grocery list...');
-                    const result = await advancedAI.generateGroceryList(
-                        ['Spaghetti Bolognese', 'Grilled Chicken Salad'],
-                        { budget: 'medium', organic: true }
-                    );
-                    advancedUI.showResults('groceryResults', result, 'grocery');
-                } catch (error) {
-                    console.error('Failed to generate grocery list:', error);
-                    showToast(error.message, 'error');
-                } finally {
-                    aiUI.hideLoading();
-                }
-            });
+        
+        // Handle meal analysis button click
+        async function handleMealAnalysis() {
+            const mealInput = document.getElementById('mealInput');
+            const resultContainer = document.getElementById('mealAnalysisResult');
+            
+            if (!mealInput || !resultContainer) return;
+            
+            const mealDescription = mealInput.value.trim();
+            
+            if (!mealDescription) {
+                showToast('Please describe your meal first', 'error');
+                return;
+            }
+            
+            try {
+                resultContainer.innerHTML = `
+                    <div class="loading-indicator">
+                        <div class="loading-spinner"></div>
+                        <p>Analyzing your meal...</p>
+                    </div>
+                `;
+                
+                // This would be replaced with a real AI call
+                const analysisResult = await analyzeMeal(mealDescription);
+                
+                const resultHtml = `
+                    <div class="analysis-result">
+                        <div class="nutrition-data">
+                            <div class="nutrition-item">
+                                <span class="nutrition-label">Calories</span>
+                                <span class="nutrition-value">${analysisResult.calories} kcal</span>
+                            </div>
+                            <div class="nutrition-item">
+                                <span class="nutrition-label">Protein</span>
+                                <span class="nutrition-value">${analysisResult.protein}g</span>
+                            </div>
+                            <div class="nutrition-item">
+                                <span class="nutrition-label">Carbs</span>
+                                <span class="nutrition-value">${analysisResult.carbs}g</span>
+                            </div>
+                            <div class="nutrition-item">
+                                <span class="nutrition-label">Fat</span>
+                                <span class="nutrition-value">${analysisResult.fat}g</span>
+                            </div>
+                        </div>
+                        <div class="analysis-notes">
+                            <h5>Key Nutrition Facts:</h5>
+                            <ul>
+                                ${(analysisResult.notes || []).map(note => `<li>${note}</li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                `;
+                
+                showPopup(resultHtml, 'Meal Analysis Results');
+                resultContainer.innerHTML = '';
+            } catch (error) {
+                console.error('Error analyzing meal:', error);
+                resultContainer.innerHTML = '';
+                showPopup(`<div class="error-message">Failed to analyze meal. Please try again.</div>`, 'Error');
+            }
         }
-
+        
+        // Handle get tips button click
+        async function handleGetTips() {
+            const resultContainer = document.getElementById('nutritionTipsResult');
+            if (!resultContainer) return;
+            
+            try {
+                resultContainer.innerHTML = `
+                    <div class="loading-indicator">
+                        <div class="loading-spinner"></div>
+                        <p>Generating personalized tips...</p>
+                    </div>
+                `;
+                
+                // This would be replaced with a real AI call
+                const tips = await getNutritionTips();
+                
+                const tipsHtml = `
+                    <div class="tips-container">
+                        ${tips.map(tip => `
+                            <div class="tip-card">
+                                <div class="tip-icon">
+                                    <i class="fas ${tip.icon}"></i>
+                                </div>
+                                <div class="tip-content">
+                                    <h5>${tip.title}</h5>
+                                    <p>${tip.description}</p>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                
+                showPopup(tipsHtml, 'Your Personalized Nutrition Tips');
+                resultContainer.innerHTML = '';
+            } catch (error) {
+                console.error('Error getting nutrition tips:', error);
+                resultContainer.innerHTML = '';
+                showPopup(`<div class="error-message">Failed to generate personalized tips. Please try again.</div>`, 'Error');
+            }
+        }
+        
+        // Handle meal planning button click
+        async function handleMealPlanning() {
+            const resultContainer = document.getElementById('mealPlanningResult');
+            if (!resultContainer) return;
+            
+            try {
+                resultContainer.innerHTML = `
+                    <div class="loading-indicator">
+                        <div class="loading-spinner"></div>
+                        <p>Creating your personalized meal plan...</p>
+                    </div>
+                `;
+                
+                // This would be replaced with a real AI call
+                const mealPlan = await planMeals();
+                
+                const mealPlanHtml = `
+                    <div class="meal-plans-container">
+                        <div class="meal-plan-header">
+                            <h4>Your 3-Day Balanced Meal Plan</h4>
+                            <p>Based on your nutritional goals and preferences</p>
+                        </div>
+                        
+                        ${mealPlan.days.map(day => `
+                            <div class="meal-plan-day">
+                                <h5 class="day-title">Day ${day.day}</h5>
+                                
+                                ${day.meals.map(meal => `
+                                    <div class="meal-plan-card">
+                                        <h5>${meal.type}</h5>
+                                        <ul>
+                                            ${meal.foods.map(food => `<li>${food}</li>`).join('')}
+                                        </ul>
+                                        <div class="meal-nutrition">${meal.nutrition}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                
+                showPopup(mealPlanHtml, 'Your Personalized Meal Plan');
+                resultContainer.innerHTML = '';
+            } catch (error) {
+                console.error('Error planning meals:', error);
+                resultContainer.innerHTML = '';
+                showPopup(`<div class="error-message">Failed to generate meal plan. Please try again.</div>`, 'Error');
+            }
+        }
+        
+        // Popup modal functions
+        function showPopup(contentHtml, title = 'AI Results') {
+            let popup = document.getElementById('aiPopup');
+            
+            if (!popup) {
+                popup = document.createElement('div');
+                popup.id = 'aiPopup';
+                popup.className = 'ai-popup-overlay';
+                popup.innerHTML = `
+                    <div class="ai-popup-card">
+                        <div class="ai-popup-header">
+                            <h3 class="ai-popup-title"></h3>
+                            <button class="ai-popup-close">&times;</button>
+                        </div>
+                        <div class="ai-popup-content"></div>
+                    </div>
+                `;
+                
+                document.body.appendChild(popup);
+                
+                // Close button event
+                popup.querySelector('.ai-popup-close').addEventListener('click', closePopup);
+                
+                // Close on escape key
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && popup.style.display === 'flex') {
+                        closePopup();
+                    }
+                });
+                
+                // Close on outside click
+                popup.addEventListener('click', (e) => {
+                    if (e.target === popup) {
+                        closePopup();
+                    }
+                });
+            }
+            
+            popup.querySelector('.ai-popup-title').textContent = title;
+            popup.querySelector('.ai-popup-content').innerHTML = contentHtml;
+            popup.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closePopup() {
+            const popup = document.getElementById('aiPopup');
+            if (popup) {
+                popup.style.display = 'none';
+                document.body.style.overflow = '';
+            }
+        }
+        
         // Toast notification helper
         function showToast(message, type = 'info') {
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
+            // Create toast if it doesn't exist
+            let toast = document.getElementById('toast-notification');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'toast-notification';
+                document.body.appendChild(toast);
+                
+                // Add toast styles
+                const style = document.createElement('style');
+                style.textContent = `
+                    #toast-notification {
+                        position: fixed;
+                        bottom: 20px;
+                        right: 20px;
+                        background: white;
+                        color: #111827;
+                        padding: 12px 20px;
+                        border-radius: 8px;
+                        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+                        font-weight: 500;
+                        z-index: 9999;
+                        transform: translateY(100px);
+                        opacity: 0;
+                        transition: all 0.3s ease;
+                    }
+                    #toast-notification.show {
+                        transform: translateY(0);
+                        opacity: 1;
+                    }
+                    #toast-notification.info { border-left: 4px solid #3B82F6; }
+                    #toast-notification.success { border-left: 4px solid #10B981; }
+                    #toast-notification.error { border-left: 4px solid #EF4444; }
+                    #toast-notification.warning { border-left: 4px solid #F59E0B; }
+                `;
+                document.head.appendChild(style);
+            }
+            
+            // Set message and type
             toast.textContent = message;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
+            toast.className = type;
+            
+            // Show the toast
+            setTimeout(() => toast.classList.add('show'), 10);
+            
+            // Auto hide after 3 seconds
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    toast.textContent = '';
+                    toast.className = '';
+                }, 300);
+            }, 3000);
+        }
+        
+        // Placeholder functions for the AI capabilities
+        
+        async function analyzeMeal(mealDescription) {
+            // Simulate network delay
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            // Simple keyword-based analysis for demo purposes
+            const lowerDesc = mealDescription.toLowerCase();
+            
+            let calories = 0;
+            let protein = 0;
+            let carbs = 0;
+            let fat = 0;
+            const notes = [];
+            
+            // Very simplistic keyword matching (for demo purposes)
+            if (lowerDesc.includes('chicken')) {
+                calories += 200;
+                protein += 25;
+                fat += 8;
+                notes.push("Good source of lean protein");
+            }
+            
+            if (lowerDesc.includes('rice')) {
+                calories += 150;
+                carbs += 30;
+                notes.push("Complex carbohydrates provide sustained energy");
+            }
+            
+            if (lowerDesc.includes('salad')) {
+                calories += 50;
+                carbs += 5;
+                notes.push("Rich in vitamins, minerals, and fiber");
+            }
+            
+            if (lowerDesc.includes('cheese')) {
+                calories += 100;
+                protein += 7;
+                fat += 8;
+                notes.push("Good source of calcium, but high in saturated fat");
+            }
+            
+            if (lowerDesc.includes('bread') || lowerDesc.includes('sandwich')) {
+                calories += 150;
+                carbs += 25;
+                notes.push("Choose whole grain options for more fiber and nutrients");
+            }
+            
+            if (lowerDesc.includes('pasta')) {
+                calories += 200;
+                carbs += 40;
+                notes.push("High in carbohydrates, consider whole grain options");
+            }
+            
+            if (lowerDesc.includes('fish') || lowerDesc.includes('salmon')) {
+                calories += 180;
+                protein += 22;
+                fat += 10;
+                notes.push("Excellent source of omega-3 fatty acids");
+            }
+            
+            if (lowerDesc.includes('nuts') || lowerDesc.includes('almonds')) {
+                calories += 160;
+                fat += 14;
+                protein += 6;
+                notes.push("Good source of healthy fats and vitamin E");
+            }
+            
+            // Generate reasonable defaults if no keywords matched
+            if (calories === 0) {
+                calories = Math.round(350 + Math.random() * 250);
+                protein = Math.round(15 + Math.random() * 15);
+                carbs = Math.round(30 + Math.random() * 30);
+                fat = Math.round(10 + Math.random() * 15);
+                notes.push("This is an approximate estimate based on general meal patterns");
+                notes.push("For more accurate analysis, please provide specific ingredients");
+            }
+            
+            // Add some general nutrition notes
+            if (notes.length < 3) {
+                notes.push("A balanced meal should include protein, complex carbs, and healthy fats");
+                notes.push("Consider portion sizes to manage overall calorie intake");
+                notes.push("Stay hydrated by drinking water with your meals");
+            }
+            
+            return {
+                calories,
+                protein,
+                carbs,
+                fat,
+                notes
+            };
+        }
+        
+        async function getNutritionTips() {
+            // Simulate network delay
+            await new Promise(resolve => setTimeout(resolve, 1800));
+            
+            // Predefined tips (in a real app these would be personalized)
+            const allTips = [
+                {
+                    title: "Increase Protein Intake",
+                    description: "Based on your recent meals, you could benefit from increasing your protein intake. Try to include a protein source with each meal to support muscle health and recovery.",
+                    icon: "fa-drumstick-bite"
+                },
+                {
+                    title: "Hydration Reminder",
+                    description: "Your logged meals show a pattern of high sodium intake. Aim to drink at least 8 glasses of water per day to support proper hydration and nutrient transport.",
+                    icon: "fa-glass-water"
+                },
+                {
+                    title: "Add More Fiber",
+                    description: "Your current diet could use more dietary fiber. Include more whole grains, fruits, and vegetables to support digestive health and help you feel full longer.",
+                    icon: "fa-wheat-awn"
+                },
+                {
+                    title: "Practice Mindful Eating",
+                    description: "Try eating more slowly and without distractions. This can help you better recognize your body's fullness signals and improve digestion.",
+                    icon: "fa-brain"
+                },
+                {
+                    title: "Balance Your Meals",
+                    description: "For optimal energy throughout the day, aim for a balanced mix of protein, complex carbohydrates, and healthy fats at each meal.",
+                    icon: "fa-balance-scale"
+                },
+                {
+                    title: "Include Omega-3 Sources",
+                    description: "Your diet could benefit from more omega-3 fatty acids. Try to include fatty fish like salmon, flaxseeds, or walnuts twice a week.",
+                    icon: "fa-fish"
+                },
+                {
+                    title: "Reduce Added Sugars",
+                    description: "Based on your logged meals, you might be consuming excessive added sugars. Try replacing sugary snacks with fruits or unsweetened options.",
+                    icon: "fa-cookie-slash"
+                }
+            ];
+            
+            // Return a selection of tips (in a real app, this would be personalized)
+            return allTips.sort(() => 0.5 - Math.random()).slice(0, 4);
+        }
+        
+        async function planMeals() {
+            // Simulate network delay
+            await new Promise(resolve => setTimeout(resolve, 2200));
+            
+            // Mock meal plan (in a real app, this would be personalized)
+            return {
+                days: [
+                    {
+                        day: 1,
+                        meals: [
+                            {
+                                type: "Breakfast",
+                                foods: [
+                                    "Greek yogurt with berries and granola",
+                                    "1 tablespoon of honey",
+                                    "Green tea or black coffee"
+                                ],
+                                nutrition: "~420 calories, 22g protein, 60g carbs, 10g fat"
+                            },
+                            {
+                                type: "Lunch",
+                                foods: [
+                                    "Grilled chicken salad with mixed greens",
+                                    "Cherry tomatoes, cucumber, red onion",
+                                    "Olive oil and lemon dressing",
+                                    "1 slice whole grain bread"
+                                ],
+                                nutrition: "~480 calories, 35g protein, 30g carbs, 20g fat"
+                            },
+                            {
+                                type: "Dinner",
+                                foods: [
+                                    "Baked salmon with herbs",
+                                    "Roasted sweet potatoes",
+                                    "Steamed broccoli",
+                                    "1 tsp olive oil"
+                                ],
+                                nutrition: "~520 calories, 40g protein, 45g carbs, 18g fat"
+                            },
+                            {
+                                type: "Snack",
+                                foods: [
+                                    "Apple with 2 tbsp almond butter",
+                                    "Small handful of almonds"
+                                ],
+                                nutrition: "~250 calories, 8g protein, 20g carbs, 16g fat"
+                            }
+                        ]
+                    },
+                    {
+                        day: 2,
+                        meals: [
+                            {
+                                type: "Breakfast",
+                                foods: [
+                                    "Vegetable omelette (2 eggs + 1 egg white)",
+                                    "Spinach, tomatoes, mushrooms",
+                                    "1 slice whole grain toast",
+                                    "1/4 avocado"
+                                ],
+                                nutrition: "~410 calories, 26g protein, 25g carbs, 22g fat"
+                            },
+                            {
+                                type: "Lunch",
+                                foods: [
+                                    "Quinoa bowl with black beans",
+                                    "Diced bell peppers and corn",
+                                    "Avocado slices",
+                                    "Lime-cilantro dressing"
+                                ],
+                                nutrition: "~490 calories, 18g protein, 65g carbs, 16g fat"
+                            },
+                            {
+                                type: "Dinner",
+                                foods: [
+                                    "Turkey and vegetable stir-fry",
+                                    "Brown rice",
+                                    "Snow peas, carrots, and water chestnuts",
+                                    "Low-sodium soy sauce"
+                                ],
+                                nutrition: "~520 calories, 38g protein, 50g carbs, 14g fat"
+                            },
+                            {
+                                type: "Snack",
+                                foods: [
+                                    "Greek yogurt with honey",
+                                    "1 tbsp chia seeds",
+                                    "Mixed berries"
+                                ],
+                                nutrition: "~220 calories, 18g protein, 25g carbs, 5g fat"
+                            }
+                        ]
+                    },
+                    {
+                        day: 3,
+                        meals: [
+                            {
+                                type: "Breakfast",
+                                foods: [
+                                    "Overnight oats with almond milk",
+                                    "1 tbsp peanut butter",
+                                    "Sliced banana",
+                                    "Cinnamon"
+                                ],
+                                nutrition: "~440 calories, 16g protein, 65g carbs, 14g fat"
+                            },
+                            {
+                                type: "Lunch",
+                                foods: [
+                                    "Mediterranean wrap with hummus",
+                                    "Whole grain tortilla",
+                                    "Mixed greens, cucumber, tomato",
+                                    "Feta cheese",
+                                    "Side of carrot sticks"
+                                ],
+                                nutrition: "~450 calories, 18g protein, 55g carbs, 18g fat"
+                            },
+                            {
+                                type: "Dinner",
+                                foods: [
+                                    "Baked white fish with herbs and lemon",
+                                    "Quinoa pilaf",
+                                    "Roasted asparagus",
+                                    "1 tsp olive oil"
+                                ],
+                                nutrition: "~480 calories, 42g protein, 40g carbs, 12g fat"
+                            },
+                            {
+                                type: "Snack",
+                                foods: [
+                                    "Cottage cheese with pineapple chunks",
+                                    "Small handful of walnuts"
+                                ],
+                                nutrition: "~230 calories, 20g protein, 15g carbs, 10g fat"
+                            }
+                        ]
+                    }
+                ]
+            };
         }
     </script>
 </body>

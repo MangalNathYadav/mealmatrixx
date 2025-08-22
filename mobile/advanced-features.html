@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MealMatrix Mobile - AI Tools</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/mobile-styles.css">
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js" defer></script>
+    <script src="assets/js/firebase-config.mobile.js" defer></script>
+    <script src="assets/js/auth.js" type="module" defer></script>
+    <script src="assets/js/advanced-features.js" type="module"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- App header -->
+        <header class="app-header">
+            <div class="header-back-button">
+                <a href="dashboard.html">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+            </div>
+            <h1 class="app-title">AI Tools</h1>
+            <div class="header-actions"></div>
+        </header>
+        
+        <!-- Main content -->
+        <main class="container">
+            <section class="ai-tools-content">
+                <!-- Meal Analyzer -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <i class="fas fa-utensils card-icon"></i>
+                        <h3>Meal Analyzer</h3>
+                    </div>
+                    <p class="card-description">
+                        Describe what you ate, and our AI will analyze its nutritional content.
+                    </p>
+                    <div class="card-content">
+                        <textarea id="mealAnalysisInput" class="form-control mb-2" rows="4" placeholder="E.g., I had a ham and cheese sandwich with lettuce, tomato, and mayo on whole grain bread"></textarea>
+                        <button id="analyzeMealBtn" class="btn btn-primary">
+                            <i class="fas fa-robot"></i>
+                            Analyze Meal
+                        </button>
+                        <div id="mealAnalysisResult" class="analysis-result mt-3"></div>
+                    </div>
+                </div>
+                
+                <!-- Nutrition Tips -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <i class="fas fa-lightbulb card-icon"></i>
+                        <h3>Personalized Nutrition Tips</h3>
+                    </div>
+                    <p class="card-description">
+                        Get AI-generated nutrition tips based on your meal history and goals.
+                    </p>
+                    <div class="card-content">
+                        <button id="getTipsBtn" class="btn btn-primary">
+                            <i class="fas fa-robot"></i>
+                            Get Personalized Tips
+                        </button>
+                        <div id="nutritionTipsResult" class="analysis-result mt-3"></div>
+                    </div>
+                </div>
+                
+                <!-- Meal Planning -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <i class="fas fa-calendar-alt card-icon"></i>
+                        <h3>Meal Planning Assistant</h3>
+                    </div>
+                    <p class="card-description">
+                        Let AI help you plan meals based on your goals and preferences.
+                    </p>
+                    <div class="card-content">
+                        <button id="mealPlanningBtn" class="btn btn-primary">
+                            <i class="fas fa-robot"></i>
+                            Plan My Meals
+                        </button>
+                        <div id="mealPlanningResult" class="analysis-result mt-3"></div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <a href="dashboard.html" class="bottom-nav-item">
+                <i class="bottom-nav-icon fas fa-home"></i>
+                <span class="bottom-nav-label">Dashboard</span>
+            </a>
+            <a href="add-meal.html" class="bottom-nav-item">
+                <i class="bottom-nav-icon fas fa-plus"></i>
+                <span class="bottom-nav-label">Add Meal</span>
+            </a>
+            <a href="nutrition-goals.html" class="bottom-nav-item">
+                <i class="bottom-nav-icon fas fa-chart-pie"></i>
+                <span class="bottom-nav-label">Goals</span>
+            </a>
+            <a href="meal-history.html" class="bottom-nav-item">
+                <i class="bottom-nav-icon fas fa-list"></i>
+                <span class="bottom-nav-label">History</span>
+            </a>
+            <a href="advanced-features.html" class="bottom-nav-item">
+                <i class="bottom-nav-icon fas fa-robot"></i>
+                <span class="bottom-nav-label">AI Tools</span>
+            </a>
+            <a href="profile.html" class="bottom-nav-item">
+                <i class="bottom-nav-icon fas fa-user"></i>
+                <span class="bottom-nav-label">Profile</span>
+            </a>
+        </nav>
+    </div>
+    <script src="assets/js/nav-active.js" defer></script>
+    
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner"></div>
+        <p class="loading-text">Loading...</p>
+    </div>
+    
+    <style>
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(124, 58, 237, 0.5);
+            backdrop-filter: blur(4px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        
+        .loading-text {
+            color: white;
+            font-weight: 600;
+            margin-top: 1rem;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+        }
+    </style>
+    
+    <style>
+        .ai-tools-content {
+            padding-bottom: 2rem;
+        }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+        
+        .card-icon {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            margin-right: 0.75rem;
+            flex-shrink: 0;
+        }
+        
+        .card-header h3 {
+            margin: 0;
+            font-size: 1.25rem;
+            color: var(--primary-color);
+        }
+        
+        .card-description {
+            color: var(--gray-600);
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+        
+        .card-content {
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 12px;
+            padding: 1rem;
+        }
+        
+        .analysis-result {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 8px;
+            padding: 1rem;
+            display: none;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        .analysis-result.active,
+        .ai-popup-content .analysis-result {
+            display: block !important;
+        }
+        
+        /* Button spinner for loading state */
+        .btn-spinner {
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 0.8s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+        
+        /* Disabled button styling */
+        button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        
+        .header-back-button a {
+            color: white;
+            font-size: 1.2rem;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</body>
+</html>

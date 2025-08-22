@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MealMatrix Mobile - Profile</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/mobile-styles.css">
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    <script src="assets/js/firebase-config.mobile.js"></script>
+    <script type="module">
+        // Import modules
+        import { showToast, showLoading, hideLoading } from './assets/js/app.js';
+        import { getCurrentUser, signOut } from './assets/js/auth.js';
+        import initializeProfile from './assets/js/profile.js';
+
+        // Wait for authentication before initializing profile
+        window.addEventListener('authStateChanged', function(e) {
+            if (e.detail && e.detail.isAuthenticated && e.detail.user) {
+                initializeProfile();
+            }
+        });
+
+        // If already authenticated (e.g. page reload), initialize immediately
+        document.addEventListener('DOMContentLoaded', function() {
+            const user = getCurrentUser && getCurrentUser();
+            if (user) {
+                initializeProfile();
+            }
+        });
+    </script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- App header -->
+        <header class="app-header">
+            <div class="header-back-button">
+                <a href="dashboard.html">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+            </div>
+            <h1 class="app-title">Profile</h1>
+            <div class="header-actions"></div>
+        </header>
+        
+        <!-- Main content -->
+        <main class="container">
+            <section class="profile-content">
+                <!-- Profile Header -->
+                <div class="card mb-3" id="profileInfo">
+                    <div class="loading-spinner"></div>
+                </div>
+                
+                <!-- Profile Details Form -->
+                <div class="card mb-3">
+                    <h3>Update Profile</h3>
+                    <form id="updateProfileForm">
+                        <div class="form-group">
+                            <label for="displayName" class="form-label">Display Name</label>
+                            <input type="text" id="displayName" class="form-control" placeholder="Your name">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Personal Details</label>
+                            <div class="personal-details">
+                                <div class="form-group">
+                                    <label for="weight" class="form-label">Weight (kg)</label>
+                                    <input type="number" id="weight" class="form-control" min="0" step="0.1" placeholder="Your weight">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="height" class="form-label">Height (cm)</label>
+                                    <input type="number" id="height" class="form-control" min="0" placeholder="Your height">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="activityLevel" class="form-label">Activity Level</label>
+                            <select id="activityLevel" class="form-control">
+                                <option value="sedentary">Sedentary</option>
+                                <option value="light">Lightly Active</option>
+                                <option value="moderate">Moderately Active</option>
+                                <option value="active">Active</option>
+                                <option value="very_active">Very Active</option>
+                            </select>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">Update Profile</button>
+                    </form>
+                </div>
+                
+                <!-- Account Settings -->
+                <div class="card mb-3">
+                    <h3>Account Settings</h3>
+                    <div class="settings-list">
+                        <a href="#" class="settings-item" id="changePasswordBtn">
+                            <div class="settings-icon">
+                                <i class="fas fa-key"></i>
+                            </div>
+                            <div class="settings-text">
+                                <span class="settings-label">Change Password</span>
+                            </div>
+                            <i class="fas fa-chevron-right settings-arrow"></i>
+                        </a>
+                        
+                        <a href="#" class="settings-item" id="exportDataBtn">
+                            <div class="settings-icon">
+                                <i class="fas fa-file-export"></i>
+                            </div>
+                            <div class="settings-text">
+                                <span class="settings-label">Export Data</span>
+                            </div>
+                            <i class="fas fa-chevron-right settings-arrow"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Sign Out Button -->
+                <button id="signOutBtn" class="btn btn-secondary btn-block mb-3">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Sign Out
+                </button>
+                
+                <!-- About App Info -->
+                <div class="card">
+                    <h3>About MealMatrix</h3>
+                    <div class="about-info">
+                        <p><strong>Version:</strong> 1.0.0</p>
+                        <p><strong>Build:</strong> 20250814</p>
+                        <p class="about-links">
+                            <a href="#">Terms of Service</a> • 
+                            <a href="#">Privacy Policy</a>
+                        </p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <a href="dashboard.html" class="bottom-nav-item">
+                <i class="bottom-nav-icon fas fa-home"></i>
+                <span class="bottom-nav-label">Dashboard</span>
+            </a>
+            <a href="add-meal.html" class="bottom-nav-item">
+                <i class="bottom-nav-icon fas fa-plus"></i>
+                <span class="bottom-nav-label">Add Meal</span>
+            </a>
+            <a href="nutrition-goals.html" class="bottom-nav-item">
+                <i class="bottom-nav-icon fas fa-chart-pie"></i>
+                <span class="bottom-nav-label">Goals</span>
+            </a>
+            <a href="meal-history.html" class="bottom-nav-item">
+                <i class="bottom-nav-icon fas fa-list"></i>
+                <span class="bottom-nav-label">History</span>
+            </a>
+            <a href="advanced-features.html" class="bottom-nav-item">
+                <i class="bottom-nav-icon fas fa-robot"></i>
+                <span class="bottom-nav-label">AI Tools</span>
+            </a>
+            <a href="profile.html" class="bottom-nav-item">
+                <i class="bottom-nav-icon fas fa-user"></i>
+                <span class="bottom-nav-label">Profile</span>
+            </a>
+        </nav>
+    </div>
+    <script src="assets/js/nav-active.js" defer></script>
+    
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner"></div>
+    </div>
+    
+    <style>
+        .profile-content {
+            padding-bottom: 2rem;
+        }
+        
+        .profile-user {
+            display: flex;
+            align-items: center;
+        }
+        
+        .profile-avatar {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: var(--gradient-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.75rem;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+        
+        .profile-name {
+            margin: 0;
+            color: var(--primary-color);
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        
+        .profile-email {
+            margin: 0.25rem 0 0 0;
+            color: var(--gray-600);
+            font-size: 0.9rem;
+        }
+        
+        .profile-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+            margin-top: 1.25rem;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 12px;
+            padding: 0.75rem;
+        }
+        
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem;
+        }
+        
+        .stat-value {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--primary-color);
+        }
+        
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--gray-600);
+        }
+        
+        .personal-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+        
+        .settings-list {
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .settings-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            color: var(--text-color);
+            text-decoration: none;
+            transition: background-color 0.15s;
+        }
+        
+        .settings-item:not(:last-child) {
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .settings-item:active {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+        
+        .settings-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 0.75rem;
+            flex-shrink: 0;
+        }
+        
+        .settings-text {
+            flex: 1;
+        }
+        
+        .settings-label {
+            font-weight: 500;
+        }
+        
+        .settings-arrow {
+            color: var(--gray-400);
+        }
+        
+        .btn-block {
+            width: 100%;
+        }
+        
+        .about-info {
+            padding: 0.5rem 0;
+        }
+        
+        .about-info p {
+            margin: 0.5rem 0;
+        }
+        
+        .about-links {
+            font-size: 0.85rem;
+            color: var(--gray-500);
+        }
+        
+        .about-links a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        
+        .header-back-button a {
+            color: white;
+            font-size: 1.2rem;
+        }
+        
+        .profile-member-since {
+            font-size: 0.8rem;
+            color: var(--gray-500);
+            margin-top: 0.25rem;
+        }
+    </style>
+</body>
+</html>

@@ -1,0 +1,32 @@
+{
+	"rules": {
+		"users": {
+			"$uid": {
+				".read": "$uid === auth.uid",
+				".write": "$uid === auth.uid",
+				"meals": {
+					".indexOn": ["date"]
+				}
+			}
+		},
+		"chat": {
+			".read": "auth !== null",
+			".write": "auth !== null",
+			"rooms": {
+				"$roomId": {
+					"messages": {
+						".indexOn": ["timestamp"]
+					},
+						"typing": {
+							".read": "auth !== null",
+							".write": "auth !== null"
+						}
+				}
+			},
+			"onlineUsers": {
+				".read": "auth !== null",
+				".write": "auth !== null"
+			}
+		}
+	}
+}

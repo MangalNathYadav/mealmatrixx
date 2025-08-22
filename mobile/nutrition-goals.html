@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MealMatrix Mobile - Nutrition Goals</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/mobile-styles.css">
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js" defer></script>
+    <script src="assets/js/firebase-config.mobile.js" defer></script>
+    <script src="assets/js/auth.js" type="module" defer></script>
+    <script src="assets/js/goals.js" type="module"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- App header -->
+        <header class="app-header">
+            <div class="header-back-button">
+                <a href="dashboard.html">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+            </div>
+            <h1 class="app-title">Nutrition Goals</h1>
+            <div class="header-actions"></div>
+        </header>
+        
+        <!-- Main content -->
+        <main class="container">
+            <section class="goals-content">
+                <!-- Current Goals Summary -->
+                <div class="card mb-3" id="currentGoals">
+                    <h3>Current Goals</h3>
+                    <div class="goals-summary">
+                        <div class="loading-spinner"></div>
+                    </div>
+                </div>
+                
+                <!-- Weekly Progress -->
+                <div class="card mb-3">
+                    <h3>Weekly Progress</h3>
+                    <div class="weekly-progress" id="weeklyProgress">
+                        <div class="loading-spinner"></div>
+                    </div>
+                </div>
+                
+                <!-- Update Goals Form -->
+                <div class="card">
+                    <h3>Update Goals</h3>
+                    <form id="goalsForm">
+                        <div class="form-group">
+                            <label for="targetCalories" class="form-label">Target Calories</label>
+                            <input type="number" id="targetCalories" class="form-control" min="0" placeholder="e.g., 2000">
+                        </div>
+                        <div class="form-group">
+                            <label for="proteinGoal" class="form-label">Protein Goal (g)</label>
+                            <input type="number" id="proteinGoal" class="form-control" min="0" placeholder="e.g., 150">
+                        </div>
+                        <div class="form-group">
+                            <label for="carbsGoal" class="form-label">Carbs Goal (g)</label>
+                            <input type="number" id="carbsGoal" class="form-control" min="0" placeholder="e.g., 250">
+                        </div>
+                        <div class="form-group">
+                            <label for="fatGoal" class="form-label">Fat Goal (g)</label>
+                            <input type="number" id="fatGoal" class="form-control" min="0" placeholder="e.g., 65">
+                        </div>
+                        <div class="form-group">
+                            <label for="activityLevel" class="form-label">Activity Level</label>
+                            <select id="activityLevel" class="form-control">
+                                <option value="sedentary">Sedentary</option>
+                                <option value="light">Light</option>
+                                <option value="moderate">Moderate</option>
+                                <option value="active">Active</option>
+                                <option value="very active">Very Active</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="goalType" class="form-label">Goal Type</label>
+                            <select id="goalType" class="form-control">
+                                <option value="maintain">Maintain</option>
+                                <option value="gain">Gain</option>
+                                <option value="lose">Lose</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="currentWeight" class="form-label">Current Weight (kg)</label>
+                            <input type="number" id="currentWeight" class="form-control" min="0" placeholder="e.g., 51">
+                        </div>
+                        <div class="form-group">
+                            <label for="weightGoal" class="form-label">Weight Goal (kg)</label>
+                            <input type="number" id="weightGoal" class="form-control" min="0" placeholder="e.g., 60">
+                        </div>
+                        <div class="form-group">
+                            <label for="weeklyGoal" class="form-label">Weekly Goal (kg/week)</label>
+                            <input type="number" id="weeklyGoal" class="form-control" min="0" step="0.1" placeholder="e.g., 0.5">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update Goals</button>
+                    </form>
+                </div>
+            </section>
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <a href="dashboard.html" class="bottom-nav-item">
+                <i class="bottom-nav-icon fas fa-home"></i>
+                <span class="bottom-nav-label">Dashboard</span>
+            </a>
+            <a href="add-meal.html" class="bottom-nav-item">
+                <i class="bottom-nav-icon fas fa-plus"></i>
+                <span class="bottom-nav-label">Add Meal</span>
+            </a>
+            <a href="nutrition-goals.html" class="bottom-nav-item">
+                <i class="bottom-nav-icon fas fa-chart-pie"></i>
+                <span class="bottom-nav-label">Goals</span>
+            </a>
+            <a href="meal-history.html" class="bottom-nav-item">
+                <i class="bottom-nav-icon fas fa-list"></i>
+                <span class="bottom-nav-label">History</span>
+            </a>
+            <a href="advanced-features.html" class="bottom-nav-item">
+                <i class="bottom-nav-icon fas fa-robot"></i>
+                <span class="bottom-nav-label">AI Tools</span>
+            </a>
+            <a href="profile.html" class="bottom-nav-item">
+                <i class="bottom-nav-icon fas fa-user"></i>
+                <span class="bottom-nav-label">Profile</span>
+            </a>
+        </nav>
+    </div>
+        <script src="assets/js/nav-active.js" defer></script>
+        <script type="module">
+            import initializeGoals from './assets/js/goals.js';
+            document.addEventListener('DOMContentLoaded', () => {
+                initializeGoals();
+            });
+        </script>
+    
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner"></div>
+    </div>
+    
+    <style>
+        .goals-content {
+            padding-bottom: 2rem;
+        }
+        
+        .goals-summary {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        
+        .goal-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 8px;
+        }
+        
+        .goal-label {
+            font-weight: 500;
+        }
+        
+        .goal-value {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .macro-slider-group {
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .macro-slider {
+            margin-bottom: 1rem;
+        }
+        
+        .macro-slider label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.25rem;
+        }
+        
+        .slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            -webkit-appearance: none;
+            appearance: none;
+            outline: none;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        
+        .protein-slider {
+            background: linear-gradient(to right, #4ADE80, #4ADE80);
+        }
+        
+        .protein-slider::-webkit-slider-thumb {
+            background: #4ADE80;
+        }
+        
+        .carbs-slider {
+            background: linear-gradient(to right, #3B82F6, #3B82F6);
+        }
+        
+        .carbs-slider::-webkit-slider-thumb {
+            background: #3B82F6;
+        }
+        
+        .fat-slider {
+            background: linear-gradient(to right, #F59E0B, #F59E0B);
+        }
+        
+        .fat-slider::-webkit-slider-thumb {
+            background: #F59E0B;
+        }
+        
+        .macro-total {
+            text-align: right;
+            font-weight: 600;
+            padding-top: 0.5rem;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .header-back-button a {
+            color: white;
+            font-size: 1.2rem;
+        }
+        
+        .weekly-progress {
+            padding: 0.5rem 0;
+        }
+    </style>
+</body>
+</html>

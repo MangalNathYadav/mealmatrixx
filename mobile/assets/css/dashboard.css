@@ -1,0 +1,251 @@
+/* Dashboard specific styles */
+.welcome-card {
+    background: linear-gradient(120deg, var(--primary-color), var(--deep-blue));
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    color: white;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow-md);
+    position: relative;
+    overflow: hidden;
+}
+
+.welcome-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.2rem;
+}
+
+.welcome-content h2 {
+    color: white;
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.wave-emoji {
+    display: inline-block;
+    animation: wave 2s infinite;
+    transform-origin: 70% 70%;
+    margin-left: 0.25rem;
+}
+
+.today-date {
+    margin: 0.3rem 0 0;
+    font-size: 0.9rem;
+    opacity: 0.85;
+}
+
+.user-avatar {
+    padding-top: 0.3rem;
+}
+
+.avatar-circle.pulse {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(255, 255, 255, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+}
+
+.quick-actions {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+}
+
+.quick-action-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    padding: 0.85rem 0.5rem;
+    color: white;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.quick-action-btn:active {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(0.95);
+}
+
+.quick-action-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+    font-size: 1.2rem;
+}
+
+.quick-action-btn span {
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+/* Card components */
+.card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.card-header h3 {
+    margin: 0;
+}
+
+.card-badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: var(--gray-200);
+    color: var(--gray-700);
+    padding: 0.25rem 0.5rem;
+    border-radius: 999px;
+}
+
+.card-badge.accent {
+    background: rgba(124, 58, 237, 0.15);
+    color: var(--primary-color);
+}
+
+.card-link {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+}
+
+.progress-card {
+    overflow: visible;
+}
+
+/* Water tracker */
+.water-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.water-card::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 40%;
+    background: linear-gradient(to top, rgba(240, 249, 255, 0.5), transparent);
+    z-index: 0;
+    border-radius: 0 0 16px 16px;
+}
+
+.water-count {
+    color: var(--primary-blue);
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.water-tracker-container {
+    position: relative;
+    z-index: 1;
+}
+
+.water-progress-bar {
+    height: 10px;
+    background-color: var(--gray-200);
+    border-radius: 5px;
+    margin: 0.5rem 0 1.2rem;
+    overflow: hidden;
+}
+
+.water-progress-fill {
+    height: 100%;
+    background-color: var(--light-blue);
+    width: 0%;
+    transition: width 0.5s ease, background-color 0.5s ease;
+}
+
+.water-progress-fill.progress-updated {
+    animation: pulse-progress 0.5s ease-in-out;
+}
+
+@keyframes pulse-progress {
+    0% { transform: scaleY(1); }
+    50% { transform: scaleY(1.5); }
+    100% { transform: scaleY(1); }
+}
+
+.water-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.water-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: white;
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow-sm);
+}
+
+.water-btn.minus {
+    background-color: var(--light-blue);
+}
+
+.water-btn.plus {
+    background-color: var(--deep-blue);
+}
+
+.water-btn:active {
+    transform: scale(0.95);
+}
+
+.water-glasses {
+    display: flex;
+    gap: 8px;
+    color: var(--primary-blue);
+    font-size: 1.2rem;
+}
+
+/* Avatar circle */
+.avatar-circle {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 0.9rem;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+@keyframes wave {
+    0% { transform: rotate(0deg); }
+    10% { transform: rotate(14deg); }
+    20% { transform: rotate(-8deg); }
+    30% { transform: rotate(14deg); }
+    40% { transform: rotate(-4deg); }
+    50% { transform: rotate(10deg); }
+    60% { transform: rotate(0deg); }
+    100% { transform: rotate(0deg); }
+}
