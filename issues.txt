@@ -6,3 +6,6 @@ sidebar -fat weight not updating , nutrition tips not updating protein , hydrati
 footer few pages not working.
 new user is seeing nutrtion tips and protein suggestion at bottom at first load app
 
+final problems still remains in the desktop vesion will fix them in future .. 
+=========================== till then use mobile version #cheers #its_drag
+====================================================
