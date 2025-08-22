@@ -7,6 +7,19 @@
     <meta name="theme-color" content="#7C3AED">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Device Redirection Script -->
+    <script>
+        function isDesktopDevice() {
+            return !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) && 
+                   (window.innerWidth > 768);
+        }
+        
+        // Redirect to desktop version if on a desktop device
+        if (isDesktopDevice()) {
+            window.location.href = '../index.html';
+        }
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="assets/css/mobile-styles.css">
